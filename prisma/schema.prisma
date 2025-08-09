@@ -1,0 +1,194 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  doctor
+  nurse
+  receptionist
+}
+
+enum ServiceType {
+  TYPE1
+  TYPE2
+}
+
+enum FactureStatus {
+  PAYEE
+  NON_PAYEE
+  EN_ATTENTE
+}
+
+enum BienType {
+  SERVICE
+  PRODUIT
+}
+
+model Utilisateur {
+  id               Int       @id @default(autoincrement())
+  CIN              String    @unique
+  nom              String
+  prenom           String
+  date_naissance   DateTime
+  adresse          String
+  numero_telephone String
+  email            String    @unique
+  password         String
+  role             Role
+  created_at       DateTime  @default(now())
+
+  // Relations
+  clients          Client[]  @relation("UtilisateurClients")
+  rendez_vous      rendez_vous[]
+  documentTemplates document_templates[]
+  documents        document[]
+  // services         service[]
+  biens         bien[]
+  factures         facture[]
+  factureBiens     facture_bien[]
+  paiements        paiment[]
+}
+
+model Entreprise {
+  id         Int      @id @default(autoincrement())
+  ICE        String   
+  CNSS       String   
+  RC         String   
+  IF         String   
+  RIB        String   
+  patente    String   
+  adresse    String
+  created_at DateTime @default(now())
+}
+
+model Client {
+  id               Int       @id @default(autoincrement())
+  CIN              String    @unique
+  nom              String
+  prenom           String
+  date_naissance   DateTime
+  adresse          String
+  numero_telephone String
+  email            String
+  groupe_sanguin   String
+  antecedents      String?
+  allergies        String?
+  commentaire      String?
+  created_at       DateTime @default(now())
+  Cree_par         String
+
+  utilisateur      Utilisateur @relation(fields: [Cree_par], references: [CIN], name: "UtilisateurClients")
+
+  rendez_vous      rendez_vous[]
+  documents        document[]
+  factures         facture[]
+}
+
+model rendez_vous {
+  id                Int       @id @default(autoincrement())
+  CIN               String
+  sujet             String
+  date_rendez_vous  DateTime
+  created_at        DateTime  @default(now())
+  Cree_par          String
+
+  client            Client      @relation(fields: [CIN], references: [CIN])
+  utilisateur       Utilisateur @relation(fields: [Cree_par], references: [CIN])
+}
+
+model document_templates {
+  id            Int       @id @default(autoincrement())
+  name          String
+  sections_json String
+  Cree_par      String
+
+  utilisateur   Utilisateur @relation(fields: [Cree_par], references: [CIN])
+  documents     document[]
+}
+
+model document {
+  id         Int       @id @default(autoincrement())
+  template_id Int
+  CIN        String
+  data_json String
+  Cree_par   String
+
+  template   document_templates @relation(fields: [template_id], references: [id])
+  client     Client             @relation(fields: [CIN], references: [CIN])
+  utilisateur Utilisateur       @relation(fields: [Cree_par], references: [CIN])
+}
+
+// model service {
+//   id       Int       @id @default(autoincrement())
+//   Nom      String
+//   Type     ServiceType
+//   prix     Float
+//   Cree_par String
+
+//   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
+//   factureBiens facture_bien[]
+// }
+
+model bien {
+  id       Int       @id @default(autoincrement())
+  Nom      String
+  bien_type BienType
+  Type     ServiceType
+  prix     Float
+  stock    Int
+  Cree_par String
+
+  utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
+  factureBiens facture_bien[]
+}
+
+model facture {
+  id         Int       @id @default(autoincrement())
+  CIN        String
+  date       DateTime
+  prix_total Float
+  statut     FactureStatus
+  notes      String?
+  Cree_par   String
+
+  client     Client      @relation(fields: [CIN], references: [CIN])
+  utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
+  factureBiens facture_bien[]
+  paiements   paiment[]
+}
+
+model facture_bien {
+  id          Int       @id @default(autoincrement())
+  id_facture  Int
+  id_bien     Int
+  type_bien   BienType
+  quantite    Int
+  Cree_par    String
+
+  facture     facture     @relation(fields: [id_facture], references: [id])
+  bien     bien     @relation(fields: [id_bien], references: [id])
+  utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
+
+  // We can't directly relate to both service and produit on same field,
+  // so handle manually in logic
+}
+
+model paiment {
+  id             Int       @id @default(autoincrement())
+  id_facture     Int
+  date           DateTime
+  montant_totale Float
+  Cree_par       String
+
+  facture        facture     @relation(fields: [id_facture], references: [id])
+  utilisateur    Utilisateur @relation(fields: [Cree_par], references: [CIN])
+}
