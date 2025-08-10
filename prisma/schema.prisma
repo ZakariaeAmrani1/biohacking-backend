@@ -17,6 +17,13 @@ enum Role {
   receptionist
 }
 
+enum Status {
+  programmé
+  confirmé
+  terminé
+  annulé
+}
+
 enum ServiceType {
   TYPE1
   TYPE2
@@ -100,6 +107,7 @@ model rendez_vous {
   date_rendez_vous  DateTime
   created_at        DateTime  @default(now())
   Cree_par          String
+  status            Status
 
   client            Client      @relation(fields: [CIN], references: [CIN])
   utilisateur       Utilisateur @relation(fields: [Cree_par], references: [CIN])

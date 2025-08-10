@@ -13,7 +13,7 @@ import { CreateEntrepriseDto } from './dto/create-entreprise.dto';
 import { UpdateEntrepriseDto } from './dto/update-entreprise.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('entreprise')
 export class EntrepriseController {
   constructor(private readonly entrepriseService: EntrepriseService) {}

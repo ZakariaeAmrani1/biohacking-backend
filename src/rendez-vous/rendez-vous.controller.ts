@@ -1,8 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { RendezVousService } from './rendez-vous.service';
 import { CreateRendezVousDto } from './dto/create-rendez-vous.dto';
 import { UpdateRendezVousDto } from './dto/update-rendez-vous.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('rendez-vous')
 export class RendezVousController {
   constructor(private readonly rendezVousService: RendezVousService) {}
@@ -23,7 +34,10 @@ export class RendezVousController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRendezVousDto: UpdateRendezVousDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateRendezVousDto: UpdateRendezVousDto,
+  ) {
     return this.rendezVousService.update(+id, updateRendezVousDto);
   }
 
