@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateClientDto } from './dto/create-client.dto';
@@ -52,11 +53,61 @@ export class ClientService {
     return `This action returns a #${id} client`;
   }
 
-  update(id: number, updateClientDto: UpdateClientDto) {
-    return `This action updates a #${id} client`;
+  async update(id: number, updateClientDto: UpdateClientDto) {
+    try {
+      const client = await this.prisma.client.findUnique({ where: { id } });
+      if (!client) {
+        throw new NotFoundException(
+          `Client avec l'identifiant ${id} introuvable`,
+        );
+      }
+      const updatedClient = await this.prisma.client.update({
+        where: { id },
+        data: {
+          CIN: updateClientDto.CIN,
+          nom: updateClientDto.nom,
+          prenom: updateClientDto.prenom,
+          date_naissance: new Date(updateClientDto.date_naissance!),
+          adresse: updateClientDto.adresse,
+          numero_telephone: updateClientDto.numero_telephone,
+          groupe_sanguin: updateClientDto.groupe_sanguin,
+          email: updateClientDto.email,
+          allergies: updateClientDto.allergies,
+          antecedents: updateClientDto.antecedents,
+          commentaire: updateClientDto.commentaire,
+          Cree_par: updateClientDto.Cree_par,
+        },
+      });
+      return updatedClient;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new UnprocessableEntityException(
+            `Un client avec ce CIN (${updateClientDto.CIN}) existe déjà.`,
+          );
+        }
+      }
+      throw new BadRequestException(
+        'Impossible de modifié le client. Vérifiez les données.',
+      );
+    }
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    try {
+      const client = await this.prisma.client.findUnique({ where: { id } });
+      if (!client) {
+        throw new NotFoundException(
+          `Client avec l'identifiant ${id} introuvable`,
+        );
+      }
+      await this.prisma.client.delete({ where: { id: id } });
+      return client;
+    } catch (error) {
+      throw new BadRequestException(
+        'Impossible de supprimé le client. Vérifiez les données.',
+      );
+    }
     return `This action removes a #${id} client`;
   }
 }

@@ -26,7 +26,7 @@ export class UtilisateurService {
   }
 
   findAll() {
-    return `This action returns all utilisateur`;
+    return this.prisma.utilisateur.findMany();
   }
 
   findOne(id: number) {
@@ -36,7 +36,9 @@ export class UtilisateurService {
   async update(id: number, updateUtilisateurDto: any) {
     const user = await this.prisma.utilisateur.findUnique({ where: { id } });
     if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`);
+      throw new NotFoundException(
+        `Utilisateur avec l'identifiant ${id} introuvable`,
+      );
     }
     updateUtilisateurDto.date_naissance = new Date(
       updateUtilisateurDto.date_naissance,
