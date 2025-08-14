@@ -5,7 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Role } from '../enum/Role';
+import { Role } from '../enum/role';
 
 export class CreateRendezVousDto {
   @IsNotEmpty({ message: 'Le CIN du client est obligatoire.' })
