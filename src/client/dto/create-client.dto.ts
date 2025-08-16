@@ -4,42 +4,48 @@ import {
   IsDateString,
   IsOptional,
   IsEmail,
+  Matches,
 } from 'class-validator';
 
 export class CreateClientDto {
-  @IsNotEmpty({ message: 'Le CIN est obligatoire.' })
+  @IsNotEmpty({ message: 'Le CIN est obligatoire.\n' })
+  @Matches(/^[A-Za-z]{1,2}\d{5,}$/, {
+    message:
+      'Le CIN doit commencer par une ou deux lettres suivies d’au moins 5 chiffres (minimum 7 caractères).\n',
+  })
   @IsString()
   CIN: string;
 
-  @IsNotEmpty({ message: 'Le nom est obligatoire.' })
+  @IsNotEmpty({ message: 'Le nom est obligatoire.\n' })
   @IsString()
   nom: string;
 
-  @IsNotEmpty({ message: 'Le prénom est obligatoire.' })
+  @IsNotEmpty({ message: 'Le prénom est obligatoire.\n' })
   @IsString()
   prenom: string;
 
-  @IsNotEmpty({ message: 'La date de naissance est obligatoire.' })
+  @IsOptional()
   @IsDateString(
     {},
-    { message: 'La date de naissance doit être au format ISO.' },
+    { message: 'La date de naissance doit être au format ISO.\n' },
   )
   date_naissance: string;
 
-  @IsNotEmpty({ message: 'L’adresse est obligatoire.' })
+  @IsOptional()
   @IsString()
   adresse: string;
 
-  @IsNotEmpty({ message: 'Le numéro de téléphone est obligatoire.' })
+  @IsOptional()
   @IsString()
   numero_telephone: string;
 
-  @IsNotEmpty({ message: 'Le groupe sanguin est obligatoire.' })
+  @IsOptional()
   @IsString()
   groupe_sanguin: string;
 
-  @IsNotEmpty({ message: 'L’email est obligatoire.' })
-  @IsEmail({}, { message: 'L’email doit être valide.' })
+  @IsOptional()
+  // @IsEmail({}, { message: 'L’email doit être valide.\n' })
+  @IsString()
   email: string;
 
   @IsOptional()
@@ -54,7 +60,7 @@ export class CreateClientDto {
   @IsString()
   antecedents?: string;
 
-  @IsNotEmpty({ message: 'Le créateur est obligatoire.' })
+  @IsNotEmpty({ message: 'Le créateur est obligatoire.\n' })
   @IsString()
   Cree_par: string;
 }

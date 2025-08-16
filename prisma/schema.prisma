@@ -116,11 +116,12 @@ model rendez_vous {
 model document_templates {
   id            Int       @id @default(autoincrement())
   name          String
-  sections_json String
+  sections_json Json
   Cree_par      String
 
   utilisateur   Utilisateur @relation(fields: [Cree_par], references: [CIN])
   documents     document[]
+  created_at DateTime @default(now())
 }
 
 model document {
@@ -129,6 +130,7 @@ model document {
   CIN        String
   data_json String
   Cree_par   String
+  created_at DateTime @default(now())
 
   template   document_templates @relation(fields: [template_id], references: [id])
   client     Client             @relation(fields: [CIN], references: [CIN])
@@ -150,10 +152,11 @@ model bien {
   id       Int       @id @default(autoincrement())
   Nom      String
   bien_type BienType
-  Type     ServiceType
+  Type     String
   prix     Float
   stock    Int
   Cree_par String
+  created_at DateTime @default(now())
 
   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
   factureBiens facture_bien[]
@@ -167,6 +170,7 @@ model facture {
   statut     FactureStatus
   notes      String?
   Cree_par   String
+  created_at DateTime @default(now())
 
   client     Client      @relation(fields: [CIN], references: [CIN])
   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
@@ -181,6 +185,7 @@ model facture_bien {
   type_bien   BienType
   quantite    Int
   Cree_par    String
+  created_at DateTime @default(now())
 
   facture     facture     @relation(fields: [id_facture], references: [id])
   bien     bien     @relation(fields: [id_bien], references: [id])
@@ -196,6 +201,7 @@ model paiment {
   date           DateTime
   montant_totale Float
   Cree_par       String
+  created_at DateTime @default(now())
 
   facture        facture     @relation(fields: [id_facture], references: [id])
   utilisateur    Utilisateur @relation(fields: [Cree_par], references: [CIN])

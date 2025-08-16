@@ -1,8 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { BienService } from './bien.service';
 import { CreateBienDto } from './dto/create-bien.dto';
 import { UpdateBienDto } from './dto/update-bien.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { BienType } from '@prisma/client';
 
+@UseGuards(JwtAuthGuard)
 @Controller('bien')
 export class BienController {
   constructor(private readonly bienService: BienService) {}
@@ -13,8 +26,8 @@ export class BienController {
   }
 
   @Get()
-  findAll() {
-    return this.bienService.findAll();
+  findAll(@Query('type') type?: BienType) {
+    return this.bienService.findAll(type);
   }
 
   @Get(':id')

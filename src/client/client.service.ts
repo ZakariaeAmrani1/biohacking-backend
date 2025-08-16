@@ -46,7 +46,11 @@ export class ClientService {
   }
 
   findAll() {
-    return this.prisma.client.findMany();
+    try {
+      return this.prisma.client.findMany();
+    } catch (error) {
+      throw new BadRequestException('Impossible de retourner les clients.');
+    }
   }
 
   findOne(id: number) {
@@ -108,6 +112,5 @@ export class ClientService {
         'Impossible de supprimé le client. Vérifiez les données.',
       );
     }
-    return `This action removes a #${id} client`;
   }
 }
