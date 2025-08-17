@@ -34,7 +34,7 @@ export class CreateRendezVousDto {
   // Cree_par : mieux la remplir côté serveur depuis req.user (optionnel côté DTO)
   @IsOptional()
   @IsString({ message: 'Cree_par doit être une chaîne de caractères.' })
-  Cree_par?: string;
+  Cree_par: string;
 
   @IsNotEmpty({ message: 'Le Statut est obligatoire.' })
   @IsEnum(Role, { message: 'status must be a valid enum value' })
