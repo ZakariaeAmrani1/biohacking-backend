@@ -29,11 +29,7 @@ enum ServiceType {
   TYPE2
 }
 
-enum FactureStatus {
-  PAYEE
-  NON_PAYEE
-  EN_ATTENTE
-}
+
 
 enum BienType {
   SERVICE
@@ -128,7 +124,7 @@ model document {
   id         Int       @id @default(autoincrement())
   template_id Int
   CIN        String
-  data_json String
+  data_json Json
   Cree_par   String
   created_at DateTime @default(now())
 
@@ -167,7 +163,7 @@ model facture {
   CIN        String
   date       DateTime
   prix_total Float
-  statut     FactureStatus
+  statut     String
   notes      String?
   Cree_par   String
   created_at DateTime @default(now())
@@ -182,7 +178,7 @@ model facture_bien {
   id          Int       @id @default(autoincrement())
   id_facture  Int
   id_bien     Int
-  type_bien   BienType
+  type_bien   String
   quantite    Int
   Cree_par    String
   created_at DateTime @default(now())
