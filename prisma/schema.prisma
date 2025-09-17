@@ -48,6 +48,7 @@ model Utilisateur {
   password         String
   role             Role
   created_at       DateTime  @default(now())
+  updated_at   DateTime     @updatedAt
 
   // Relations
   clients          Client[]  @relation("UtilisateurClients")
@@ -71,6 +72,7 @@ model Entreprise {
   patente    String   
   adresse    String
   created_at DateTime @default(now())
+  updated_at   DateTime     @updatedAt
 }
 
 model Client {
@@ -87,6 +89,7 @@ model Client {
   allergies        String?
   commentaire      String?
   created_at       DateTime @default(now())
+  updated_at   DateTime     @updatedAt
   Cree_par         String
 
   utilisateur      Utilisateur @relation(fields: [Cree_par], references: [CIN], name: "UtilisateurClients")
@@ -104,6 +107,8 @@ model rendez_vous {
   created_at        DateTime  @default(now())
   Cree_par          String
   status            Status
+  cabinet           String @default("Biohacking")
+  updated_at   DateTime     @updatedAt
 
   client            Client      @relation(fields: [CIN], references: [CIN])
   utilisateur       Utilisateur @relation(fields: [Cree_par], references: [CIN])
@@ -127,6 +132,7 @@ model document {
   data_json Json
   Cree_par   String
   created_at DateTime @default(now())
+  updated_at   DateTime     @updatedAt
 
   template   document_templates @relation(fields: [template_id], references: [id])
   client     Client             @relation(fields: [CIN], references: [CIN])
@@ -151,8 +157,10 @@ model bien {
   Type     String
   prix     Float
   stock    Int
+  cabinet  String @default("Biohacking")
   Cree_par String
   created_at DateTime @default(now())
+  updated_at   DateTime     @updatedAt
 
   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
   factureBiens facture_bien[]
@@ -167,6 +175,8 @@ model facture {
   notes      String?
   Cree_par   String
   created_at DateTime @default(now())
+  updated_at   DateTime     @updatedAt 
+  date_paiement DateTime?
 
   client     Client      @relation(fields: [CIN], references: [CIN])
   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
@@ -182,6 +192,7 @@ model facture_bien {
   quantite    Int
   Cree_par    String
   created_at DateTime @default(now())
+  updated_at   DateTime     @updatedAt
 
   facture     facture     @relation(fields: [id_facture], references: [id])
   bien     bien     @relation(fields: [id_bien], references: [id])
@@ -198,6 +209,7 @@ model paiment {
   montant_totale Float
   Cree_par       String
   created_at DateTime @default(now())
+  updated_at   DateTime     @updatedAt 
 
   facture        facture     @relation(fields: [id_facture], references: [id])
   utilisateur    Utilisateur @relation(fields: [Cree_par], references: [CIN])

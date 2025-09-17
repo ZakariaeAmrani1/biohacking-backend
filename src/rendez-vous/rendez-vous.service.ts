@@ -21,6 +21,7 @@ export class RendezVousService {
           sujet: createRendezVousDto.sujet,
           date_rendez_vous: createRendezVousDto.date_rendez_vous,
           status: createRendezVousDto.status,
+          cabinet: createRendezVousDto.cabinet,
           Cree_par: createRendezVousDto.Cree_par,
         },
       });
@@ -75,6 +76,7 @@ export class RendezVousService {
           sujet: updateRendezVousDto.sujet,
           date_rendez_vous: updateRendezVousDto.date_rendez_vous,
           status: updateRendezVousDto.status,
+          cabinet: updateRendezVousDto.cabinet,
           Cree_par: updateRendezVousDto.Cree_par,
         },
       });

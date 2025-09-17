@@ -29,6 +29,10 @@ export class CreateBienDto {
   @IsInt()
   stock: number;
 
+  @IsOptional()
+  @IsString()
+  cabinet: string;
+
   @IsString()
   Cree_par: string;
 }

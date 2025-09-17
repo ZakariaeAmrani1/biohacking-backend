@@ -39,4 +39,8 @@ export class CreateRendezVousDto {
   @IsNotEmpty({ message: 'Le Statut est obligatoire.' })
   @IsEnum(Role, { message: 'status must be a valid enum value' })
   status: Role;
+
+  @IsNotEmpty({ message: 'Le cabinet est obligatoire.' })
+  @IsString()
+  cabinet: string;
 }

@@ -21,6 +21,7 @@ export class BienService {
           Type: createBienDto.Type,
           prix: createBienDto.prix,
           stock: createBienDto.stock,
+          cabinet: createBienDto.cabinet,
           Cree_par: createBienDto.Cree_par,
         },
       });
@@ -68,6 +69,7 @@ export class BienService {
           bien_type: updateBienDto.bien_type,
           Type: updateBienDto.Type,
           prix: updateBienDto.prix,
+          cabinet: updateBienDto.cabinet,
           stock: updateBienDto.stock,
         },
       });
