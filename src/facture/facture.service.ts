@@ -22,6 +22,11 @@ export class FactureService {
           prix_total: createFactureDto.prix_total,
           statut: createFactureDto.statut,
           notes: createFactureDto.notes,
+          date_paiement: createFactureDto.date_paiement,
+          methode_paiement: createFactureDto.methode_paiement,
+          cheque_date_tirage: createFactureDto.cheque_date_tirage,
+          cheque_banque: createFactureDto.cheque_banque,
+          cheque_numero: createFactureDto.cheque_numero,
           Cree_par: createFactureDto.Cree_par,
         },
       });
@@ -70,11 +75,17 @@ export class FactureService {
           prix_total: updateFactureDto.prix_total ?? undefined,
           statut: updateFactureDto.statut ?? undefined,
           notes: updateFactureDto.notes ?? undefined,
+          date_paiement: updateFactureDto.date_paiement ?? undefined,
+          methode_paiement: updateFactureDto.methode_paiement ?? undefined,
+          cheque_date_tirage: updateFactureDto.cheque_date_tirage ?? undefined,
+          cheque_banque: updateFactureDto.cheque_banque ?? undefined,
+          cheque_numero: updateFactureDto.cheque_numero ?? undefined,
           Cree_par: updateFactureDto.Cree_par ?? undefined,
         },
       });
       return updatedTemplate;
     } catch (error: any) {
+      console.log(error);
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         throw new BadRequestException(error.message);
       }

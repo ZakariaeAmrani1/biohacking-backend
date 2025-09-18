@@ -22,6 +22,8 @@ export class EntrepriseService {
           RIB: createEntrepriseDto.RIB,
           patente: createEntrepriseDto.patente,
           adresse: createEntrepriseDto.adresse,
+          email: createEntrepriseDto.email,
+          numero_telephone: createEntrepriseDto.numero_telephone,
         },
       });
       return entreprise;
@@ -42,21 +44,25 @@ export class EntrepriseService {
   }
 
   async update(id: number, updateEntrepriseDto: UpdateEntrepriseDto) {
-    const entreprise = await this.prisma.entreprise.findUnique({
-      where: { id },
-    });
-    if (!entreprise) {
-      throw new NotFoundException(
-        `Entreprise avec l'identifiant ${id} introuvable`,
-      );
+    try {
+      const entreprise = await this.prisma.entreprise.findUnique({
+        where: { id },
+      });
+      if (!entreprise) {
+        throw new NotFoundException(
+          `Entreprise avec l'identifiant ${id} introuvable`,
+        );
+      }
+
+      const updatedEntreprise = await this.prisma.entreprise.update({
+        where: { id },
+        data: updateEntrepriseDto,
+      });
+
+      return updatedEntreprise;
+    } catch (error) {
+      console.log(error);
     }
-
-    const updatedEntreprise = await this.prisma.entreprise.update({
-      where: { id },
-      data: updateEntrepriseDto,
-    });
-
-    return updatedEntreprise;
   }
 
   async remove(id: number) {

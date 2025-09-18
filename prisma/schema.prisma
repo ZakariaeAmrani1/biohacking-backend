@@ -71,6 +71,8 @@ model Entreprise {
   RIB        String   
   patente    String   
   adresse    String
+  email      String?
+  numero_telephone String?
   created_at DateTime @default(now())
   updated_at   DateTime     @updatedAt
 }
@@ -177,6 +179,10 @@ model facture {
   created_at DateTime @default(now())
   updated_at   DateTime     @updatedAt 
   date_paiement DateTime?
+  methode_paiement String?
+  cheque_numero String?
+  cheque_banque String?
+  cheque_date_tirage DateTime?
 
   client     Client      @relation(fields: [CIN], references: [CIN])
   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])

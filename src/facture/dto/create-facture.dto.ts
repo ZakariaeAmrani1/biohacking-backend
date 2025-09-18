@@ -30,6 +30,29 @@ export class CreateFactureDto {
   @IsString()
   notes: string;
 
+  @IsOptional()
+  @IsString()
+  methode_paiement?: string;
+
+  @IsOptional()
+  @IsDateString(
+    {},
+    { message: 'La date de paiement doit être au format ISO.\n' },
+  )
+  date_paiement?: string;
+
+  @IsOptional()
+  @IsString()
+  cheque_numero?: string;
+
+  @IsOptional()
+  @IsString()
+  cheque_banque?: string;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'La date de tirage doit être au format ISO.\n' })
+  cheque_date_tirage?: string;
+
   @IsNotEmpty({ message: 'Le créateur est obligatoire.\n' })
   @IsString()
   Cree_par: string;

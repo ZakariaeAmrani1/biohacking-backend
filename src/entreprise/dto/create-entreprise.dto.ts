@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateEntrepriseDto {
   @IsString({ message: 'L’ICE doit être un nombre entier.' })
@@ -28,4 +28,12 @@ export class CreateEntrepriseDto {
   @IsString({ message: "L'adresse doit être une chaîne de caractères." })
   @IsNotEmpty({ message: "L'adresse est obligatoire." })
   adresse: string;
+
+  @IsOptional()
+  @IsString()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  numero_telephone?: string;
 }
