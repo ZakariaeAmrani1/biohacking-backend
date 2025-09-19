@@ -13,6 +13,7 @@ import { FactureBienModule } from './facture-bien/facture-bien.module';
 import { PaimentModule } from './paiment/paiment.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ScannedDocumentModule } from './scanned-document/scanned-document.module';
 
 @Module({
   imports: [
@@ -26,10 +27,11 @@ import { PrismaModule } from './prisma/prisma.module';
     FactureModule,
     FactureBienModule,
     PaimentModule,
-    AuthModule, // AuthModule now handles JWT/Passport imports and providers internally
+    AuthModule,
     PrismaModule,
+    ScannedDocumentModule,
   ],
-  controllers: [AppController], // ONLY app controller here
-  providers: [AppService], // ONLY app service here
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

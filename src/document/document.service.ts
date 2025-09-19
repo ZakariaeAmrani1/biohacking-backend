@@ -50,7 +50,7 @@ export class DocumentService {
 
   async update(id: number, updateDocumentDto: UpdateDocumentDto) {
     try {
-      const template = await this.prisma.document_templates.findUnique({
+      const template = await this.prisma.document.findUnique({
         where: { id },
       });
       if (!template) {
@@ -69,6 +69,7 @@ export class DocumentService {
       });
       return updatedTemplate;
     } catch (error: any) {
+      console.log(error);
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         throw new BadRequestException(error.message);
       }

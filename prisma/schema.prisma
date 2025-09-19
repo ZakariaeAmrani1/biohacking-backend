@@ -60,6 +60,7 @@ model Utilisateur {
   factures         facture[]
   factureBiens     facture_bien[]
   paiements        paiment[]
+  scanned_Documents scannedDocument[]
 }
 
 model Entreprise {
@@ -98,6 +99,7 @@ model Client {
 
   rendez_vous      rendez_vous[]
   documents        document[]
+  scanned_Documents scannedDocument[]
   factures         facture[]
 }
 
@@ -137,6 +139,21 @@ model document {
   updated_at   DateTime     @updatedAt
 
   template   document_templates @relation(fields: [template_id], references: [id])
+  client     Client             @relation(fields: [CIN], references: [CIN])
+  utilisateur Utilisateur       @relation(fields: [Cree_par], references: [CIN])
+}
+
+model scannedDocument {
+  id        Int      @id @default(autoincrement())
+  title     String
+  filePath  String   
+  CIN        String
+  description String?
+  Cree_par   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   client     Client             @relation(fields: [CIN], references: [CIN])
   utilisateur Utilisateur       @relation(fields: [Cree_par], references: [CIN])
 }
