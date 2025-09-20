@@ -213,6 +213,7 @@ model facture_bien {
   id_bien     Int
   type_bien   String
   quantite    Int
+  prix     Float
   Cree_par    String
   created_at DateTime @default(now())
   updated_at   DateTime     @updatedAt

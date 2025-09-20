@@ -32,4 +32,10 @@ export class RegisterDto {
     message: 'Le mot de passe doit comporter au moins 6 caractères.',
   })
   password: string;
+
+  @IsNotEmpty({ message: 'Un mot de passe est requis.' })
+  @MinLength(6, {
+    message: 'Le mot de passe doit comporter au moins 6 caractères.',
+  })
+  confirmPassword: string;
 }

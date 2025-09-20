@@ -18,6 +18,10 @@ export class CreateFactureBienDto {
   @IsNumber()
   quantite: number;
 
+  @IsNotEmpty({ message: 'Le prix du bien est obligatoire.\n' })
+  @IsNumber()
+  prix: number;
+
   @IsNotEmpty({ message: 'Le créateur est obligatoire.\n' })
   @IsString()
   Cree_par: string;

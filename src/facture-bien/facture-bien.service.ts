@@ -21,6 +21,7 @@ export class FactureBienService {
           id_bien: createFactureBienDto.id_bien,
           type_bien: createFactureBienDto.type_bien,
           quantite: createFactureBienDto.quantite,
+          prix: createFactureBienDto.prix,
           Cree_par: createFactureBienDto.Cree_par,
         },
       });
@@ -78,6 +79,7 @@ export class FactureBienService {
           id_bien: updateFactureBienDto.id_bien,
           type_bien: updateFactureBienDto.type_bien,
           quantite: updateFactureBienDto.quantite,
+          prix: updateFactureBienDto.prix,
           Cree_par: updateFactureBienDto.Cree_par,
         },
       });
