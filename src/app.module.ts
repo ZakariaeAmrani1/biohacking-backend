@@ -14,6 +14,7 @@ import { PaimentModule } from './paiment/paiment.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ScannedDocumentModule } from './scanned-document/scanned-document.module';
+import { OptionsServiceModule } from './options-service/options-service.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ScannedDocumentModule } from './scanned-document/scanned-document.modul
     AuthModule,
     PrismaModule,
     ScannedDocumentModule,
+    OptionsServiceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
