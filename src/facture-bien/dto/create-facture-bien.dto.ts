@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, Max, Min } from 'class-validator';
 import { BienType } from 'generated/prisma';
 
 export class CreateFactureBienDto {
@@ -20,6 +20,8 @@ export class CreateFactureBienDto {
 
   @IsNotEmpty({ message: 'Le prix du bien est obligatoire.\n' })
   @IsNumber()
+  @Min(0, { message: 'Le prix minimum est 0.\n' })
+  @Max(100000, { message: 'Le prix maximum est 100000.\n' })
   prix: number;
 
   @IsNotEmpty({ message: 'Le créateur est obligatoire.\n' })

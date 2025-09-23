@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -9,6 +10,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -40,28 +42,41 @@ export class AuthService {
   }
 
   async register(data: RegisterDto) {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-    data.date_naissance = new Date(data.date_naissance);
-    const payload = { email: data.email, role: data.role };
-    const access_token = this.jwtService.sign(payload);
-    const user = await this.prisma.utilisateur.create({
-      data: {
-        CIN: data.CIN,
-        role: data.role,
-        prenom: data.prenom,
-        nom: data.nom,
-        date_naissance: data.date_naissance,
-        numero_telephone: data.numero_telephone,
-        adresse: data.adresse,
-        email: data.email,
-        password: hashedPassword,
-      },
-    });
-    const { password, ...userWithoutPassword } = user;
-    return {
-      user: userWithoutPassword,
-      token: access_token,
-    };
+    try {
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      data.date_naissance = new Date(data.date_naissance);
+      const payload = { email: data.email, role: data.role };
+      const access_token = this.jwtService.sign(payload);
+      const user = await this.prisma.utilisateur.create({
+        data: {
+          CIN: data.CIN,
+          role: data.role,
+          prenom: data.prenom,
+          nom: data.nom,
+          date_naissance: data.date_naissance,
+          numero_telephone: data.numero_telephone,
+          adresse: data.adresse,
+          email: data.email,
+          password: hashedPassword,
+        },
+      });
+      const { password, ...userWithoutPassword } = user;
+      return {
+        user: userWithoutPassword,
+        token: access_token,
+      };
+    } catch (error: any) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new UnprocessableEntityException(
+            `Un utilisateur avec ce email (${data.email}) existe déjà.`,
+          );
+        }
+      }
+      throw new BadRequestException(
+        "Impossible de créer l'utilisateur. Vérifiez les données.",
+      );
+    }
   }
 
   async updatePassword(userId: number, updatePasswordDto: UpdatePasswordDto) {
