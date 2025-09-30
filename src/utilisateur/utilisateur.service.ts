@@ -22,15 +22,17 @@ export class UtilisateurService {
         password: hashedPassword,
       },
     });
-    return 'This action adds a new utilisateur';
+    return user;
   }
 
   findAll() {
     return this.prisma.utilisateur.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} utilisateur`;
+  async findOne(id: number) {
+    const user = await this.prisma.utilisateur.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException(`user #${id} not found`);
+    return user;
   }
 
   async update(id: number, updateUtilisateurDto: any) {
