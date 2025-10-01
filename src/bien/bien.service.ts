@@ -22,6 +22,7 @@ export class BienService {
           prix: createBienDto.prix,
           stock: createBienDto.stock,
           cabinet: createBienDto.cabinet,
+          therapeute: createBienDto.therapeute,
           Cree_par: createBienDto.Cree_par,
         },
       });
@@ -70,6 +71,7 @@ export class BienService {
           Type: updateBienDto.Type,
           prix: updateBienDto.prix,
           cabinet: updateBienDto.cabinet,
+          therapeute: updateBienDto.therapeute,
           stock: updateBienDto.stock,
         },
       });
