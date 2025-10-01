@@ -12,9 +12,7 @@ datasource db {
 
 enum Role {
   admin
-  doctor
-  nurse
-  receptionist
+  therapeute
 }
 
 enum Status {
@@ -56,11 +54,13 @@ model Utilisateur {
   documentTemplates document_templates[]
   documents        document[]
   // services         service[]
-  biens         bien[]
+  biensCreated      bien[]             @relation("BienCreePar")     
+  biensTherapeute   bien[]             @relation("BienTherapeute")
   factures         facture[]
   factureBiens     facture_bien[]
   paiements        paiment[]
   scanned_Documents scannedDocument[]
+
 }
 
 model Entreprise {
@@ -178,10 +178,13 @@ model bien {
   stock    Int
   cabinet  String @default("Biohacking")
   Cree_par String
+  therapeute String? 
   created_at DateTime @default(now())
   updated_at   DateTime     @updatedAt
 
-  utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
+  utilisateur Utilisateur @relation("BienCreePar", fields: [Cree_par], references: [CIN])
+  therapeuteUser Utilisateur? @relation("BienTherapeute", fields: [therapeute], references: [CIN])
+
   factureBiens facture_bien[]
 }
 

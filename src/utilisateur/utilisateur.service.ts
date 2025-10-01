@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUtilisateurDto } from './dto/create-utilisateur.dto';
 import { UpdateUtilisateurDto } from './dto/update-utilisateur.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -56,7 +60,20 @@ export class UtilisateurService {
     return result;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} utilisateur`;
+  async remove(id: number) {
+    try {
+      const user = await this.prisma.utilisateur.findUnique({ where: { id } });
+      if (!user) {
+        throw new NotFoundException(
+          `Utilisateur avec l'identifiant ${id} introuvable`,
+        );
+      }
+      await this.prisma.utilisateur.delete({ where: { id: id } });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(
+        "Impossible de supprimé l' Utilisateur. Vérifiez les données.",
+      );
+    }
   }
 }

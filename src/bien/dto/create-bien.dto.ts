@@ -39,6 +39,10 @@ export class CreateBienDto {
   @IsString()
   cabinet: string;
 
+  @IsOptional()
+  @IsString()
+  therapeute: string;
+
   @IsString()
   Cree_par: string;
 }
