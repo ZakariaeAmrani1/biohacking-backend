@@ -2,6 +2,7 @@ import {
   IsDateString,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -43,4 +44,8 @@ export class CreateRendezVousDto {
   @IsNotEmpty({ message: 'Le cabinet est obligatoire.' })
   @IsString()
   cabinet: string;
+
+  @IsNotEmpty({ message: 'Le soin est obligatoire.' })
+  @IsNumber()
+  soin_id: number;
 }
