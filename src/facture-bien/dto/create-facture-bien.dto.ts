@@ -1,4 +1,12 @@
-import { IsNotEmpty, IsNumber, IsString, Max, Min } from 'class-validator';
+import { MovementType } from '@prisma/client';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 import { BienType } from 'generated/prisma';
 
 export class CreateFactureBienDto {
@@ -23,6 +31,10 @@ export class CreateFactureBienDto {
   @Min(0, { message: 'Le prix minimum est 0.\n' })
   @Max(100000, { message: 'Le prix maximum est 100000.\n' })
   prix: number;
+
+  @IsOptional()
+  @IsString()
+  movementType: MovementType;
 
   @IsNotEmpty({ message: 'Le créateur est obligatoire.\n' })
   @IsString()
