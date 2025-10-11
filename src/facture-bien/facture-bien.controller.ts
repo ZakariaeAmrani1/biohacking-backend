@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { FactureBienService } from './facture-bien.service';
 import { CreateFactureBienDto } from './dto/create-facture-bien.dto';
 import { UpdateFactureBienDto } from './dto/update-facture-bien.dto';
@@ -23,8 +31,16 @@ export class FactureBienController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFactureBienDto: UpdateFactureBienDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateFactureBienDto: UpdateFactureBienDto,
+  ) {
     return this.factureBienService.update(+id, updateFactureBienDto);
+  }
+
+  @Delete('/IN/:id')
+  remove1(@Param('id') id: string) {
+    return this.factureBienService.remove1(+id);
   }
 
   @Delete(':id')

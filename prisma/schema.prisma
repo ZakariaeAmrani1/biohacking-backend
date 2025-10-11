@@ -222,7 +222,7 @@ model facture {
 
 model facture_bien {
   id          Int       @id @default(autoincrement())
-  id_facture  Int
+  id_facture  Int?
   id_bien     Int
   type_bien   String
   quantite    Int
@@ -232,7 +232,7 @@ model facture_bien {
   created_at DateTime @default(now())
   updated_at   DateTime     @updatedAt
 
-  facture     facture     @relation(fields: [id_facture], references: [id])
+  facture     facture?    @relation(fields: [id_facture], references: [id])
   bien     bien     @relation(fields: [id_bien], references: [id])
   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
 

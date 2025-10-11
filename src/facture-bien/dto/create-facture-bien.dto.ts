@@ -10,7 +10,8 @@ import {
 import { BienType } from 'generated/prisma';
 
 export class CreateFactureBienDto {
-  @IsNotEmpty({ message: 'La facture est obligatoire.\n' })
+  // @IsNotEmpty({ message: 'La facture est obligatoire.\n' })
+  @IsOptional()
   @IsNumber()
   id_facture: number;
 

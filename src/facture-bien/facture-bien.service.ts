@@ -122,4 +122,23 @@ export class FactureBienService {
       );
     }
   }
+
+  async remove1(id: number) {
+    try {
+      const facture_bien = await this.prisma.facture_bien.findUnique({
+        where: { id },
+      });
+      if (!facture_bien) {
+        throw new NotFoundException(
+          `Facture/Bien avec l'identifiant ${id} introuvable`,
+        );
+      }
+      await this.prisma.facture_bien.delete({ where: { id } });
+      return facture_bien;
+    } catch (error) {
+      throw new BadRequestException(
+        'Impossible de supprimé la Facture/Bien. Vérifiez les données.',
+      );
+    }
+  }
 }
