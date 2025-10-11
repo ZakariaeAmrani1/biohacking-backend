@@ -37,6 +37,10 @@ export class CreateFactureBienDto {
   @IsString()
   movementType: MovementType;
 
+  @IsOptional()
+  @IsString()
+  created_at: string;
+
   @IsNotEmpty({ message: 'Le créateur est obligatoire.\n' })
   @IsString()
   Cree_par: string;

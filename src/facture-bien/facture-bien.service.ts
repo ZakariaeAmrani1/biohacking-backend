@@ -23,6 +23,7 @@ export class FactureBienService {
           quantite: createFactureBienDto.quantite,
           prix: createFactureBienDto.prix,
           movementType: createFactureBienDto.movementType,
+          created_at: createFactureBienDto.created_at,
           Cree_par: createFactureBienDto.Cree_par,
         },
       });
@@ -82,6 +83,7 @@ export class FactureBienService {
           quantite: updateFactureBienDto.quantite,
           prix: updateFactureBienDto.prix,
           movementType: updateFactureBienDto.movementType,
+          created_at: updateFactureBienDto.created_at,
           Cree_par: updateFactureBienDto.Cree_par,
         },
       });
