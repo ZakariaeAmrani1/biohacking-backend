@@ -27,6 +27,11 @@ enum ServiceType {
   TYPE2
 }
 
+enum MovementType {
+  OUT
+  IN
+}
+
 
 
 enum BienType {
@@ -107,6 +112,7 @@ model rendez_vous {
   id                Int       @id @default(autoincrement())
   CIN               String
   sujet             String
+  soin_id     Int
   date_rendez_vous  DateTime
   created_at        DateTime  @default(now())
   Cree_par          String
@@ -116,6 +122,8 @@ model rendez_vous {
 
   client            Client      @relation(fields: [CIN], references: [CIN])
   utilisateur       Utilisateur @relation(fields: [Cree_par], references: [CIN])
+  bien     bien     @relation(fields: [soin_id], references: [id])
+
 }
 
 model document_templates {
@@ -186,6 +194,8 @@ model bien {
   therapeuteUser Utilisateur? @relation("BienTherapeute", fields: [therapeute], references: [CIN])
 
   factureBiens facture_bien[]
+
+  rendez_vous rendez_vous[]
 }
 
 model facture {
@@ -212,16 +222,17 @@ model facture {
 
 model facture_bien {
   id          Int       @id @default(autoincrement())
-  id_facture  Int
+  id_facture  Int?
   id_bien     Int
   type_bien   String
   quantite    Int
   prix     Float
   Cree_par    String
+  movementType       MovementType @default(OUT)
   created_at DateTime @default(now())
   updated_at   DateTime     @updatedAt
 
-  facture     facture     @relation(fields: [id_facture], references: [id])
+  facture     facture?    @relation(fields: [id_facture], references: [id])
   bien     bien     @relation(fields: [id_bien], references: [id])
   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
 

@@ -22,6 +22,7 @@ export class RendezVousService {
           date_rendez_vous: createRendezVousDto.date_rendez_vous,
           status: createRendezVousDto.status,
           cabinet: createRendezVousDto.cabinet,
+          soin_id: createRendezVousDto.soin_id,
           Cree_par: createRendezVousDto.Cree_par,
         },
       });
@@ -77,6 +78,7 @@ export class RendezVousService {
           date_rendez_vous: updateRendezVousDto.date_rendez_vous,
           status: updateRendezVousDto.status,
           cabinet: updateRendezVousDto.cabinet,
+          soin_id: updateRendezVousDto.soin_id,
           Cree_par: updateRendezVousDto.Cree_par,
         },
       });

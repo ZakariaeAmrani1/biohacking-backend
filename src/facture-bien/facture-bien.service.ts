@@ -22,6 +22,8 @@ export class FactureBienService {
           type_bien: createFactureBienDto.type_bien,
           quantite: createFactureBienDto.quantite,
           prix: createFactureBienDto.prix,
+          movementType: createFactureBienDto.movementType,
+          created_at: createFactureBienDto.created_at,
           Cree_par: createFactureBienDto.Cree_par,
         },
       });
@@ -80,6 +82,8 @@ export class FactureBienService {
           type_bien: updateFactureBienDto.type_bien,
           quantite: updateFactureBienDto.quantite,
           prix: updateFactureBienDto.prix,
+          movementType: updateFactureBienDto.movementType,
+          created_at: updateFactureBienDto.created_at,
           Cree_par: updateFactureBienDto.Cree_par,
         },
       });
@@ -117,6 +121,25 @@ export class FactureBienService {
     } catch (error) {
       throw new BadRequestException(
         'Impossible de supprimer les Bien/Facture. Vérifiez les données.',
+      );
+    }
+  }
+
+  async remove1(id: number) {
+    try {
+      const facture_bien = await this.prisma.facture_bien.findUnique({
+        where: { id },
+      });
+      if (!facture_bien) {
+        throw new NotFoundException(
+          `Facture/Bien avec l'identifiant ${id} introuvable`,
+        );
+      }
+      await this.prisma.facture_bien.delete({ where: { id } });
+      return facture_bien;
+    } catch (error) {
+      throw new BadRequestException(
+        'Impossible de supprimé la Facture/Bien. Vérifiez les données.',
       );
     }
   }
