@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsEnum, IsEmail, MinLength } from 'class-validator';
+import { IsNotEmpty, IsEnum, IsEmail, MinLength, IsOptional } from 'class-validator';
 import { Role } from 'src/auth/enum/role';
 
 export class CreateUtilisateurDto {
@@ -21,7 +21,7 @@ export class CreateUtilisateurDto {
   @IsNotEmpty({ message: 'Le numéro de téléphone est obligatoire.' })
   numero_telephone: string;
 
-  @IsNotEmpty({ message: "L'adresse est obligatoire." })
+  @IsOptional({ message: "L'adresse est obligatoire." })
   adresse: string;
 
   @IsEmail({}, { message: 'Adresse e-mail non valide' })
