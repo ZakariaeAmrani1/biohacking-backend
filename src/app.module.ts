@@ -15,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ScannedDocumentModule } from './scanned-document/scanned-document.module';
 import { OptionsServiceModule } from './options-service/options-service.module';
+import { WorkflowModule } from './workflow/workflow.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { OptionsServiceModule } from './options-service/options-service.module';
     PrismaModule,
     ScannedDocumentModule,
     OptionsServiceModule,
+    WorkflowModule,
   ],
   controllers: [AppController],
   providers: [AppService],

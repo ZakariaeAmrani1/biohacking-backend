@@ -1,1 +1,12 @@
 npm install 
+npx prisma generate
+npx prisma migrate dev
+
+sudo chmod 777 prisma
+sudo chmod 777 prisma/dev.db
+sudo chmod 777 uploads/
+
+npm run build
+
+pm2 start dist/src/main.js --name "biohacking-backend"
+pm2 save

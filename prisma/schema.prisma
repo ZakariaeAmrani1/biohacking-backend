@@ -38,6 +38,11 @@ enum BienType {
   PRODUIT
 }
 
+enum WorkflowStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
 model Utilisateur {
   id               Int       @id @default(autoincrement())
   CIN              String    @unique
@@ -64,6 +69,7 @@ model Utilisateur {
   factureBiens     facture_bien[]
   paiements        paiment[]
   scanned_Documents scannedDocument[]
+  workflowsCreated   Workflow[] @relation("WorkflowCreePar")
 
 }
 
@@ -105,6 +111,7 @@ model Client {
   documents        document[]
   scanned_Documents scannedDocument[]
   factures         facture[]
+  workflows          Workflow[]
 }
 
 model rendez_vous {
@@ -122,6 +129,7 @@ model rendez_vous {
   client            Client      @relation(fields: [CIN], references: [CIN])
   utilisateur       Utilisateur @relation(fields: [Cree_par], references: [CIN])
   bien     bien     @relation(fields: [soin_id], references: [id])
+ workflow           Workflow?
 
 }
 
@@ -217,6 +225,7 @@ model facture {
   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
   factureBiens facture_bien[]
   paiements   paiment[]
+  workflow           Workflow?
 }
 
 model facture_bien {
@@ -250,4 +259,28 @@ model paiment {
 
   facture        facture     @relation(fields: [id_facture], references: [id])
   utilisateur    Utilisateur @relation(fields: [Cree_par], references: [CIN])
+}
+
+model Workflow {
+  id               Int            @id @default(autoincrement())
+  
+  // Required relationships
+  client_CIN       String
+  rendez_vous_id   Int            @unique // One workflow per appointment usually
+  
+  // Optional relationship
+  facture_id       Int?           @unique // One workflow per invoice
+  
+  status           WorkflowStatus @default(IN_PROGRESS)
+  
+  // Metadata
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+  Cree_par         String
+
+  // Relations
+  client           Client         @relation(fields: [client_CIN], references: [CIN])
+  rendez_vous      rendez_vous    @relation(fields: [rendez_vous_id], references: [id])
+  facture          facture?       @relation(fields: [facture_id], references: [id])
+  utilisateur      Utilisateur    @relation("WorkflowCreePar", fields: [Cree_par], references: [CIN])
 }
