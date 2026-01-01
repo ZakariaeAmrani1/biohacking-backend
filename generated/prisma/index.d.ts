@@ -3,7 +3,7 @@
  * Client
 **/
 
-import * as runtime from './runtime/library.js';
+import * as runtime from './runtime/client.js';
 import $Types = runtime.Types // general types
 import $Public = runtime.Types.Public
 import $Utils = runtime.Types.Utils
@@ -44,6 +44,11 @@ export type document_templates = $Result.DefaultSelection<Prisma.$document_templ
  */
 export type document = $Result.DefaultSelection<Prisma.$documentPayload>
 /**
+ * Model scannedDocument
+ * 
+ */
+export type scannedDocument = $Result.DefaultSelection<Prisma.$scannedDocumentPayload>
+/**
  * Model bien
  * 
  */
@@ -69,12 +74,21 @@ export type paiment = $Result.DefaultSelection<Prisma.$paimentPayload>
  */
 export namespace $Enums {
   export const Role: {
-  ADMIN: 'ADMIN',
-  USER: 'USER',
-  OTHER: 'OTHER'
+  admin: 'admin',
+  therapeute: 'therapeute'
 };
 
 export type Role = (typeof Role)[keyof typeof Role]
+
+
+export const Status: {
+  programmé: 'programmé',
+  confirmé: 'confirmé',
+  terminé: 'terminé',
+  annulé: 'annulé'
+};
+
+export type Status = (typeof Status)[keyof typeof Status]
 
 
 export const ServiceType: {
@@ -85,13 +99,12 @@ export const ServiceType: {
 export type ServiceType = (typeof ServiceType)[keyof typeof ServiceType]
 
 
-export const FactureStatus: {
-  PAYEE: 'PAYEE',
-  NON_PAYEE: 'NON_PAYEE',
-  EN_ATTENTE: 'EN_ATTENTE'
+export const MovementType: {
+  OUT: 'OUT',
+  IN: 'IN'
 };
 
-export type FactureStatus = (typeof FactureStatus)[keyof typeof FactureStatus]
+export type MovementType = (typeof MovementType)[keyof typeof MovementType]
 
 
 export const BienType: {
@@ -107,13 +120,17 @@ export type Role = $Enums.Role
 
 export const Role: typeof $Enums.Role
 
+export type Status = $Enums.Status
+
+export const Status: typeof $Enums.Status
+
 export type ServiceType = $Enums.ServiceType
 
 export const ServiceType: typeof $Enums.ServiceType
 
-export type FactureStatus = $Enums.FactureStatus
+export type MovementType = $Enums.MovementType
 
-export const FactureStatus: typeof $Enums.FactureStatus
+export const MovementType: typeof $Enums.MovementType
 
 export type BienType = $Enums.BienType
 
@@ -131,7 +148,7 @@ export const BienType: typeof $Enums.BienType
  * ```
  *
  *
- * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
+ * Read more in our [docs](https://pris.ly/d/client).
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
@@ -152,7 +169,7 @@ export class PrismaClient<
    * ```
    *
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
+   * Read more in our [docs](https://pris.ly/d/client).
    */
 
   constructor(optionsArg ?: Prisma.Subset<ClientOptions, Prisma.PrismaClientOptions>);
@@ -168,13 +185,6 @@ export class PrismaClient<
    */
   $disconnect(): $Utils.JsPromise<void>;
 
-  /**
-   * Add a middleware
-   * @deprecated since 4.16.0. For new code, prefer client extensions instead.
-   * @see https://pris.ly/d/extensions
-   */
-  $use(cb: Prisma.Middleware): void
-
 /**
    * Executes a prepared raw query and returns the number of affected rows.
    * @example
@@ -182,7 +192,7 @@ export class PrismaClient<
    * const result = await prisma.$executeRaw`UPDATE User SET cool = ${true} WHERE email = ${'user@email.com'};`
    * ```
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
    */
   $executeRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<number>;
 
@@ -194,7 +204,7 @@ export class PrismaClient<
    * const result = await prisma.$executeRawUnsafe('UPDATE User SET cool = $1 WHERE email = $2 ;', true, 'user@email.com')
    * ```
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
    */
   $executeRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<number>;
 
@@ -205,7 +215,7 @@ export class PrismaClient<
    * const result = await prisma.$queryRaw`SELECT * FROM User WHERE id = ${1} OR email = ${'user@email.com'};`
    * ```
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
    */
   $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<T>;
 
@@ -217,7 +227,7 @@ export class PrismaClient<
    * const result = await prisma.$queryRawUnsafe('SELECT * FROM User WHERE id = $1 OR email = $2;', 1, 'user@email.com')
    * ```
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
    */
   $queryRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<T>;
 
@@ -238,7 +248,6 @@ export class PrismaClient<
   $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P], options?: { isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
 
   $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
-
 
   $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb<ClientOptions>, ExtArgs, $Utils.Call<Prisma.TypeMapCb<ClientOptions>, {
     extArgs: ExtArgs
@@ -303,6 +312,16 @@ export class PrismaClient<
     * ```
     */
   get document(): Prisma.documentDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.scannedDocument`: Exposes CRUD operations for the **scannedDocument** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ScannedDocuments
+    * const scannedDocuments = await prisma.scannedDocument.findMany()
+    * ```
+    */
+  get scannedDocument(): Prisma.scannedDocumentDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.bien`: Exposes CRUD operations for the **bien** model.
@@ -383,14 +402,6 @@ export namespace Prisma {
   export type DecimalJsLike = runtime.DecimalJsLike
 
   /**
-   * Metrics
-   */
-  export type Metrics = runtime.Metrics
-  export type Metric<T> = runtime.Metric<T>
-  export type MetricHistogram = runtime.MetricHistogram
-  export type MetricHistogramBucket = runtime.MetricHistogramBucket
-
-  /**
   * Extensions
   */
   export import Extension = $Extensions.UserArgs
@@ -401,11 +412,12 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.13.0
-   * Query Engine version: 361e86d0ea4987e9f53a565309b3eed797a6bcbd
+   * Prisma Client JS version: 7.1.0
+   * Query Engine version: ab635e6b9d606fa5c8fb8b1a7f909c3c3c1c98ba
    */
   export type PrismaVersion = {
     client: string
+    engine: string
   }
 
   export const prismaVersion: PrismaVersion
@@ -415,6 +427,7 @@ export namespace Prisma {
    */
 
 
+  export import Bytes = runtime.Bytes
   export import JsonObject = runtime.JsonObject
   export import JsonArray = runtime.JsonArray
   export import JsonValue = runtime.JsonValue
@@ -789,6 +802,7 @@ export namespace Prisma {
     rendez_vous: 'rendez_vous',
     document_templates: 'document_templates',
     document: 'document',
+    scannedDocument: 'scannedDocument',
     bien: 'bien',
     facture: 'facture',
     facture_bien: 'facture_bien',
@@ -798,9 +812,6 @@ export namespace Prisma {
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
 
 
-  export type Datasources = {
-    db?: Datasource
-  }
 
   interface TypeMapCb<ClientOptions = {}> extends $Utils.Fn<{extArgs: $Extensions.InternalArgs }, $Utils.Record<string, any>> {
     returns: Prisma.TypeMap<this['params']['extArgs'], ClientOptions extends { omit: infer OmitOptions } ? OmitOptions : {}>
@@ -811,7 +822,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "utilisateur" | "entreprise" | "client" | "rendez_vous" | "document_templates" | "document" | "bien" | "facture" | "facture_bien" | "paiment"
+      modelProps: "utilisateur" | "entreprise" | "client" | "rendez_vous" | "document_templates" | "document" | "scannedDocument" | "bien" | "facture" | "facture_bien" | "paiment"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1259,6 +1270,80 @@ export namespace Prisma {
           }
         }
       }
+      scannedDocument: {
+        payload: Prisma.$scannedDocumentPayload<ExtArgs>
+        fields: Prisma.scannedDocumentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.scannedDocumentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scannedDocumentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.scannedDocumentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scannedDocumentPayload>
+          }
+          findFirst: {
+            args: Prisma.scannedDocumentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scannedDocumentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.scannedDocumentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scannedDocumentPayload>
+          }
+          findMany: {
+            args: Prisma.scannedDocumentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scannedDocumentPayload>[]
+          }
+          create: {
+            args: Prisma.scannedDocumentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scannedDocumentPayload>
+          }
+          createMany: {
+            args: Prisma.scannedDocumentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.scannedDocumentCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scannedDocumentPayload>[]
+          }
+          delete: {
+            args: Prisma.scannedDocumentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scannedDocumentPayload>
+          }
+          update: {
+            args: Prisma.scannedDocumentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scannedDocumentPayload>
+          }
+          deleteMany: {
+            args: Prisma.scannedDocumentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.scannedDocumentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.scannedDocumentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scannedDocumentPayload>[]
+          }
+          upsert: {
+            args: Prisma.scannedDocumentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$scannedDocumentPayload>
+          }
+          aggregate: {
+            args: Prisma.ScannedDocumentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateScannedDocument>
+          }
+          groupBy: {
+            args: Prisma.scannedDocumentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ScannedDocumentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.scannedDocumentCountArgs<ExtArgs>
+            result: $Utils.Optional<ScannedDocumentCountAggregateOutputType> | number
+          }
+        }
+      }
       bien: {
         payload: Prisma.$bienPayload<ExtArgs>
         fields: Prisma.bienFieldRefs
@@ -1584,14 +1669,6 @@ export namespace Prisma {
   export type ErrorFormat = 'pretty' | 'colorless' | 'minimal'
   export interface PrismaClientOptions {
     /**
-     * Overwrites the datasource url from your schema.prisma file
-     */
-    datasources?: Datasources
-    /**
-     * Overwrites the datasource url from your schema.prisma file
-     */
-    datasourceUrl?: string
-    /**
      * @default "colorless"
      */
     errorFormat?: ErrorFormat
@@ -1617,7 +1694,7 @@ export namespace Prisma {
      *  { emit: 'stdout', level: 'error' }
      * 
      * ```
-     * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/logging#the-log-option).
+     * Read more in our [docs](https://pris.ly/d/logging).
      */
     log?: (LogLevel | LogDefinition)[]
     /**
@@ -1630,6 +1707,14 @@ export namespace Prisma {
       timeout?: number
       isolationLevel?: Prisma.TransactionIsolationLevel
     }
+    /**
+     * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`
+     */
+    adapter?: runtime.SqlDriverAdapterFactory
+    /**
+     * Prisma Accelerate URL allowing the client to connect through Accelerate instead of a direct database.
+     */
+    accelerateUrl?: string
     /**
      * Global configuration for omitting model fields by default.
      * 
@@ -1645,6 +1730,22 @@ export namespace Prisma {
      * ```
      */
     omit?: Prisma.GlobalOmitConfig
+    /**
+     * SQL commenter plugins that add metadata to SQL queries as comments.
+     * Comments follow the sqlcommenter format: https://google.github.io/sqlcommenter/
+     * 
+     * @example
+     * ```
+     * const prisma = new PrismaClient({
+     *   adapter,
+     *   comments: [
+     *     traceContext(),
+     *     queryInsights(),
+     *   ],
+     * })
+     * ```
+     */
+    comments?: runtime.SqlCommenterPlugin[]
   }
   export type GlobalOmitConfig = {
     utilisateur?: UtilisateurOmit
@@ -1653,6 +1754,7 @@ export namespace Prisma {
     rendez_vous?: rendez_vousOmit
     document_templates?: document_templatesOmit
     document?: documentOmit
+    scannedDocument?: scannedDocumentOmit
     bien?: bienOmit
     facture?: factureOmit
     facture_bien?: facture_bienOmit
@@ -1715,25 +1817,6 @@ export namespace Prisma {
     | 'findRaw'
     | 'groupBy'
 
-  /**
-   * These options are being passed into the middleware as "params"
-   */
-  export type MiddlewareParams = {
-    model?: ModelName
-    action: PrismaAction
-    args: any
-    dataPath: string[]
-    runInTransaction: boolean
-  }
-
-  /**
-   * The `T` type makes sure, that the `return proceed` is not forgotten in the middleware implementation
-   */
-  export type Middleware<T = any> = (
-    params: MiddlewareParams,
-    next: (params: MiddlewareParams) => $Utils.JsPromise<T>,
-  ) => $Utils.JsPromise<T>
-
   // tested in getLogLevel.test.ts
   export function getLogLevel(log: Array<LogLevel | LogDefinition>): LogLevel | undefined;
 
@@ -1760,10 +1843,12 @@ export namespace Prisma {
     rendez_vous: number
     documentTemplates: number
     documents: number
-    biens: number
+    biensCreated: number
+    biensTherapeute: number
     factures: number
     factureBiens: number
     paiements: number
+    scanned_Documents: number
   }
 
   export type UtilisateurCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1771,10 +1856,12 @@ export namespace Prisma {
     rendez_vous?: boolean | UtilisateurCountOutputTypeCountRendez_vousArgs
     documentTemplates?: boolean | UtilisateurCountOutputTypeCountDocumentTemplatesArgs
     documents?: boolean | UtilisateurCountOutputTypeCountDocumentsArgs
-    biens?: boolean | UtilisateurCountOutputTypeCountBiensArgs
+    biensCreated?: boolean | UtilisateurCountOutputTypeCountBiensCreatedArgs
+    biensTherapeute?: boolean | UtilisateurCountOutputTypeCountBiensTherapeuteArgs
     factures?: boolean | UtilisateurCountOutputTypeCountFacturesArgs
     factureBiens?: boolean | UtilisateurCountOutputTypeCountFactureBiensArgs
     paiements?: boolean | UtilisateurCountOutputTypeCountPaiementsArgs
+    scanned_Documents?: boolean | UtilisateurCountOutputTypeCountScanned_DocumentsArgs
   }
 
   // Custom InputTypes
@@ -1819,7 +1906,14 @@ export namespace Prisma {
   /**
    * UtilisateurCountOutputType without action
    */
-  export type UtilisateurCountOutputTypeCountBiensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UtilisateurCountOutputTypeCountBiensCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: bienWhereInput
+  }
+
+  /**
+   * UtilisateurCountOutputType without action
+   */
+  export type UtilisateurCountOutputTypeCountBiensTherapeuteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: bienWhereInput
   }
 
@@ -1844,6 +1938,13 @@ export namespace Prisma {
     where?: paimentWhereInput
   }
 
+  /**
+   * UtilisateurCountOutputType without action
+   */
+  export type UtilisateurCountOutputTypeCountScanned_DocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: scannedDocumentWhereInput
+  }
+
 
   /**
    * Count Type ClientCountOutputType
@@ -1852,12 +1953,14 @@ export namespace Prisma {
   export type ClientCountOutputType = {
     rendez_vous: number
     documents: number
+    scanned_Documents: number
     factures: number
   }
 
   export type ClientCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     rendez_vous?: boolean | ClientCountOutputTypeCountRendez_vousArgs
     documents?: boolean | ClientCountOutputTypeCountDocumentsArgs
+    scanned_Documents?: boolean | ClientCountOutputTypeCountScanned_DocumentsArgs
     factures?: boolean | ClientCountOutputTypeCountFacturesArgs
   }
 
@@ -1884,6 +1987,13 @@ export namespace Prisma {
    */
   export type ClientCountOutputTypeCountDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: documentWhereInput
+  }
+
+  /**
+   * ClientCountOutputType without action
+   */
+  export type ClientCountOutputTypeCountScanned_DocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: scannedDocumentWhereInput
   }
 
   /**
@@ -1931,10 +2041,12 @@ export namespace Prisma {
 
   export type BienCountOutputType = {
     factureBiens: number
+    rendez_vous: number
   }
 
   export type BienCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     factureBiens?: boolean | BienCountOutputTypeCountFactureBiensArgs
+    rendez_vous?: boolean | BienCountOutputTypeCountRendez_vousArgs
   }
 
   // Custom InputTypes
@@ -1953,6 +2065,13 @@ export namespace Prisma {
    */
   export type BienCountOutputTypeCountFactureBiensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: facture_bienWhereInput
+  }
+
+  /**
+   * BienCountOutputType without action
+   */
+  export type BienCountOutputTypeCountRendez_vousArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: rendez_vousWhereInput
   }
 
 
@@ -2032,6 +2151,7 @@ export namespace Prisma {
     password: string | null
     role: $Enums.Role | null
     created_at: Date | null
+    updated_at: Date | null
   }
 
   export type UtilisateurMaxAggregateOutputType = {
@@ -2046,6 +2166,7 @@ export namespace Prisma {
     password: string | null
     role: $Enums.Role | null
     created_at: Date | null
+    updated_at: Date | null
   }
 
   export type UtilisateurCountAggregateOutputType = {
@@ -2060,6 +2181,7 @@ export namespace Prisma {
     password: number
     role: number
     created_at: number
+    updated_at: number
     _all: number
   }
 
@@ -2084,6 +2206,7 @@ export namespace Prisma {
     password?: true
     role?: true
     created_at?: true
+    updated_at?: true
   }
 
   export type UtilisateurMaxAggregateInputType = {
@@ -2098,6 +2221,7 @@ export namespace Prisma {
     password?: true
     role?: true
     created_at?: true
+    updated_at?: true
   }
 
   export type UtilisateurCountAggregateInputType = {
@@ -2112,6 +2236,7 @@ export namespace Prisma {
     password?: true
     role?: true
     created_at?: true
+    updated_at?: true
     _all?: true
   }
 
@@ -2213,6 +2338,7 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at: Date
+    updated_at: Date
     _count: UtilisateurCountAggregateOutputType | null
     _avg: UtilisateurAvgAggregateOutputType | null
     _sum: UtilisateurSumAggregateOutputType | null
@@ -2246,14 +2372,17 @@ export namespace Prisma {
     password?: boolean
     role?: boolean
     created_at?: boolean
+    updated_at?: boolean
     clients?: boolean | Utilisateur$clientsArgs<ExtArgs>
     rendez_vous?: boolean | Utilisateur$rendez_vousArgs<ExtArgs>
     documentTemplates?: boolean | Utilisateur$documentTemplatesArgs<ExtArgs>
     documents?: boolean | Utilisateur$documentsArgs<ExtArgs>
-    biens?: boolean | Utilisateur$biensArgs<ExtArgs>
+    biensCreated?: boolean | Utilisateur$biensCreatedArgs<ExtArgs>
+    biensTherapeute?: boolean | Utilisateur$biensTherapeuteArgs<ExtArgs>
     factures?: boolean | Utilisateur$facturesArgs<ExtArgs>
     factureBiens?: boolean | Utilisateur$factureBiensArgs<ExtArgs>
     paiements?: boolean | Utilisateur$paiementsArgs<ExtArgs>
+    scanned_Documents?: boolean | Utilisateur$scanned_DocumentsArgs<ExtArgs>
     _count?: boolean | UtilisateurCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["utilisateur"]>
 
@@ -2269,6 +2398,7 @@ export namespace Prisma {
     password?: boolean
     role?: boolean
     created_at?: boolean
+    updated_at?: boolean
   }, ExtArgs["result"]["utilisateur"]>
 
   export type UtilisateurSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -2283,6 +2413,7 @@ export namespace Prisma {
     password?: boolean
     role?: boolean
     created_at?: boolean
+    updated_at?: boolean
   }, ExtArgs["result"]["utilisateur"]>
 
   export type UtilisateurSelectScalar = {
@@ -2297,18 +2428,21 @@ export namespace Prisma {
     password?: boolean
     role?: boolean
     created_at?: boolean
+    updated_at?: boolean
   }
 
-  export type UtilisateurOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "CIN" | "nom" | "prenom" | "date_naissance" | "adresse" | "numero_telephone" | "email" | "password" | "role" | "created_at", ExtArgs["result"]["utilisateur"]>
+  export type UtilisateurOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "CIN" | "nom" | "prenom" | "date_naissance" | "adresse" | "numero_telephone" | "email" | "password" | "role" | "created_at" | "updated_at", ExtArgs["result"]["utilisateur"]>
   export type UtilisateurInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     clients?: boolean | Utilisateur$clientsArgs<ExtArgs>
     rendez_vous?: boolean | Utilisateur$rendez_vousArgs<ExtArgs>
     documentTemplates?: boolean | Utilisateur$documentTemplatesArgs<ExtArgs>
     documents?: boolean | Utilisateur$documentsArgs<ExtArgs>
-    biens?: boolean | Utilisateur$biensArgs<ExtArgs>
+    biensCreated?: boolean | Utilisateur$biensCreatedArgs<ExtArgs>
+    biensTherapeute?: boolean | Utilisateur$biensTherapeuteArgs<ExtArgs>
     factures?: boolean | Utilisateur$facturesArgs<ExtArgs>
     factureBiens?: boolean | Utilisateur$factureBiensArgs<ExtArgs>
     paiements?: boolean | Utilisateur$paiementsArgs<ExtArgs>
+    scanned_Documents?: boolean | Utilisateur$scanned_DocumentsArgs<ExtArgs>
     _count?: boolean | UtilisateurCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UtilisateurIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2321,10 +2455,12 @@ export namespace Prisma {
       rendez_vous: Prisma.$rendez_vousPayload<ExtArgs>[]
       documentTemplates: Prisma.$document_templatesPayload<ExtArgs>[]
       documents: Prisma.$documentPayload<ExtArgs>[]
-      biens: Prisma.$bienPayload<ExtArgs>[]
+      biensCreated: Prisma.$bienPayload<ExtArgs>[]
+      biensTherapeute: Prisma.$bienPayload<ExtArgs>[]
       factures: Prisma.$facturePayload<ExtArgs>[]
       factureBiens: Prisma.$facture_bienPayload<ExtArgs>[]
       paiements: Prisma.$paimentPayload<ExtArgs>[]
+      scanned_Documents: Prisma.$scannedDocumentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -2338,6 +2474,7 @@ export namespace Prisma {
       password: string
       role: $Enums.Role
       created_at: Date
+      updated_at: Date
     }, ExtArgs["result"]["utilisateur"]>
     composites: {}
   }
@@ -2736,10 +2873,12 @@ export namespace Prisma {
     rendez_vous<T extends Utilisateur$rendez_vousArgs<ExtArgs> = {}>(args?: Subset<T, Utilisateur$rendez_vousArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$rendez_vousPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     documentTemplates<T extends Utilisateur$documentTemplatesArgs<ExtArgs> = {}>(args?: Subset<T, Utilisateur$documentTemplatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$document_templatesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     documents<T extends Utilisateur$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Utilisateur$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$documentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    biens<T extends Utilisateur$biensArgs<ExtArgs> = {}>(args?: Subset<T, Utilisateur$biensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$bienPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    biensCreated<T extends Utilisateur$biensCreatedArgs<ExtArgs> = {}>(args?: Subset<T, Utilisateur$biensCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$bienPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    biensTherapeute<T extends Utilisateur$biensTherapeuteArgs<ExtArgs> = {}>(args?: Subset<T, Utilisateur$biensTherapeuteArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$bienPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     factures<T extends Utilisateur$facturesArgs<ExtArgs> = {}>(args?: Subset<T, Utilisateur$facturesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$facturePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     factureBiens<T extends Utilisateur$factureBiensArgs<ExtArgs> = {}>(args?: Subset<T, Utilisateur$factureBiensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$facture_bienPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     paiements<T extends Utilisateur$paiementsArgs<ExtArgs> = {}>(args?: Subset<T, Utilisateur$paiementsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$paimentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    scanned_Documents<T extends Utilisateur$scanned_DocumentsArgs<ExtArgs> = {}>(args?: Subset<T, Utilisateur$scanned_DocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$scannedDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2780,6 +2919,7 @@ export namespace Prisma {
     readonly password: FieldRef<"Utilisateur", 'String'>
     readonly role: FieldRef<"Utilisateur", 'Role'>
     readonly created_at: FieldRef<"Utilisateur", 'DateTime'>
+    readonly updated_at: FieldRef<"Utilisateur", 'DateTime'>
   }
     
 
@@ -3262,9 +3402,33 @@ export namespace Prisma {
   }
 
   /**
-   * Utilisateur.biens
+   * Utilisateur.biensCreated
    */
-  export type Utilisateur$biensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Utilisateur$biensCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the bien
+     */
+    select?: bienSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the bien
+     */
+    omit?: bienOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: bienInclude<ExtArgs> | null
+    where?: bienWhereInput
+    orderBy?: bienOrderByWithRelationInput | bienOrderByWithRelationInput[]
+    cursor?: bienWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BienScalarFieldEnum | BienScalarFieldEnum[]
+  }
+
+  /**
+   * Utilisateur.biensTherapeute
+   */
+  export type Utilisateur$biensTherapeuteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the bien
      */
@@ -3358,6 +3522,30 @@ export namespace Prisma {
   }
 
   /**
+   * Utilisateur.scanned_Documents
+   */
+  export type Utilisateur$scanned_DocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentInclude<ExtArgs> | null
+    where?: scannedDocumentWhereInput
+    orderBy?: scannedDocumentOrderByWithRelationInput | scannedDocumentOrderByWithRelationInput[]
+    cursor?: scannedDocumentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ScannedDocumentScalarFieldEnum | ScannedDocumentScalarFieldEnum[]
+  }
+
+  /**
    * Utilisateur without action
    */
   export type UtilisateurDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3390,46 +3578,40 @@ export namespace Prisma {
 
   export type EntrepriseAvgAggregateOutputType = {
     id: number | null
-    ICE: number | null
-    CNSS: number | null
-    RC: number | null
-    IF: number | null
-    RIB: number | null
-    patente: number | null
   }
 
   export type EntrepriseSumAggregateOutputType = {
     id: number | null
-    ICE: number | null
-    CNSS: number | null
-    RC: number | null
-    IF: number | null
-    RIB: number | null
-    patente: number | null
   }
 
   export type EntrepriseMinAggregateOutputType = {
     id: number | null
-    ICE: number | null
-    CNSS: number | null
-    RC: number | null
-    IF: number | null
-    RIB: number | null
-    patente: number | null
+    ICE: string | null
+    CNSS: string | null
+    RC: string | null
+    IF: string | null
+    RIB: string | null
+    patente: string | null
     adresse: string | null
+    email: string | null
+    numero_telephone: string | null
     created_at: Date | null
+    updated_at: Date | null
   }
 
   export type EntrepriseMaxAggregateOutputType = {
     id: number | null
-    ICE: number | null
-    CNSS: number | null
-    RC: number | null
-    IF: number | null
-    RIB: number | null
-    patente: number | null
+    ICE: string | null
+    CNSS: string | null
+    RC: string | null
+    IF: string | null
+    RIB: string | null
+    patente: string | null
     adresse: string | null
+    email: string | null
+    numero_telephone: string | null
     created_at: Date | null
+    updated_at: Date | null
   }
 
   export type EntrepriseCountAggregateOutputType = {
@@ -3441,29 +3623,20 @@ export namespace Prisma {
     RIB: number
     patente: number
     adresse: number
+    email: number
+    numero_telephone: number
     created_at: number
+    updated_at: number
     _all: number
   }
 
 
   export type EntrepriseAvgAggregateInputType = {
     id?: true
-    ICE?: true
-    CNSS?: true
-    RC?: true
-    IF?: true
-    RIB?: true
-    patente?: true
   }
 
   export type EntrepriseSumAggregateInputType = {
     id?: true
-    ICE?: true
-    CNSS?: true
-    RC?: true
-    IF?: true
-    RIB?: true
-    patente?: true
   }
 
   export type EntrepriseMinAggregateInputType = {
@@ -3475,7 +3648,10 @@ export namespace Prisma {
     RIB?: true
     patente?: true
     adresse?: true
+    email?: true
+    numero_telephone?: true
     created_at?: true
+    updated_at?: true
   }
 
   export type EntrepriseMaxAggregateInputType = {
@@ -3487,7 +3663,10 @@ export namespace Prisma {
     RIB?: true
     patente?: true
     adresse?: true
+    email?: true
+    numero_telephone?: true
     created_at?: true
+    updated_at?: true
   }
 
   export type EntrepriseCountAggregateInputType = {
@@ -3499,7 +3678,10 @@ export namespace Prisma {
     RIB?: true
     patente?: true
     adresse?: true
+    email?: true
+    numero_telephone?: true
     created_at?: true
+    updated_at?: true
     _all?: true
   }
 
@@ -3591,14 +3773,17 @@ export namespace Prisma {
 
   export type EntrepriseGroupByOutputType = {
     id: number
-    ICE: number
-    CNSS: number
-    RC: number
-    IF: number
-    RIB: number
-    patente: number
+    ICE: string
+    CNSS: string
+    RC: string
+    IF: string
+    RIB: string
+    patente: string
     adresse: string
+    email: string | null
+    numero_telephone: string | null
     created_at: Date
+    updated_at: Date
     _count: EntrepriseCountAggregateOutputType | null
     _avg: EntrepriseAvgAggregateOutputType | null
     _sum: EntrepriseSumAggregateOutputType | null
@@ -3629,7 +3814,10 @@ export namespace Prisma {
     RIB?: boolean
     patente?: boolean
     adresse?: boolean
+    email?: boolean
+    numero_telephone?: boolean
     created_at?: boolean
+    updated_at?: boolean
   }, ExtArgs["result"]["entreprise"]>
 
   export type EntrepriseSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3641,7 +3829,10 @@ export namespace Prisma {
     RIB?: boolean
     patente?: boolean
     adresse?: boolean
+    email?: boolean
+    numero_telephone?: boolean
     created_at?: boolean
+    updated_at?: boolean
   }, ExtArgs["result"]["entreprise"]>
 
   export type EntrepriseSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3653,7 +3844,10 @@ export namespace Prisma {
     RIB?: boolean
     patente?: boolean
     adresse?: boolean
+    email?: boolean
+    numero_telephone?: boolean
     created_at?: boolean
+    updated_at?: boolean
   }, ExtArgs["result"]["entreprise"]>
 
   export type EntrepriseSelectScalar = {
@@ -3665,24 +3859,30 @@ export namespace Prisma {
     RIB?: boolean
     patente?: boolean
     adresse?: boolean
+    email?: boolean
+    numero_telephone?: boolean
     created_at?: boolean
+    updated_at?: boolean
   }
 
-  export type EntrepriseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ICE" | "CNSS" | "RC" | "IF" | "RIB" | "patente" | "adresse" | "created_at", ExtArgs["result"]["entreprise"]>
+  export type EntrepriseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ICE" | "CNSS" | "RC" | "IF" | "RIB" | "patente" | "adresse" | "email" | "numero_telephone" | "created_at" | "updated_at", ExtArgs["result"]["entreprise"]>
 
   export type $EntreprisePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Entreprise"
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      ICE: number
-      CNSS: number
-      RC: number
-      IF: number
-      RIB: number
-      patente: number
+      ICE: string
+      CNSS: string
+      RC: string
+      IF: string
+      RIB: string
+      patente: string
       adresse: string
+      email: string | null
+      numero_telephone: string | null
       created_at: Date
+      updated_at: Date
     }, ExtArgs["result"]["entreprise"]>
     composites: {}
   }
@@ -4107,14 +4307,17 @@ export namespace Prisma {
    */
   interface EntrepriseFieldRefs {
     readonly id: FieldRef<"Entreprise", 'Int'>
-    readonly ICE: FieldRef<"Entreprise", 'Int'>
-    readonly CNSS: FieldRef<"Entreprise", 'Int'>
-    readonly RC: FieldRef<"Entreprise", 'Int'>
-    readonly IF: FieldRef<"Entreprise", 'Int'>
-    readonly RIB: FieldRef<"Entreprise", 'Int'>
-    readonly patente: FieldRef<"Entreprise", 'Int'>
+    readonly ICE: FieldRef<"Entreprise", 'String'>
+    readonly CNSS: FieldRef<"Entreprise", 'String'>
+    readonly RC: FieldRef<"Entreprise", 'String'>
+    readonly IF: FieldRef<"Entreprise", 'String'>
+    readonly RIB: FieldRef<"Entreprise", 'String'>
+    readonly patente: FieldRef<"Entreprise", 'String'>
     readonly adresse: FieldRef<"Entreprise", 'String'>
+    readonly email: FieldRef<"Entreprise", 'String'>
+    readonly numero_telephone: FieldRef<"Entreprise", 'String'>
     readonly created_at: FieldRef<"Entreprise", 'DateTime'>
+    readonly updated_at: FieldRef<"Entreprise", 'DateTime'>
   }
     
 
@@ -4513,6 +4716,7 @@ export namespace Prisma {
     allergies: string | null
     commentaire: string | null
     created_at: Date | null
+    updated_at: Date | null
     Cree_par: string | null
   }
 
@@ -4530,6 +4734,7 @@ export namespace Prisma {
     allergies: string | null
     commentaire: string | null
     created_at: Date | null
+    updated_at: Date | null
     Cree_par: string | null
   }
 
@@ -4547,6 +4752,7 @@ export namespace Prisma {
     allergies: number
     commentaire: number
     created_at: number
+    updated_at: number
     Cree_par: number
     _all: number
   }
@@ -4574,6 +4780,7 @@ export namespace Prisma {
     allergies?: true
     commentaire?: true
     created_at?: true
+    updated_at?: true
     Cree_par?: true
   }
 
@@ -4591,6 +4798,7 @@ export namespace Prisma {
     allergies?: true
     commentaire?: true
     created_at?: true
+    updated_at?: true
     Cree_par?: true
   }
 
@@ -4608,6 +4816,7 @@ export namespace Prisma {
     allergies?: true
     commentaire?: true
     created_at?: true
+    updated_at?: true
     Cree_par?: true
     _all?: true
   }
@@ -4712,6 +4921,7 @@ export namespace Prisma {
     allergies: string | null
     commentaire: string | null
     created_at: Date
+    updated_at: Date
     Cree_par: string
     _count: ClientCountAggregateOutputType | null
     _avg: ClientAvgAggregateOutputType | null
@@ -4748,10 +4958,12 @@ export namespace Prisma {
     allergies?: boolean
     commentaire?: boolean
     created_at?: boolean
+    updated_at?: boolean
     Cree_par?: boolean
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
     rendez_vous?: boolean | Client$rendez_vousArgs<ExtArgs>
     documents?: boolean | Client$documentsArgs<ExtArgs>
+    scanned_Documents?: boolean | Client$scanned_DocumentsArgs<ExtArgs>
     factures?: boolean | Client$facturesArgs<ExtArgs>
     _count?: boolean | ClientCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["client"]>
@@ -4770,6 +4982,7 @@ export namespace Prisma {
     allergies?: boolean
     commentaire?: boolean
     created_at?: boolean
+    updated_at?: boolean
     Cree_par?: boolean
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["client"]>
@@ -4788,6 +5001,7 @@ export namespace Prisma {
     allergies?: boolean
     commentaire?: boolean
     created_at?: boolean
+    updated_at?: boolean
     Cree_par?: boolean
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["client"]>
@@ -4806,14 +5020,16 @@ export namespace Prisma {
     allergies?: boolean
     commentaire?: boolean
     created_at?: boolean
+    updated_at?: boolean
     Cree_par?: boolean
   }
 
-  export type ClientOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "CIN" | "nom" | "prenom" | "date_naissance" | "adresse" | "numero_telephone" | "email" | "groupe_sanguin" | "antecedents" | "allergies" | "commentaire" | "created_at" | "Cree_par", ExtArgs["result"]["client"]>
+  export type ClientOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "CIN" | "nom" | "prenom" | "date_naissance" | "adresse" | "numero_telephone" | "email" | "groupe_sanguin" | "antecedents" | "allergies" | "commentaire" | "created_at" | "updated_at" | "Cree_par", ExtArgs["result"]["client"]>
   export type ClientInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
     rendez_vous?: boolean | Client$rendez_vousArgs<ExtArgs>
     documents?: boolean | Client$documentsArgs<ExtArgs>
+    scanned_Documents?: boolean | Client$scanned_DocumentsArgs<ExtArgs>
     factures?: boolean | Client$facturesArgs<ExtArgs>
     _count?: boolean | ClientCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -4830,6 +5046,7 @@ export namespace Prisma {
       utilisateur: Prisma.$UtilisateurPayload<ExtArgs>
       rendez_vous: Prisma.$rendez_vousPayload<ExtArgs>[]
       documents: Prisma.$documentPayload<ExtArgs>[]
+      scanned_Documents: Prisma.$scannedDocumentPayload<ExtArgs>[]
       factures: Prisma.$facturePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -4846,6 +5063,7 @@ export namespace Prisma {
       allergies: string | null
       commentaire: string | null
       created_at: Date
+      updated_at: Date
       Cree_par: string
     }, ExtArgs["result"]["client"]>
     composites: {}
@@ -5244,6 +5462,7 @@ export namespace Prisma {
     utilisateur<T extends UtilisateurDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UtilisateurDefaultArgs<ExtArgs>>): Prisma__UtilisateurClient<$Result.GetResult<Prisma.$UtilisateurPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     rendez_vous<T extends Client$rendez_vousArgs<ExtArgs> = {}>(args?: Subset<T, Client$rendez_vousArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$rendez_vousPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     documents<T extends Client$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Client$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$documentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    scanned_Documents<T extends Client$scanned_DocumentsArgs<ExtArgs> = {}>(args?: Subset<T, Client$scanned_DocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$scannedDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     factures<T extends Client$facturesArgs<ExtArgs> = {}>(args?: Subset<T, Client$facturesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$facturePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -5287,6 +5506,7 @@ export namespace Prisma {
     readonly allergies: FieldRef<"Client", 'String'>
     readonly commentaire: FieldRef<"Client", 'String'>
     readonly created_at: FieldRef<"Client", 'DateTime'>
+    readonly updated_at: FieldRef<"Client", 'DateTime'>
     readonly Cree_par: FieldRef<"Client", 'String'>
   }
     
@@ -5730,6 +5950,30 @@ export namespace Prisma {
   }
 
   /**
+   * Client.scanned_Documents
+   */
+  export type Client$scanned_DocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentInclude<ExtArgs> | null
+    where?: scannedDocumentWhereInput
+    orderBy?: scannedDocumentOrderByWithRelationInput | scannedDocumentOrderByWithRelationInput[]
+    cursor?: scannedDocumentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ScannedDocumentScalarFieldEnum | ScannedDocumentScalarFieldEnum[]
+  }
+
+  /**
    * Client.factures
    */
   export type Client$facturesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5786,74 +6030,102 @@ export namespace Prisma {
 
   export type Rendez_vousAvgAggregateOutputType = {
     id: number | null
+    soin_id: number | null
   }
 
   export type Rendez_vousSumAggregateOutputType = {
     id: number | null
+    soin_id: number | null
   }
 
   export type Rendez_vousMinAggregateOutputType = {
     id: number | null
     CIN: string | null
     sujet: string | null
+    soin_id: number | null
     date_rendez_vous: Date | null
     created_at: Date | null
     Cree_par: string | null
+    status: $Enums.Status | null
+    cabinet: string | null
+    updated_at: Date | null
   }
 
   export type Rendez_vousMaxAggregateOutputType = {
     id: number | null
     CIN: string | null
     sujet: string | null
+    soin_id: number | null
     date_rendez_vous: Date | null
     created_at: Date | null
     Cree_par: string | null
+    status: $Enums.Status | null
+    cabinet: string | null
+    updated_at: Date | null
   }
 
   export type Rendez_vousCountAggregateOutputType = {
     id: number
     CIN: number
     sujet: number
+    soin_id: number
     date_rendez_vous: number
     created_at: number
     Cree_par: number
+    status: number
+    cabinet: number
+    updated_at: number
     _all: number
   }
 
 
   export type Rendez_vousAvgAggregateInputType = {
     id?: true
+    soin_id?: true
   }
 
   export type Rendez_vousSumAggregateInputType = {
     id?: true
+    soin_id?: true
   }
 
   export type Rendez_vousMinAggregateInputType = {
     id?: true
     CIN?: true
     sujet?: true
+    soin_id?: true
     date_rendez_vous?: true
     created_at?: true
     Cree_par?: true
+    status?: true
+    cabinet?: true
+    updated_at?: true
   }
 
   export type Rendez_vousMaxAggregateInputType = {
     id?: true
     CIN?: true
     sujet?: true
+    soin_id?: true
     date_rendez_vous?: true
     created_at?: true
     Cree_par?: true
+    status?: true
+    cabinet?: true
+    updated_at?: true
   }
 
   export type Rendez_vousCountAggregateInputType = {
     id?: true
     CIN?: true
     sujet?: true
+    soin_id?: true
     date_rendez_vous?: true
     created_at?: true
     Cree_par?: true
+    status?: true
+    cabinet?: true
+    updated_at?: true
     _all?: true
   }
 
@@ -5947,9 +6219,13 @@ export namespace Prisma {
     id: number
     CIN: string
     sujet: string
+    soin_id: number
     date_rendez_vous: Date
     created_at: Date
     Cree_par: string
+    status: $Enums.Status
+    cabinet: string
+    updated_at: Date
     _count: Rendez_vousCountAggregateOutputType | null
     _avg: Rendez_vousAvgAggregateOutputType | null
     _sum: Rendez_vousSumAggregateOutputType | null
@@ -5975,56 +6251,78 @@ export namespace Prisma {
     id?: boolean
     CIN?: boolean
     sujet?: boolean
+    soin_id?: boolean
     date_rendez_vous?: boolean
     created_at?: boolean
     Cree_par?: boolean
+    status?: boolean
+    cabinet?: boolean
+    updated_at?: boolean
     client?: boolean | ClientDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+    bien?: boolean | bienDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["rendez_vous"]>
 
   export type rendez_vousSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     CIN?: boolean
     sujet?: boolean
+    soin_id?: boolean
     date_rendez_vous?: boolean
     created_at?: boolean
     Cree_par?: boolean
+    status?: boolean
+    cabinet?: boolean
+    updated_at?: boolean
     client?: boolean | ClientDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+    bien?: boolean | bienDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["rendez_vous"]>
 
   export type rendez_vousSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     CIN?: boolean
     sujet?: boolean
+    soin_id?: boolean
     date_rendez_vous?: boolean
     created_at?: boolean
     Cree_par?: boolean
+    status?: boolean
+    cabinet?: boolean
+    updated_at?: boolean
     client?: boolean | ClientDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+    bien?: boolean | bienDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["rendez_vous"]>
 
   export type rendez_vousSelectScalar = {
     id?: boolean
     CIN?: boolean
     sujet?: boolean
+    soin_id?: boolean
     date_rendez_vous?: boolean
     created_at?: boolean
     Cree_par?: boolean
+    status?: boolean
+    cabinet?: boolean
+    updated_at?: boolean
   }
 
-  export type rendez_vousOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "CIN" | "sujet" | "date_rendez_vous" | "created_at" | "Cree_par", ExtArgs["result"]["rendez_vous"]>
+  export type rendez_vousOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "CIN" | "sujet" | "soin_id" | "date_rendez_vous" | "created_at" | "Cree_par" | "status" | "cabinet" | "updated_at", ExtArgs["result"]["rendez_vous"]>
   export type rendez_vousInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     client?: boolean | ClientDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+    bien?: boolean | bienDefaultArgs<ExtArgs>
   }
   export type rendez_vousIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     client?: boolean | ClientDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+    bien?: boolean | bienDefaultArgs<ExtArgs>
   }
   export type rendez_vousIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     client?: boolean | ClientDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+    bien?: boolean | bienDefaultArgs<ExtArgs>
   }
 
   export type $rendez_vousPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6032,14 +6330,19 @@ export namespace Prisma {
     objects: {
       client: Prisma.$ClientPayload<ExtArgs>
       utilisateur: Prisma.$UtilisateurPayload<ExtArgs>
+      bien: Prisma.$bienPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       CIN: string
       sujet: string
+      soin_id: number
       date_rendez_vous: Date
       created_at: Date
       Cree_par: string
+      status: $Enums.Status
+      cabinet: string
+      updated_at: Date
     }, ExtArgs["result"]["rendez_vous"]>
     composites: {}
   }
@@ -6436,6 +6739,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     client<T extends ClientDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ClientDefaultArgs<ExtArgs>>): Prisma__ClientClient<$Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     utilisateur<T extends UtilisateurDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UtilisateurDefaultArgs<ExtArgs>>): Prisma__UtilisateurClient<$Result.GetResult<Prisma.$UtilisateurPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    bien<T extends bienDefaultArgs<ExtArgs> = {}>(args?: Subset<T, bienDefaultArgs<ExtArgs>>): Prisma__bienClient<$Result.GetResult<Prisma.$bienPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6468,9 +6772,13 @@ export namespace Prisma {
     readonly id: FieldRef<"rendez_vous", 'Int'>
     readonly CIN: FieldRef<"rendez_vous", 'String'>
     readonly sujet: FieldRef<"rendez_vous", 'String'>
+    readonly soin_id: FieldRef<"rendez_vous", 'Int'>
     readonly date_rendez_vous: FieldRef<"rendez_vous", 'DateTime'>
     readonly created_at: FieldRef<"rendez_vous", 'DateTime'>
     readonly Cree_par: FieldRef<"rendez_vous", 'String'>
+    readonly status: FieldRef<"rendez_vous", 'Status'>
+    readonly cabinet: FieldRef<"rendez_vous", 'String'>
+    readonly updated_at: FieldRef<"rendez_vous", 'DateTime'>
   }
     
 
@@ -6906,15 +7214,15 @@ export namespace Prisma {
   export type Document_templatesMinAggregateOutputType = {
     id: number | null
     name: string | null
-    sections_json: string | null
     Cree_par: string | null
+    created_at: Date | null
   }
 
   export type Document_templatesMaxAggregateOutputType = {
     id: number | null
     name: string | null
-    sections_json: string | null
     Cree_par: string | null
+    created_at: Date | null
   }
 
   export type Document_templatesCountAggregateOutputType = {
@@ -6922,6 +7230,7 @@ export namespace Prisma {
     name: number
     sections_json: number
     Cree_par: number
+    created_at: number
     _all: number
   }
 
@@ -6937,15 +7246,15 @@ export namespace Prisma {
   export type Document_templatesMinAggregateInputType = {
     id?: true
     name?: true
-    sections_json?: true
     Cree_par?: true
+    created_at?: true
   }
 
   export type Document_templatesMaxAggregateInputType = {
     id?: true
     name?: true
-    sections_json?: true
     Cree_par?: true
+    created_at?: true
   }
 
   export type Document_templatesCountAggregateInputType = {
@@ -6953,6 +7262,7 @@ export namespace Prisma {
     name?: true
     sections_json?: true
     Cree_par?: true
+    created_at?: true
     _all?: true
   }
 
@@ -7045,8 +7355,9 @@ export namespace Prisma {
   export type Document_templatesGroupByOutputType = {
     id: number
     name: string
-    sections_json: string
+    sections_json: JsonValue
     Cree_par: string
+    created_at: Date
     _count: Document_templatesCountAggregateOutputType | null
     _avg: Document_templatesAvgAggregateOutputType | null
     _sum: Document_templatesSumAggregateOutputType | null
@@ -7073,6 +7384,7 @@ export namespace Prisma {
     name?: boolean
     sections_json?: boolean
     Cree_par?: boolean
+    created_at?: boolean
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
     documents?: boolean | document_templates$documentsArgs<ExtArgs>
     _count?: boolean | Document_templatesCountOutputTypeDefaultArgs<ExtArgs>
@@ -7083,6 +7395,7 @@ export namespace Prisma {
     name?: boolean
     sections_json?: boolean
     Cree_par?: boolean
+    created_at?: boolean
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["document_templates"]>
 
@@ -7091,6 +7404,7 @@ export namespace Prisma {
     name?: boolean
     sections_json?: boolean
     Cree_par?: boolean
+    created_at?: boolean
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["document_templates"]>
 
@@ -7099,9 +7413,10 @@ export namespace Prisma {
     name?: boolean
     sections_json?: boolean
     Cree_par?: boolean
+    created_at?: boolean
   }
 
-  export type document_templatesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "sections_json" | "Cree_par", ExtArgs["result"]["document_templates"]>
+  export type document_templatesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "sections_json" | "Cree_par" | "created_at", ExtArgs["result"]["document_templates"]>
   export type document_templatesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
     documents?: boolean | document_templates$documentsArgs<ExtArgs>
@@ -7123,8 +7438,9 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       name: string
-      sections_json: string
+      sections_json: Prisma.JsonValue
       Cree_par: string
+      created_at: Date
     }, ExtArgs["result"]["document_templates"]>
     composites: {}
   }
@@ -7552,8 +7868,9 @@ export namespace Prisma {
   interface document_templatesFieldRefs {
     readonly id: FieldRef<"document_templates", 'Int'>
     readonly name: FieldRef<"document_templates", 'String'>
-    readonly sections_json: FieldRef<"document_templates", 'String'>
+    readonly sections_json: FieldRef<"document_templates", 'Json'>
     readonly Cree_par: FieldRef<"document_templates", 'String'>
+    readonly created_at: FieldRef<"document_templates", 'DateTime'>
   }
     
 
@@ -8016,16 +8333,18 @@ export namespace Prisma {
     id: number | null
     template_id: number | null
     CIN: string | null
-    data_json: string | null
     Cree_par: string | null
+    created_at: Date | null
+    updated_at: Date | null
   }
 
   export type DocumentMaxAggregateOutputType = {
     id: number | null
     template_id: number | null
     CIN: string | null
-    data_json: string | null
     Cree_par: string | null
+    created_at: Date | null
+    updated_at: Date | null
   }
 
   export type DocumentCountAggregateOutputType = {
@@ -8034,6 +8353,8 @@ export namespace Prisma {
     CIN: number
     data_json: number
     Cree_par: number
+    created_at: number
+    updated_at: number
     _all: number
   }
 
@@ -8052,16 +8373,18 @@ export namespace Prisma {
     id?: true
     template_id?: true
     CIN?: true
-    data_json?: true
     Cree_par?: true
+    created_at?: true
+    updated_at?: true
   }
 
   export type DocumentMaxAggregateInputType = {
     id?: true
     template_id?: true
     CIN?: true
-    data_json?: true
     Cree_par?: true
+    created_at?: true
+    updated_at?: true
   }
 
   export type DocumentCountAggregateInputType = {
@@ -8070,6 +8393,8 @@ export namespace Prisma {
     CIN?: true
     data_json?: true
     Cree_par?: true
+    created_at?: true
+    updated_at?: true
     _all?: true
   }
 
@@ -8163,8 +8488,10 @@ export namespace Prisma {
     id: number
     template_id: number
     CIN: string
-    data_json: string
+    data_json: JsonValue
     Cree_par: string
+    created_at: Date
+    updated_at: Date
     _count: DocumentCountAggregateOutputType | null
     _avg: DocumentAvgAggregateOutputType | null
     _sum: DocumentSumAggregateOutputType | null
@@ -8192,6 +8519,8 @@ export namespace Prisma {
     CIN?: boolean
     data_json?: boolean
     Cree_par?: boolean
+    created_at?: boolean
+    updated_at?: boolean
     template?: boolean | document_templatesDefaultArgs<ExtArgs>
     client?: boolean | ClientDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
@@ -8203,6 +8532,8 @@ export namespace Prisma {
     CIN?: boolean
     data_json?: boolean
     Cree_par?: boolean
+    created_at?: boolean
+    updated_at?: boolean
     template?: boolean | document_templatesDefaultArgs<ExtArgs>
     client?: boolean | ClientDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
@@ -8214,6 +8545,8 @@ export namespace Prisma {
     CIN?: boolean
     data_json?: boolean
     Cree_par?: boolean
+    created_at?: boolean
+    updated_at?: boolean
     template?: boolean | document_templatesDefaultArgs<ExtArgs>
     client?: boolean | ClientDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
@@ -8225,9 +8558,11 @@ export namespace Prisma {
     CIN?: boolean
     data_json?: boolean
     Cree_par?: boolean
+    created_at?: boolean
+    updated_at?: boolean
   }
 
-  export type documentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "template_id" | "CIN" | "data_json" | "Cree_par", ExtArgs["result"]["document"]>
+  export type documentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "template_id" | "CIN" | "data_json" | "Cree_par" | "created_at" | "updated_at", ExtArgs["result"]["document"]>
   export type documentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     template?: boolean | document_templatesDefaultArgs<ExtArgs>
     client?: boolean | ClientDefaultArgs<ExtArgs>
@@ -8255,8 +8590,10 @@ export namespace Prisma {
       id: number
       template_id: number
       CIN: string
-      data_json: string
+      data_json: Prisma.JsonValue
       Cree_par: string
+      created_at: Date
+      updated_at: Date
     }, ExtArgs["result"]["document"]>
     composites: {}
   }
@@ -8686,8 +9023,10 @@ export namespace Prisma {
     readonly id: FieldRef<"document", 'Int'>
     readonly template_id: FieldRef<"document", 'Int'>
     readonly CIN: FieldRef<"document", 'String'>
-    readonly data_json: FieldRef<"document", 'String'>
+    readonly data_json: FieldRef<"document", 'Json'>
     readonly Cree_par: FieldRef<"document", 'String'>
+    readonly created_at: FieldRef<"document", 'DateTime'>
+    readonly updated_at: FieldRef<"document", 'DateTime'>
   }
     
 
@@ -9101,6 +9440,1143 @@ export namespace Prisma {
 
 
   /**
+   * Model scannedDocument
+   */
+
+  export type AggregateScannedDocument = {
+    _count: ScannedDocumentCountAggregateOutputType | null
+    _avg: ScannedDocumentAvgAggregateOutputType | null
+    _sum: ScannedDocumentSumAggregateOutputType | null
+    _min: ScannedDocumentMinAggregateOutputType | null
+    _max: ScannedDocumentMaxAggregateOutputType | null
+  }
+
+  export type ScannedDocumentAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type ScannedDocumentSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type ScannedDocumentMinAggregateOutputType = {
+    id: number | null
+    title: string | null
+    filePath: string | null
+    CIN: string | null
+    description: string | null
+    Cree_par: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ScannedDocumentMaxAggregateOutputType = {
+    id: number | null
+    title: string | null
+    filePath: string | null
+    CIN: string | null
+    description: string | null
+    Cree_par: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ScannedDocumentCountAggregateOutputType = {
+    id: number
+    title: number
+    filePath: number
+    CIN: number
+    description: number
+    Cree_par: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ScannedDocumentAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type ScannedDocumentSumAggregateInputType = {
+    id?: true
+  }
+
+  export type ScannedDocumentMinAggregateInputType = {
+    id?: true
+    title?: true
+    filePath?: true
+    CIN?: true
+    description?: true
+    Cree_par?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ScannedDocumentMaxAggregateInputType = {
+    id?: true
+    title?: true
+    filePath?: true
+    CIN?: true
+    description?: true
+    Cree_par?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ScannedDocumentCountAggregateInputType = {
+    id?: true
+    title?: true
+    filePath?: true
+    CIN?: true
+    description?: true
+    Cree_par?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ScannedDocumentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which scannedDocument to aggregate.
+     */
+    where?: scannedDocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of scannedDocuments to fetch.
+     */
+    orderBy?: scannedDocumentOrderByWithRelationInput | scannedDocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: scannedDocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` scannedDocuments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` scannedDocuments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned scannedDocuments
+    **/
+    _count?: true | ScannedDocumentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ScannedDocumentAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ScannedDocumentSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ScannedDocumentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ScannedDocumentMaxAggregateInputType
+  }
+
+  export type GetScannedDocumentAggregateType<T extends ScannedDocumentAggregateArgs> = {
+        [P in keyof T & keyof AggregateScannedDocument]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateScannedDocument[P]>
+      : GetScalarType<T[P], AggregateScannedDocument[P]>
+  }
+
+
+
+
+  export type scannedDocumentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: scannedDocumentWhereInput
+    orderBy?: scannedDocumentOrderByWithAggregationInput | scannedDocumentOrderByWithAggregationInput[]
+    by: ScannedDocumentScalarFieldEnum[] | ScannedDocumentScalarFieldEnum
+    having?: scannedDocumentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ScannedDocumentCountAggregateInputType | true
+    _avg?: ScannedDocumentAvgAggregateInputType
+    _sum?: ScannedDocumentSumAggregateInputType
+    _min?: ScannedDocumentMinAggregateInputType
+    _max?: ScannedDocumentMaxAggregateInputType
+  }
+
+  export type ScannedDocumentGroupByOutputType = {
+    id: number
+    title: string
+    filePath: string
+    CIN: string
+    description: string | null
+    Cree_par: string
+    createdAt: Date
+    updatedAt: Date
+    _count: ScannedDocumentCountAggregateOutputType | null
+    _avg: ScannedDocumentAvgAggregateOutputType | null
+    _sum: ScannedDocumentSumAggregateOutputType | null
+    _min: ScannedDocumentMinAggregateOutputType | null
+    _max: ScannedDocumentMaxAggregateOutputType | null
+  }
+
+  type GetScannedDocumentGroupByPayload<T extends scannedDocumentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ScannedDocumentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ScannedDocumentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ScannedDocumentGroupByOutputType[P]>
+            : GetScalarType<T[P], ScannedDocumentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type scannedDocumentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    title?: boolean
+    filePath?: boolean
+    CIN?: boolean
+    description?: boolean
+    Cree_par?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["scannedDocument"]>
+
+  export type scannedDocumentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    title?: boolean
+    filePath?: boolean
+    CIN?: boolean
+    description?: boolean
+    Cree_par?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["scannedDocument"]>
+
+  export type scannedDocumentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    title?: boolean
+    filePath?: boolean
+    CIN?: boolean
+    description?: boolean
+    Cree_par?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["scannedDocument"]>
+
+  export type scannedDocumentSelectScalar = {
+    id?: boolean
+    title?: boolean
+    filePath?: boolean
+    CIN?: boolean
+    description?: boolean
+    Cree_par?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type scannedDocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "filePath" | "CIN" | "description" | "Cree_par" | "createdAt" | "updatedAt", ExtArgs["result"]["scannedDocument"]>
+  export type scannedDocumentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+  }
+  export type scannedDocumentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+  }
+  export type scannedDocumentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+  }
+
+  export type $scannedDocumentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "scannedDocument"
+    objects: {
+      client: Prisma.$ClientPayload<ExtArgs>
+      utilisateur: Prisma.$UtilisateurPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      title: string
+      filePath: string
+      CIN: string
+      description: string | null
+      Cree_par: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["scannedDocument"]>
+    composites: {}
+  }
+
+  type scannedDocumentGetPayload<S extends boolean | null | undefined | scannedDocumentDefaultArgs> = $Result.GetResult<Prisma.$scannedDocumentPayload, S>
+
+  type scannedDocumentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<scannedDocumentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ScannedDocumentCountAggregateInputType | true
+    }
+
+  export interface scannedDocumentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['scannedDocument'], meta: { name: 'scannedDocument' } }
+    /**
+     * Find zero or one ScannedDocument that matches the filter.
+     * @param {scannedDocumentFindUniqueArgs} args - Arguments to find a ScannedDocument
+     * @example
+     * // Get one ScannedDocument
+     * const scannedDocument = await prisma.scannedDocument.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends scannedDocumentFindUniqueArgs>(args: SelectSubset<T, scannedDocumentFindUniqueArgs<ExtArgs>>): Prisma__scannedDocumentClient<$Result.GetResult<Prisma.$scannedDocumentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ScannedDocument that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {scannedDocumentFindUniqueOrThrowArgs} args - Arguments to find a ScannedDocument
+     * @example
+     * // Get one ScannedDocument
+     * const scannedDocument = await prisma.scannedDocument.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends scannedDocumentFindUniqueOrThrowArgs>(args: SelectSubset<T, scannedDocumentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__scannedDocumentClient<$Result.GetResult<Prisma.$scannedDocumentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ScannedDocument that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scannedDocumentFindFirstArgs} args - Arguments to find a ScannedDocument
+     * @example
+     * // Get one ScannedDocument
+     * const scannedDocument = await prisma.scannedDocument.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends scannedDocumentFindFirstArgs>(args?: SelectSubset<T, scannedDocumentFindFirstArgs<ExtArgs>>): Prisma__scannedDocumentClient<$Result.GetResult<Prisma.$scannedDocumentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ScannedDocument that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scannedDocumentFindFirstOrThrowArgs} args - Arguments to find a ScannedDocument
+     * @example
+     * // Get one ScannedDocument
+     * const scannedDocument = await prisma.scannedDocument.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends scannedDocumentFindFirstOrThrowArgs>(args?: SelectSubset<T, scannedDocumentFindFirstOrThrowArgs<ExtArgs>>): Prisma__scannedDocumentClient<$Result.GetResult<Prisma.$scannedDocumentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ScannedDocuments that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scannedDocumentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ScannedDocuments
+     * const scannedDocuments = await prisma.scannedDocument.findMany()
+     * 
+     * // Get first 10 ScannedDocuments
+     * const scannedDocuments = await prisma.scannedDocument.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const scannedDocumentWithIdOnly = await prisma.scannedDocument.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends scannedDocumentFindManyArgs>(args?: SelectSubset<T, scannedDocumentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$scannedDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ScannedDocument.
+     * @param {scannedDocumentCreateArgs} args - Arguments to create a ScannedDocument.
+     * @example
+     * // Create one ScannedDocument
+     * const ScannedDocument = await prisma.scannedDocument.create({
+     *   data: {
+     *     // ... data to create a ScannedDocument
+     *   }
+     * })
+     * 
+     */
+    create<T extends scannedDocumentCreateArgs>(args: SelectSubset<T, scannedDocumentCreateArgs<ExtArgs>>): Prisma__scannedDocumentClient<$Result.GetResult<Prisma.$scannedDocumentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ScannedDocuments.
+     * @param {scannedDocumentCreateManyArgs} args - Arguments to create many ScannedDocuments.
+     * @example
+     * // Create many ScannedDocuments
+     * const scannedDocument = await prisma.scannedDocument.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends scannedDocumentCreateManyArgs>(args?: SelectSubset<T, scannedDocumentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ScannedDocuments and returns the data saved in the database.
+     * @param {scannedDocumentCreateManyAndReturnArgs} args - Arguments to create many ScannedDocuments.
+     * @example
+     * // Create many ScannedDocuments
+     * const scannedDocument = await prisma.scannedDocument.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ScannedDocuments and only return the `id`
+     * const scannedDocumentWithIdOnly = await prisma.scannedDocument.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends scannedDocumentCreateManyAndReturnArgs>(args?: SelectSubset<T, scannedDocumentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$scannedDocumentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ScannedDocument.
+     * @param {scannedDocumentDeleteArgs} args - Arguments to delete one ScannedDocument.
+     * @example
+     * // Delete one ScannedDocument
+     * const ScannedDocument = await prisma.scannedDocument.delete({
+     *   where: {
+     *     // ... filter to delete one ScannedDocument
+     *   }
+     * })
+     * 
+     */
+    delete<T extends scannedDocumentDeleteArgs>(args: SelectSubset<T, scannedDocumentDeleteArgs<ExtArgs>>): Prisma__scannedDocumentClient<$Result.GetResult<Prisma.$scannedDocumentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ScannedDocument.
+     * @param {scannedDocumentUpdateArgs} args - Arguments to update one ScannedDocument.
+     * @example
+     * // Update one ScannedDocument
+     * const scannedDocument = await prisma.scannedDocument.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends scannedDocumentUpdateArgs>(args: SelectSubset<T, scannedDocumentUpdateArgs<ExtArgs>>): Prisma__scannedDocumentClient<$Result.GetResult<Prisma.$scannedDocumentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ScannedDocuments.
+     * @param {scannedDocumentDeleteManyArgs} args - Arguments to filter ScannedDocuments to delete.
+     * @example
+     * // Delete a few ScannedDocuments
+     * const { count } = await prisma.scannedDocument.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends scannedDocumentDeleteManyArgs>(args?: SelectSubset<T, scannedDocumentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ScannedDocuments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scannedDocumentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ScannedDocuments
+     * const scannedDocument = await prisma.scannedDocument.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends scannedDocumentUpdateManyArgs>(args: SelectSubset<T, scannedDocumentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ScannedDocuments and returns the data updated in the database.
+     * @param {scannedDocumentUpdateManyAndReturnArgs} args - Arguments to update many ScannedDocuments.
+     * @example
+     * // Update many ScannedDocuments
+     * const scannedDocument = await prisma.scannedDocument.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ScannedDocuments and only return the `id`
+     * const scannedDocumentWithIdOnly = await prisma.scannedDocument.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends scannedDocumentUpdateManyAndReturnArgs>(args: SelectSubset<T, scannedDocumentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$scannedDocumentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ScannedDocument.
+     * @param {scannedDocumentUpsertArgs} args - Arguments to update or create a ScannedDocument.
+     * @example
+     * // Update or create a ScannedDocument
+     * const scannedDocument = await prisma.scannedDocument.upsert({
+     *   create: {
+     *     // ... data to create a ScannedDocument
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ScannedDocument we want to update
+     *   }
+     * })
+     */
+    upsert<T extends scannedDocumentUpsertArgs>(args: SelectSubset<T, scannedDocumentUpsertArgs<ExtArgs>>): Prisma__scannedDocumentClient<$Result.GetResult<Prisma.$scannedDocumentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ScannedDocuments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scannedDocumentCountArgs} args - Arguments to filter ScannedDocuments to count.
+     * @example
+     * // Count the number of ScannedDocuments
+     * const count = await prisma.scannedDocument.count({
+     *   where: {
+     *     // ... the filter for the ScannedDocuments we want to count
+     *   }
+     * })
+    **/
+    count<T extends scannedDocumentCountArgs>(
+      args?: Subset<T, scannedDocumentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ScannedDocumentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ScannedDocument.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScannedDocumentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ScannedDocumentAggregateArgs>(args: Subset<T, ScannedDocumentAggregateArgs>): Prisma.PrismaPromise<GetScannedDocumentAggregateType<T>>
+
+    /**
+     * Group by ScannedDocument.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {scannedDocumentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends scannedDocumentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: scannedDocumentGroupByArgs['orderBy'] }
+        : { orderBy?: scannedDocumentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, scannedDocumentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetScannedDocumentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the scannedDocument model
+   */
+  readonly fields: scannedDocumentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for scannedDocument.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__scannedDocumentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    client<T extends ClientDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ClientDefaultArgs<ExtArgs>>): Prisma__ClientClient<$Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    utilisateur<T extends UtilisateurDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UtilisateurDefaultArgs<ExtArgs>>): Prisma__UtilisateurClient<$Result.GetResult<Prisma.$UtilisateurPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the scannedDocument model
+   */
+  interface scannedDocumentFieldRefs {
+    readonly id: FieldRef<"scannedDocument", 'Int'>
+    readonly title: FieldRef<"scannedDocument", 'String'>
+    readonly filePath: FieldRef<"scannedDocument", 'String'>
+    readonly CIN: FieldRef<"scannedDocument", 'String'>
+    readonly description: FieldRef<"scannedDocument", 'String'>
+    readonly Cree_par: FieldRef<"scannedDocument", 'String'>
+    readonly createdAt: FieldRef<"scannedDocument", 'DateTime'>
+    readonly updatedAt: FieldRef<"scannedDocument", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * scannedDocument findUnique
+   */
+  export type scannedDocumentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which scannedDocument to fetch.
+     */
+    where: scannedDocumentWhereUniqueInput
+  }
+
+  /**
+   * scannedDocument findUniqueOrThrow
+   */
+  export type scannedDocumentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which scannedDocument to fetch.
+     */
+    where: scannedDocumentWhereUniqueInput
+  }
+
+  /**
+   * scannedDocument findFirst
+   */
+  export type scannedDocumentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which scannedDocument to fetch.
+     */
+    where?: scannedDocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of scannedDocuments to fetch.
+     */
+    orderBy?: scannedDocumentOrderByWithRelationInput | scannedDocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for scannedDocuments.
+     */
+    cursor?: scannedDocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` scannedDocuments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` scannedDocuments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of scannedDocuments.
+     */
+    distinct?: ScannedDocumentScalarFieldEnum | ScannedDocumentScalarFieldEnum[]
+  }
+
+  /**
+   * scannedDocument findFirstOrThrow
+   */
+  export type scannedDocumentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which scannedDocument to fetch.
+     */
+    where?: scannedDocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of scannedDocuments to fetch.
+     */
+    orderBy?: scannedDocumentOrderByWithRelationInput | scannedDocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for scannedDocuments.
+     */
+    cursor?: scannedDocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` scannedDocuments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` scannedDocuments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of scannedDocuments.
+     */
+    distinct?: ScannedDocumentScalarFieldEnum | ScannedDocumentScalarFieldEnum[]
+  }
+
+  /**
+   * scannedDocument findMany
+   */
+  export type scannedDocumentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which scannedDocuments to fetch.
+     */
+    where?: scannedDocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of scannedDocuments to fetch.
+     */
+    orderBy?: scannedDocumentOrderByWithRelationInput | scannedDocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing scannedDocuments.
+     */
+    cursor?: scannedDocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` scannedDocuments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` scannedDocuments.
+     */
+    skip?: number
+    distinct?: ScannedDocumentScalarFieldEnum | ScannedDocumentScalarFieldEnum[]
+  }
+
+  /**
+   * scannedDocument create
+   */
+  export type scannedDocumentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentInclude<ExtArgs> | null
+    /**
+     * The data needed to create a scannedDocument.
+     */
+    data: XOR<scannedDocumentCreateInput, scannedDocumentUncheckedCreateInput>
+  }
+
+  /**
+   * scannedDocument createMany
+   */
+  export type scannedDocumentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many scannedDocuments.
+     */
+    data: scannedDocumentCreateManyInput | scannedDocumentCreateManyInput[]
+  }
+
+  /**
+   * scannedDocument createManyAndReturn
+   */
+  export type scannedDocumentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * The data used to create many scannedDocuments.
+     */
+    data: scannedDocumentCreateManyInput | scannedDocumentCreateManyInput[]
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * scannedDocument update
+   */
+  export type scannedDocumentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentInclude<ExtArgs> | null
+    /**
+     * The data needed to update a scannedDocument.
+     */
+    data: XOR<scannedDocumentUpdateInput, scannedDocumentUncheckedUpdateInput>
+    /**
+     * Choose, which scannedDocument to update.
+     */
+    where: scannedDocumentWhereUniqueInput
+  }
+
+  /**
+   * scannedDocument updateMany
+   */
+  export type scannedDocumentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update scannedDocuments.
+     */
+    data: XOR<scannedDocumentUpdateManyMutationInput, scannedDocumentUncheckedUpdateManyInput>
+    /**
+     * Filter which scannedDocuments to update
+     */
+    where?: scannedDocumentWhereInput
+    /**
+     * Limit how many scannedDocuments to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * scannedDocument updateManyAndReturn
+   */
+  export type scannedDocumentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * The data used to update scannedDocuments.
+     */
+    data: XOR<scannedDocumentUpdateManyMutationInput, scannedDocumentUncheckedUpdateManyInput>
+    /**
+     * Filter which scannedDocuments to update
+     */
+    where?: scannedDocumentWhereInput
+    /**
+     * Limit how many scannedDocuments to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * scannedDocument upsert
+   */
+  export type scannedDocumentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentInclude<ExtArgs> | null
+    /**
+     * The filter to search for the scannedDocument to update in case it exists.
+     */
+    where: scannedDocumentWhereUniqueInput
+    /**
+     * In case the scannedDocument found by the `where` argument doesn't exist, create a new scannedDocument with this data.
+     */
+    create: XOR<scannedDocumentCreateInput, scannedDocumentUncheckedCreateInput>
+    /**
+     * In case the scannedDocument was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<scannedDocumentUpdateInput, scannedDocumentUncheckedUpdateInput>
+  }
+
+  /**
+   * scannedDocument delete
+   */
+  export type scannedDocumentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentInclude<ExtArgs> | null
+    /**
+     * Filter which scannedDocument to delete.
+     */
+    where: scannedDocumentWhereUniqueInput
+  }
+
+  /**
+   * scannedDocument deleteMany
+   */
+  export type scannedDocumentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which scannedDocuments to delete
+     */
+    where?: scannedDocumentWhereInput
+    /**
+     * Limit how many scannedDocuments to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * scannedDocument without action
+   */
+  export type scannedDocumentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the scannedDocument
+     */
+    select?: scannedDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the scannedDocument
+     */
+    omit?: scannedDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: scannedDocumentInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model bien
    */
 
@@ -9128,20 +10604,28 @@ export namespace Prisma {
     id: number | null
     Nom: string | null
     bien_type: $Enums.BienType | null
-    Type: $Enums.ServiceType | null
+    Type: string | null
     prix: number | null
     stock: number | null
+    cabinet: string | null
     Cree_par: string | null
+    therapeute: string | null
+    created_at: Date | null
+    updated_at: Date | null
   }
 
   export type BienMaxAggregateOutputType = {
     id: number | null
     Nom: string | null
     bien_type: $Enums.BienType | null
-    Type: $Enums.ServiceType | null
+    Type: string | null
     prix: number | null
     stock: number | null
+    cabinet: string | null
     Cree_par: string | null
+    therapeute: string | null
+    created_at: Date | null
+    updated_at: Date | null
   }
 
   export type BienCountAggregateOutputType = {
@@ -9151,7 +10635,11 @@ export namespace Prisma {
     Type: number
     prix: number
     stock: number
+    cabinet: number
     Cree_par: number
+    therapeute: number
+    created_at: number
+    updated_at: number
     _all: number
   }
 
@@ -9175,7 +10663,11 @@ export namespace Prisma {
     Type?: true
     prix?: true
     stock?: true
+    cabinet?: true
     Cree_par?: true
+    therapeute?: true
+    created_at?: true
+    updated_at?: true
   }
 
   export type BienMaxAggregateInputType = {
@@ -9185,7 +10677,11 @@ export namespace Prisma {
     Type?: true
     prix?: true
     stock?: true
+    cabinet?: true
     Cree_par?: true
+    therapeute?: true
+    created_at?: true
+    updated_at?: true
   }
 
   export type BienCountAggregateInputType = {
@@ -9195,7 +10691,11 @@ export namespace Prisma {
     Type?: true
     prix?: true
     stock?: true
+    cabinet?: true
     Cree_par?: true
+    therapeute?: true
+    created_at?: true
+    updated_at?: true
     _all?: true
   }
 
@@ -9289,10 +10789,14 @@ export namespace Prisma {
     id: number
     Nom: string
     bien_type: $Enums.BienType
-    Type: $Enums.ServiceType
+    Type: string
     prix: number
     stock: number
+    cabinet: string
     Cree_par: string
+    therapeute: string | null
+    created_at: Date
+    updated_at: Date
     _count: BienCountAggregateOutputType | null
     _avg: BienAvgAggregateOutputType | null
     _sum: BienSumAggregateOutputType | null
@@ -9321,9 +10825,15 @@ export namespace Prisma {
     Type?: boolean
     prix?: boolean
     stock?: boolean
+    cabinet?: boolean
     Cree_par?: boolean
+    therapeute?: boolean
+    created_at?: boolean
+    updated_at?: boolean
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+    therapeuteUser?: boolean | bien$therapeuteUserArgs<ExtArgs>
     factureBiens?: boolean | bien$factureBiensArgs<ExtArgs>
+    rendez_vous?: boolean | bien$rendez_vousArgs<ExtArgs>
     _count?: boolean | BienCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["bien"]>
 
@@ -9334,8 +10844,13 @@ export namespace Prisma {
     Type?: boolean
     prix?: boolean
     stock?: boolean
+    cabinet?: boolean
     Cree_par?: boolean
+    therapeute?: boolean
+    created_at?: boolean
+    updated_at?: boolean
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+    therapeuteUser?: boolean | bien$therapeuteUserArgs<ExtArgs>
   }, ExtArgs["result"]["bien"]>
 
   export type bienSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -9345,8 +10860,13 @@ export namespace Prisma {
     Type?: boolean
     prix?: boolean
     stock?: boolean
+    cabinet?: boolean
     Cree_par?: boolean
+    therapeute?: boolean
+    created_at?: boolean
+    updated_at?: boolean
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+    therapeuteUser?: boolean | bien$therapeuteUserArgs<ExtArgs>
   }, ExtArgs["result"]["bien"]>
 
   export type bienSelectScalar = {
@@ -9356,36 +10876,50 @@ export namespace Prisma {
     Type?: boolean
     prix?: boolean
     stock?: boolean
+    cabinet?: boolean
     Cree_par?: boolean
+    therapeute?: boolean
+    created_at?: boolean
+    updated_at?: boolean
   }
 
-  export type bienOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "Nom" | "bien_type" | "Type" | "prix" | "stock" | "Cree_par", ExtArgs["result"]["bien"]>
+  export type bienOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "Nom" | "bien_type" | "Type" | "prix" | "stock" | "cabinet" | "Cree_par" | "therapeute" | "created_at" | "updated_at", ExtArgs["result"]["bien"]>
   export type bienInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+    therapeuteUser?: boolean | bien$therapeuteUserArgs<ExtArgs>
     factureBiens?: boolean | bien$factureBiensArgs<ExtArgs>
+    rendez_vous?: boolean | bien$rendez_vousArgs<ExtArgs>
     _count?: boolean | BienCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type bienIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+    therapeuteUser?: boolean | bien$therapeuteUserArgs<ExtArgs>
   }
   export type bienIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
+    therapeuteUser?: boolean | bien$therapeuteUserArgs<ExtArgs>
   }
 
   export type $bienPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "bien"
     objects: {
       utilisateur: Prisma.$UtilisateurPayload<ExtArgs>
+      therapeuteUser: Prisma.$UtilisateurPayload<ExtArgs> | null
       factureBiens: Prisma.$facture_bienPayload<ExtArgs>[]
+      rendez_vous: Prisma.$rendez_vousPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       Nom: string
       bien_type: $Enums.BienType
-      Type: $Enums.ServiceType
+      Type: string
       prix: number
       stock: number
+      cabinet: string
       Cree_par: string
+      therapeute: string | null
+      created_at: Date
+      updated_at: Date
     }, ExtArgs["result"]["bien"]>
     composites: {}
   }
@@ -9781,7 +11315,9 @@ export namespace Prisma {
   export interface Prisma__bienClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     utilisateur<T extends UtilisateurDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UtilisateurDefaultArgs<ExtArgs>>): Prisma__UtilisateurClient<$Result.GetResult<Prisma.$UtilisateurPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    therapeuteUser<T extends bien$therapeuteUserArgs<ExtArgs> = {}>(args?: Subset<T, bien$therapeuteUserArgs<ExtArgs>>): Prisma__UtilisateurClient<$Result.GetResult<Prisma.$UtilisateurPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     factureBiens<T extends bien$factureBiensArgs<ExtArgs> = {}>(args?: Subset<T, bien$factureBiensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$facture_bienPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    rendez_vous<T extends bien$rendez_vousArgs<ExtArgs> = {}>(args?: Subset<T, bien$rendez_vousArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$rendez_vousPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9814,10 +11350,14 @@ export namespace Prisma {
     readonly id: FieldRef<"bien", 'Int'>
     readonly Nom: FieldRef<"bien", 'String'>
     readonly bien_type: FieldRef<"bien", 'BienType'>
-    readonly Type: FieldRef<"bien", 'ServiceType'>
+    readonly Type: FieldRef<"bien", 'String'>
     readonly prix: FieldRef<"bien", 'Float'>
     readonly stock: FieldRef<"bien", 'Int'>
+    readonly cabinet: FieldRef<"bien", 'String'>
     readonly Cree_par: FieldRef<"bien", 'String'>
+    readonly therapeute: FieldRef<"bien", 'String'>
+    readonly created_at: FieldRef<"bien", 'DateTime'>
+    readonly updated_at: FieldRef<"bien", 'DateTime'>
   }
     
 
@@ -10212,6 +11752,25 @@ export namespace Prisma {
   }
 
   /**
+   * bien.therapeuteUser
+   */
+  export type bien$therapeuteUserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Utilisateur
+     */
+    select?: UtilisateurSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Utilisateur
+     */
+    omit?: UtilisateurOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UtilisateurInclude<ExtArgs> | null
+    where?: UtilisateurWhereInput
+  }
+
+  /**
    * bien.factureBiens
    */
   export type bien$factureBiensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10233,6 +11792,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: Facture_bienScalarFieldEnum | Facture_bienScalarFieldEnum[]
+  }
+
+  /**
+   * bien.rendez_vous
+   */
+  export type bien$rendez_vousArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the rendez_vous
+     */
+    select?: rendez_vousSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the rendez_vous
+     */
+    omit?: rendez_vousOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: rendez_vousInclude<ExtArgs> | null
+    where?: rendez_vousWhereInput
+    orderBy?: rendez_vousOrderByWithRelationInput | rendez_vousOrderByWithRelationInput[]
+    cursor?: rendez_vousWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Rendez_vousScalarFieldEnum | Rendez_vousScalarFieldEnum[]
   }
 
   /**
@@ -10281,9 +11864,16 @@ export namespace Prisma {
     CIN: string | null
     date: Date | null
     prix_total: number | null
-    statut: $Enums.FactureStatus | null
+    statut: string | null
     notes: string | null
     Cree_par: string | null
+    created_at: Date | null
+    updated_at: Date | null
+    date_paiement: Date | null
+    methode_paiement: string | null
+    cheque_numero: string | null
+    cheque_banque: string | null
+    cheque_date_tirage: Date | null
   }
 
   export type FactureMaxAggregateOutputType = {
@@ -10291,9 +11881,16 @@ export namespace Prisma {
     CIN: string | null
     date: Date | null
     prix_total: number | null
-    statut: $Enums.FactureStatus | null
+    statut: string | null
     notes: string | null
     Cree_par: string | null
+    created_at: Date | null
+    updated_at: Date | null
+    date_paiement: Date | null
+    methode_paiement: string | null
+    cheque_numero: string | null
+    cheque_banque: string | null
+    cheque_date_tirage: Date | null
   }
 
   export type FactureCountAggregateOutputType = {
@@ -10304,6 +11901,13 @@ export namespace Prisma {
     statut: number
     notes: number
     Cree_par: number
+    created_at: number
+    updated_at: number
+    date_paiement: number
+    methode_paiement: number
+    cheque_numero: number
+    cheque_banque: number
+    cheque_date_tirage: number
     _all: number
   }
 
@@ -10326,6 +11930,13 @@ export namespace Prisma {
     statut?: true
     notes?: true
     Cree_par?: true
+    created_at?: true
+    updated_at?: true
+    date_paiement?: true
+    methode_paiement?: true
+    cheque_numero?: true
+    cheque_banque?: true
+    cheque_date_tirage?: true
   }
 
   export type FactureMaxAggregateInputType = {
@@ -10336,6 +11947,13 @@ export namespace Prisma {
     statut?: true
     notes?: true
     Cree_par?: true
+    created_at?: true
+    updated_at?: true
+    date_paiement?: true
+    methode_paiement?: true
+    cheque_numero?: true
+    cheque_banque?: true
+    cheque_date_tirage?: true
   }
 
   export type FactureCountAggregateInputType = {
@@ -10346,6 +11964,13 @@ export namespace Prisma {
     statut?: true
     notes?: true
     Cree_par?: true
+    created_at?: true
+    updated_at?: true
+    date_paiement?: true
+    methode_paiement?: true
+    cheque_numero?: true
+    cheque_banque?: true
+    cheque_date_tirage?: true
     _all?: true
   }
 
@@ -10440,9 +12065,16 @@ export namespace Prisma {
     CIN: string
     date: Date
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes: string | null
     Cree_par: string
+    created_at: Date
+    updated_at: Date
+    date_paiement: Date | null
+    methode_paiement: string | null
+    cheque_numero: string | null
+    cheque_banque: string | null
+    cheque_date_tirage: Date | null
     _count: FactureCountAggregateOutputType | null
     _avg: FactureAvgAggregateOutputType | null
     _sum: FactureSumAggregateOutputType | null
@@ -10472,6 +12104,13 @@ export namespace Prisma {
     statut?: boolean
     notes?: boolean
     Cree_par?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    date_paiement?: boolean
+    methode_paiement?: boolean
+    cheque_numero?: boolean
+    cheque_banque?: boolean
+    cheque_date_tirage?: boolean
     client?: boolean | ClientDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
     factureBiens?: boolean | facture$factureBiensArgs<ExtArgs>
@@ -10487,6 +12126,13 @@ export namespace Prisma {
     statut?: boolean
     notes?: boolean
     Cree_par?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    date_paiement?: boolean
+    methode_paiement?: boolean
+    cheque_numero?: boolean
+    cheque_banque?: boolean
+    cheque_date_tirage?: boolean
     client?: boolean | ClientDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["facture"]>
@@ -10499,6 +12145,13 @@ export namespace Prisma {
     statut?: boolean
     notes?: boolean
     Cree_par?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    date_paiement?: boolean
+    methode_paiement?: boolean
+    cheque_numero?: boolean
+    cheque_banque?: boolean
+    cheque_date_tirage?: boolean
     client?: boolean | ClientDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["facture"]>
@@ -10511,9 +12164,16 @@ export namespace Prisma {
     statut?: boolean
     notes?: boolean
     Cree_par?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    date_paiement?: boolean
+    methode_paiement?: boolean
+    cheque_numero?: boolean
+    cheque_banque?: boolean
+    cheque_date_tirage?: boolean
   }
 
-  export type factureOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "CIN" | "date" | "prix_total" | "statut" | "notes" | "Cree_par", ExtArgs["result"]["facture"]>
+  export type factureOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "CIN" | "date" | "prix_total" | "statut" | "notes" | "Cree_par" | "created_at" | "updated_at" | "date_paiement" | "methode_paiement" | "cheque_numero" | "cheque_banque" | "cheque_date_tirage", ExtArgs["result"]["facture"]>
   export type factureInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     client?: boolean | ClientDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
@@ -10543,9 +12203,16 @@ export namespace Prisma {
       CIN: string
       date: Date
       prix_total: number
-      statut: $Enums.FactureStatus
+      statut: string
       notes: string | null
       Cree_par: string
+      created_at: Date
+      updated_at: Date
+      date_paiement: Date | null
+      methode_paiement: string | null
+      cheque_numero: string | null
+      cheque_banque: string | null
+      cheque_date_tirage: Date | null
     }, ExtArgs["result"]["facture"]>
     composites: {}
   }
@@ -10977,9 +12644,16 @@ export namespace Prisma {
     readonly CIN: FieldRef<"facture", 'String'>
     readonly date: FieldRef<"facture", 'DateTime'>
     readonly prix_total: FieldRef<"facture", 'Float'>
-    readonly statut: FieldRef<"facture", 'FactureStatus'>
+    readonly statut: FieldRef<"facture", 'String'>
     readonly notes: FieldRef<"facture", 'String'>
     readonly Cree_par: FieldRef<"facture", 'String'>
+    readonly created_at: FieldRef<"facture", 'DateTime'>
+    readonly updated_at: FieldRef<"facture", 'DateTime'>
+    readonly date_paiement: FieldRef<"facture", 'DateTime'>
+    readonly methode_paiement: FieldRef<"facture", 'String'>
+    readonly cheque_numero: FieldRef<"facture", 'String'>
+    readonly cheque_banque: FieldRef<"facture", 'String'>
+    readonly cheque_date_tirage: FieldRef<"facture", 'DateTime'>
   }
     
 
@@ -11457,6 +13131,7 @@ export namespace Prisma {
     id_facture: number | null
     id_bien: number | null
     quantite: number | null
+    prix: number | null
   }
 
   export type Facture_bienSumAggregateOutputType = {
@@ -11464,24 +13139,33 @@ export namespace Prisma {
     id_facture: number | null
     id_bien: number | null
     quantite: number | null
+    prix: number | null
   }
 
   export type Facture_bienMinAggregateOutputType = {
     id: number | null
     id_facture: number | null
     id_bien: number | null
-    type_bien: $Enums.BienType | null
+    type_bien: string | null
     quantite: number | null
+    prix: number | null
     Cree_par: string | null
+    movementType: $Enums.MovementType | null
+    created_at: Date | null
+    updated_at: Date | null
   }
 
   export type Facture_bienMaxAggregateOutputType = {
     id: number | null
     id_facture: number | null
     id_bien: number | null
-    type_bien: $Enums.BienType | null
+    type_bien: string | null
     quantite: number | null
+    prix: number | null
     Cree_par: string | null
+    movementType: $Enums.MovementType | null
+    created_at: Date | null
+    updated_at: Date | null
   }
 
   export type Facture_bienCountAggregateOutputType = {
@@ -11490,7 +13174,11 @@ export namespace Prisma {
     id_bien: number
     type_bien: number
     quantite: number
+    prix: number
     Cree_par: number
+    movementType: number
+    created_at: number
+    updated_at: number
     _all: number
   }
 
@@ -11500,6 +13188,7 @@ export namespace Prisma {
     id_facture?: true
     id_bien?: true
     quantite?: true
+    prix?: true
   }
 
   export type Facture_bienSumAggregateInputType = {
@@ -11507,6 +13196,7 @@ export namespace Prisma {
     id_facture?: true
     id_bien?: true
     quantite?: true
+    prix?: true
   }
 
   export type Facture_bienMinAggregateInputType = {
@@ -11515,7 +13205,11 @@ export namespace Prisma {
     id_bien?: true
     type_bien?: true
     quantite?: true
+    prix?: true
     Cree_par?: true
+    movementType?: true
+    created_at?: true
+    updated_at?: true
   }
 
   export type Facture_bienMaxAggregateInputType = {
@@ -11524,7 +13218,11 @@ export namespace Prisma {
     id_bien?: true
     type_bien?: true
     quantite?: true
+    prix?: true
     Cree_par?: true
+    movementType?: true
+    created_at?: true
+    updated_at?: true
   }
 
   export type Facture_bienCountAggregateInputType = {
@@ -11533,7 +13231,11 @@ export namespace Prisma {
     id_bien?: true
     type_bien?: true
     quantite?: true
+    prix?: true
     Cree_par?: true
+    movementType?: true
+    created_at?: true
+    updated_at?: true
     _all?: true
   }
 
@@ -11625,11 +13327,15 @@ export namespace Prisma {
 
   export type Facture_bienGroupByOutputType = {
     id: number
-    id_facture: number
+    id_facture: number | null
     id_bien: number
-    type_bien: $Enums.BienType
+    type_bien: string
     quantite: number
+    prix: number
     Cree_par: string
+    movementType: $Enums.MovementType
+    created_at: Date
+    updated_at: Date
     _count: Facture_bienCountAggregateOutputType | null
     _avg: Facture_bienAvgAggregateOutputType | null
     _sum: Facture_bienSumAggregateOutputType | null
@@ -11657,8 +13363,12 @@ export namespace Prisma {
     id_bien?: boolean
     type_bien?: boolean
     quantite?: boolean
+    prix?: boolean
     Cree_par?: boolean
-    facture?: boolean | factureDefaultArgs<ExtArgs>
+    movementType?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    facture?: boolean | facture_bien$factureArgs<ExtArgs>
     bien?: boolean | bienDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["facture_bien"]>
@@ -11669,8 +13379,12 @@ export namespace Prisma {
     id_bien?: boolean
     type_bien?: boolean
     quantite?: boolean
+    prix?: boolean
     Cree_par?: boolean
-    facture?: boolean | factureDefaultArgs<ExtArgs>
+    movementType?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    facture?: boolean | facture_bien$factureArgs<ExtArgs>
     bien?: boolean | bienDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["facture_bien"]>
@@ -11681,8 +13395,12 @@ export namespace Prisma {
     id_bien?: boolean
     type_bien?: boolean
     quantite?: boolean
+    prix?: boolean
     Cree_par?: boolean
-    facture?: boolean | factureDefaultArgs<ExtArgs>
+    movementType?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    facture?: boolean | facture_bien$factureArgs<ExtArgs>
     bien?: boolean | bienDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["facture_bien"]>
@@ -11693,22 +13411,26 @@ export namespace Prisma {
     id_bien?: boolean
     type_bien?: boolean
     quantite?: boolean
+    prix?: boolean
     Cree_par?: boolean
+    movementType?: boolean
+    created_at?: boolean
+    updated_at?: boolean
   }
 
-  export type facture_bienOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "id_facture" | "id_bien" | "type_bien" | "quantite" | "Cree_par", ExtArgs["result"]["facture_bien"]>
+  export type facture_bienOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "id_facture" | "id_bien" | "type_bien" | "quantite" | "prix" | "Cree_par" | "movementType" | "created_at" | "updated_at", ExtArgs["result"]["facture_bien"]>
   export type facture_bienInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    facture?: boolean | factureDefaultArgs<ExtArgs>
+    facture?: boolean | facture_bien$factureArgs<ExtArgs>
     bien?: boolean | bienDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }
   export type facture_bienIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    facture?: boolean | factureDefaultArgs<ExtArgs>
+    facture?: boolean | facture_bien$factureArgs<ExtArgs>
     bien?: boolean | bienDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }
   export type facture_bienIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    facture?: boolean | factureDefaultArgs<ExtArgs>
+    facture?: boolean | facture_bien$factureArgs<ExtArgs>
     bien?: boolean | bienDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }
@@ -11716,17 +13438,21 @@ export namespace Prisma {
   export type $facture_bienPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "facture_bien"
     objects: {
-      facture: Prisma.$facturePayload<ExtArgs>
+      facture: Prisma.$facturePayload<ExtArgs> | null
       bien: Prisma.$bienPayload<ExtArgs>
       utilisateur: Prisma.$UtilisateurPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      id_facture: number
+      id_facture: number | null
       id_bien: number
-      type_bien: $Enums.BienType
+      type_bien: string
       quantite: number
+      prix: number
       Cree_par: string
+      movementType: $Enums.MovementType
+      created_at: Date
+      updated_at: Date
     }, ExtArgs["result"]["facture_bien"]>
     composites: {}
   }
@@ -12121,7 +13847,7 @@ export namespace Prisma {
    */
   export interface Prisma__facture_bienClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    facture<T extends factureDefaultArgs<ExtArgs> = {}>(args?: Subset<T, factureDefaultArgs<ExtArgs>>): Prisma__factureClient<$Result.GetResult<Prisma.$facturePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    facture<T extends facture_bien$factureArgs<ExtArgs> = {}>(args?: Subset<T, facture_bien$factureArgs<ExtArgs>>): Prisma__factureClient<$Result.GetResult<Prisma.$facturePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     bien<T extends bienDefaultArgs<ExtArgs> = {}>(args?: Subset<T, bienDefaultArgs<ExtArgs>>): Prisma__bienClient<$Result.GetResult<Prisma.$bienPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     utilisateur<T extends UtilisateurDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UtilisateurDefaultArgs<ExtArgs>>): Prisma__UtilisateurClient<$Result.GetResult<Prisma.$UtilisateurPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -12156,9 +13882,13 @@ export namespace Prisma {
     readonly id: FieldRef<"facture_bien", 'Int'>
     readonly id_facture: FieldRef<"facture_bien", 'Int'>
     readonly id_bien: FieldRef<"facture_bien", 'Int'>
-    readonly type_bien: FieldRef<"facture_bien", 'BienType'>
+    readonly type_bien: FieldRef<"facture_bien", 'String'>
     readonly quantite: FieldRef<"facture_bien", 'Int'>
+    readonly prix: FieldRef<"facture_bien", 'Float'>
     readonly Cree_par: FieldRef<"facture_bien", 'String'>
+    readonly movementType: FieldRef<"facture_bien", 'MovementType'>
+    readonly created_at: FieldRef<"facture_bien", 'DateTime'>
+    readonly updated_at: FieldRef<"facture_bien", 'DateTime'>
   }
     
 
@@ -12553,6 +14283,25 @@ export namespace Prisma {
   }
 
   /**
+   * facture_bien.facture
+   */
+  export type facture_bien$factureArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the facture
+     */
+    select?: factureSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the facture
+     */
+    omit?: factureOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: factureInclude<ExtArgs> | null
+    where?: factureWhereInput
+  }
+
+  /**
    * facture_bien without action
    */
   export type facture_bienDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12601,6 +14350,8 @@ export namespace Prisma {
     date: Date | null
     montant_totale: number | null
     Cree_par: string | null
+    created_at: Date | null
+    updated_at: Date | null
   }
 
   export type PaimentMaxAggregateOutputType = {
@@ -12609,6 +14360,8 @@ export namespace Prisma {
     date: Date | null
     montant_totale: number | null
     Cree_par: string | null
+    created_at: Date | null
+    updated_at: Date | null
   }
 
   export type PaimentCountAggregateOutputType = {
@@ -12617,6 +14370,8 @@ export namespace Prisma {
     date: number
     montant_totale: number
     Cree_par: number
+    created_at: number
+    updated_at: number
     _all: number
   }
 
@@ -12639,6 +14394,8 @@ export namespace Prisma {
     date?: true
     montant_totale?: true
     Cree_par?: true
+    created_at?: true
+    updated_at?: true
   }
 
   export type PaimentMaxAggregateInputType = {
@@ -12647,6 +14404,8 @@ export namespace Prisma {
     date?: true
     montant_totale?: true
     Cree_par?: true
+    created_at?: true
+    updated_at?: true
   }
 
   export type PaimentCountAggregateInputType = {
@@ -12655,6 +14414,8 @@ export namespace Prisma {
     date?: true
     montant_totale?: true
     Cree_par?: true
+    created_at?: true
+    updated_at?: true
     _all?: true
   }
 
@@ -12750,6 +14511,8 @@ export namespace Prisma {
     date: Date
     montant_totale: number
     Cree_par: string
+    created_at: Date
+    updated_at: Date
     _count: PaimentCountAggregateOutputType | null
     _avg: PaimentAvgAggregateOutputType | null
     _sum: PaimentSumAggregateOutputType | null
@@ -12777,6 +14540,8 @@ export namespace Prisma {
     date?: boolean
     montant_totale?: boolean
     Cree_par?: boolean
+    created_at?: boolean
+    updated_at?: boolean
     facture?: boolean | factureDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["paiment"]>
@@ -12787,6 +14552,8 @@ export namespace Prisma {
     date?: boolean
     montant_totale?: boolean
     Cree_par?: boolean
+    created_at?: boolean
+    updated_at?: boolean
     facture?: boolean | factureDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["paiment"]>
@@ -12797,6 +14564,8 @@ export namespace Prisma {
     date?: boolean
     montant_totale?: boolean
     Cree_par?: boolean
+    created_at?: boolean
+    updated_at?: boolean
     facture?: boolean | factureDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["paiment"]>
@@ -12807,9 +14576,11 @@ export namespace Prisma {
     date?: boolean
     montant_totale?: boolean
     Cree_par?: boolean
+    created_at?: boolean
+    updated_at?: boolean
   }
 
-  export type paimentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "id_facture" | "date" | "montant_totale" | "Cree_par", ExtArgs["result"]["paiment"]>
+  export type paimentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "id_facture" | "date" | "montant_totale" | "Cree_par" | "created_at" | "updated_at", ExtArgs["result"]["paiment"]>
   export type paimentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     facture?: boolean | factureDefaultArgs<ExtArgs>
     utilisateur?: boolean | UtilisateurDefaultArgs<ExtArgs>
@@ -12835,6 +14606,8 @@ export namespace Prisma {
       date: Date
       montant_totale: number
       Cree_par: string
+      created_at: Date
+      updated_at: Date
     }, ExtArgs["result"]["paiment"]>
     composites: {}
   }
@@ -13265,6 +15038,8 @@ export namespace Prisma {
     readonly date: FieldRef<"paiment", 'DateTime'>
     readonly montant_totale: FieldRef<"paiment", 'Float'>
     readonly Cree_par: FieldRef<"paiment", 'String'>
+    readonly created_at: FieldRef<"paiment", 'DateTime'>
+    readonly updated_at: FieldRef<"paiment", 'DateTime'>
   }
     
 
@@ -13699,7 +15474,8 @@ export namespace Prisma {
     email: 'email',
     password: 'password',
     role: 'role',
-    created_at: 'created_at'
+    created_at: 'created_at',
+    updated_at: 'updated_at'
   };
 
   export type UtilisateurScalarFieldEnum = (typeof UtilisateurScalarFieldEnum)[keyof typeof UtilisateurScalarFieldEnum]
@@ -13714,7 +15490,10 @@ export namespace Prisma {
     RIB: 'RIB',
     patente: 'patente',
     adresse: 'adresse',
-    created_at: 'created_at'
+    email: 'email',
+    numero_telephone: 'numero_telephone',
+    created_at: 'created_at',
+    updated_at: 'updated_at'
   };
 
   export type EntrepriseScalarFieldEnum = (typeof EntrepriseScalarFieldEnum)[keyof typeof EntrepriseScalarFieldEnum]
@@ -13734,6 +15513,7 @@ export namespace Prisma {
     allergies: 'allergies',
     commentaire: 'commentaire',
     created_at: 'created_at',
+    updated_at: 'updated_at',
     Cree_par: 'Cree_par'
   };
 
@@ -13744,9 +15524,13 @@ export namespace Prisma {
     id: 'id',
     CIN: 'CIN',
     sujet: 'sujet',
+    soin_id: 'soin_id',
     date_rendez_vous: 'date_rendez_vous',
     created_at: 'created_at',
-    Cree_par: 'Cree_par'
+    Cree_par: 'Cree_par',
+    status: 'status',
+    cabinet: 'cabinet',
+    updated_at: 'updated_at'
   };
 
   export type Rendez_vousScalarFieldEnum = (typeof Rendez_vousScalarFieldEnum)[keyof typeof Rendez_vousScalarFieldEnum]
@@ -13756,7 +15540,8 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     sections_json: 'sections_json',
-    Cree_par: 'Cree_par'
+    Cree_par: 'Cree_par',
+    created_at: 'created_at'
   };
 
   export type Document_templatesScalarFieldEnum = (typeof Document_templatesScalarFieldEnum)[keyof typeof Document_templatesScalarFieldEnum]
@@ -13767,10 +15552,26 @@ export namespace Prisma {
     template_id: 'template_id',
     CIN: 'CIN',
     data_json: 'data_json',
-    Cree_par: 'Cree_par'
+    Cree_par: 'Cree_par',
+    created_at: 'created_at',
+    updated_at: 'updated_at'
   };
 
   export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
+
+
+  export const ScannedDocumentScalarFieldEnum: {
+    id: 'id',
+    title: 'title',
+    filePath: 'filePath',
+    CIN: 'CIN',
+    description: 'description',
+    Cree_par: 'Cree_par',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ScannedDocumentScalarFieldEnum = (typeof ScannedDocumentScalarFieldEnum)[keyof typeof ScannedDocumentScalarFieldEnum]
 
 
   export const BienScalarFieldEnum: {
@@ -13780,7 +15581,11 @@ export namespace Prisma {
     Type: 'Type',
     prix: 'prix',
     stock: 'stock',
-    Cree_par: 'Cree_par'
+    cabinet: 'cabinet',
+    Cree_par: 'Cree_par',
+    therapeute: 'therapeute',
+    created_at: 'created_at',
+    updated_at: 'updated_at'
   };
 
   export type BienScalarFieldEnum = (typeof BienScalarFieldEnum)[keyof typeof BienScalarFieldEnum]
@@ -13793,7 +15598,14 @@ export namespace Prisma {
     prix_total: 'prix_total',
     statut: 'statut',
     notes: 'notes',
-    Cree_par: 'Cree_par'
+    Cree_par: 'Cree_par',
+    created_at: 'created_at',
+    updated_at: 'updated_at',
+    date_paiement: 'date_paiement',
+    methode_paiement: 'methode_paiement',
+    cheque_numero: 'cheque_numero',
+    cheque_banque: 'cheque_banque',
+    cheque_date_tirage: 'cheque_date_tirage'
   };
 
   export type FactureScalarFieldEnum = (typeof FactureScalarFieldEnum)[keyof typeof FactureScalarFieldEnum]
@@ -13805,7 +15617,11 @@ export namespace Prisma {
     id_bien: 'id_bien',
     type_bien: 'type_bien',
     quantite: 'quantite',
-    Cree_par: 'Cree_par'
+    prix: 'prix',
+    Cree_par: 'Cree_par',
+    movementType: 'movementType',
+    created_at: 'created_at',
+    updated_at: 'updated_at'
   };
 
   export type Facture_bienScalarFieldEnum = (typeof Facture_bienScalarFieldEnum)[keyof typeof Facture_bienScalarFieldEnum]
@@ -13816,7 +15632,9 @@ export namespace Prisma {
     id_facture: 'id_facture',
     date: 'date',
     montant_totale: 'montant_totale',
-    Cree_par: 'Cree_par'
+    Cree_par: 'Cree_par',
+    created_at: 'created_at',
+    updated_at: 'updated_at'
   };
 
   export type PaimentScalarFieldEnum = (typeof PaimentScalarFieldEnum)[keyof typeof PaimentScalarFieldEnum]
@@ -13830,12 +15648,36 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
   export const NullsOrder: {
     first: 'first',
     last: 'last'
   };
 
   export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+  export const QueryMode: {
+    default: 'default',
+    insensitive: 'insensitive'
+  };
+
+  export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
   /**
@@ -13872,16 +15714,30 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'BienType'
+   * Reference to a field of type 'Status'
    */
-  export type EnumBienTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BienType'>
+  export type EnumStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Status'>
     
 
 
   /**
-   * Reference to a field of type 'ServiceType'
+   * Reference to a field of type 'Json'
    */
-  export type EnumServiceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceType'>
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
+   * Reference to a field of type 'BienType'
+   */
+  export type EnumBienTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BienType'>
     
 
 
@@ -13893,9 +15749,9 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'FactureStatus'
+   * Reference to a field of type 'MovementType'
    */
-  export type EnumFactureStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FactureStatus'>
+  export type EnumMovementTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MovementType'>
     
   /**
    * Deep Input Types
@@ -13917,14 +15773,17 @@ export namespace Prisma {
     password?: StringFilter<"Utilisateur"> | string
     role?: EnumRoleFilter<"Utilisateur"> | $Enums.Role
     created_at?: DateTimeFilter<"Utilisateur"> | Date | string
+    updated_at?: DateTimeFilter<"Utilisateur"> | Date | string
     clients?: ClientListRelationFilter
     rendez_vous?: Rendez_vousListRelationFilter
     documentTemplates?: Document_templatesListRelationFilter
     documents?: DocumentListRelationFilter
-    biens?: BienListRelationFilter
+    biensCreated?: BienListRelationFilter
+    biensTherapeute?: BienListRelationFilter
     factures?: FactureListRelationFilter
     factureBiens?: Facture_bienListRelationFilter
     paiements?: PaimentListRelationFilter
+    scanned_Documents?: ScannedDocumentListRelationFilter
   }
 
   export type UtilisateurOrderByWithRelationInput = {
@@ -13939,14 +15798,17 @@ export namespace Prisma {
     password?: SortOrder
     role?: SortOrder
     created_at?: SortOrder
+    updated_at?: SortOrder
     clients?: ClientOrderByRelationAggregateInput
     rendez_vous?: rendez_vousOrderByRelationAggregateInput
     documentTemplates?: document_templatesOrderByRelationAggregateInput
     documents?: documentOrderByRelationAggregateInput
-    biens?: bienOrderByRelationAggregateInput
+    biensCreated?: bienOrderByRelationAggregateInput
+    biensTherapeute?: bienOrderByRelationAggregateInput
     factures?: factureOrderByRelationAggregateInput
     factureBiens?: facture_bienOrderByRelationAggregateInput
     paiements?: paimentOrderByRelationAggregateInput
+    scanned_Documents?: scannedDocumentOrderByRelationAggregateInput
   }
 
   export type UtilisateurWhereUniqueInput = Prisma.AtLeast<{
@@ -13964,14 +15826,17 @@ export namespace Prisma {
     password?: StringFilter<"Utilisateur"> | string
     role?: EnumRoleFilter<"Utilisateur"> | $Enums.Role
     created_at?: DateTimeFilter<"Utilisateur"> | Date | string
+    updated_at?: DateTimeFilter<"Utilisateur"> | Date | string
     clients?: ClientListRelationFilter
     rendez_vous?: Rendez_vousListRelationFilter
     documentTemplates?: Document_templatesListRelationFilter
     documents?: DocumentListRelationFilter
-    biens?: BienListRelationFilter
+    biensCreated?: BienListRelationFilter
+    biensTherapeute?: BienListRelationFilter
     factures?: FactureListRelationFilter
     factureBiens?: Facture_bienListRelationFilter
     paiements?: PaimentListRelationFilter
+    scanned_Documents?: ScannedDocumentListRelationFilter
   }, "id" | "CIN" | "email">
 
   export type UtilisateurOrderByWithAggregationInput = {
@@ -13986,6 +15851,7 @@ export namespace Prisma {
     password?: SortOrder
     role?: SortOrder
     created_at?: SortOrder
+    updated_at?: SortOrder
     _count?: UtilisateurCountOrderByAggregateInput
     _avg?: UtilisateurAvgOrderByAggregateInput
     _max?: UtilisateurMaxOrderByAggregateInput
@@ -14008,6 +15874,7 @@ export namespace Prisma {
     password?: StringWithAggregatesFilter<"Utilisateur"> | string
     role?: EnumRoleWithAggregatesFilter<"Utilisateur"> | $Enums.Role
     created_at?: DateTimeWithAggregatesFilter<"Utilisateur"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"Utilisateur"> | Date | string
   }
 
   export type EntrepriseWhereInput = {
@@ -14015,14 +15882,17 @@ export namespace Prisma {
     OR?: EntrepriseWhereInput[]
     NOT?: EntrepriseWhereInput | EntrepriseWhereInput[]
     id?: IntFilter<"Entreprise"> | number
-    ICE?: IntFilter<"Entreprise"> | number
-    CNSS?: IntFilter<"Entreprise"> | number
-    RC?: IntFilter<"Entreprise"> | number
-    IF?: IntFilter<"Entreprise"> | number
-    RIB?: IntFilter<"Entreprise"> | number
-    patente?: IntFilter<"Entreprise"> | number
+    ICE?: StringFilter<"Entreprise"> | string
+    CNSS?: StringFilter<"Entreprise"> | string
+    RC?: StringFilter<"Entreprise"> | string
+    IF?: StringFilter<"Entreprise"> | string
+    RIB?: StringFilter<"Entreprise"> | string
+    patente?: StringFilter<"Entreprise"> | string
     adresse?: StringFilter<"Entreprise"> | string
+    email?: StringNullableFilter<"Entreprise"> | string | null
+    numero_telephone?: StringNullableFilter<"Entreprise"> | string | null
     created_at?: DateTimeFilter<"Entreprise"> | Date | string
+    updated_at?: DateTimeFilter<"Entreprise"> | Date | string
   }
 
   export type EntrepriseOrderByWithRelationInput = {
@@ -14034,7 +15904,10 @@ export namespace Prisma {
     RIB?: SortOrder
     patente?: SortOrder
     adresse?: SortOrder
+    email?: SortOrderInput | SortOrder
+    numero_telephone?: SortOrderInput | SortOrder
     created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type EntrepriseWhereUniqueInput = Prisma.AtLeast<{
@@ -14042,14 +15915,17 @@ export namespace Prisma {
     AND?: EntrepriseWhereInput | EntrepriseWhereInput[]
     OR?: EntrepriseWhereInput[]
     NOT?: EntrepriseWhereInput | EntrepriseWhereInput[]
-    ICE?: IntFilter<"Entreprise"> | number
-    CNSS?: IntFilter<"Entreprise"> | number
-    RC?: IntFilter<"Entreprise"> | number
-    IF?: IntFilter<"Entreprise"> | number
-    RIB?: IntFilter<"Entreprise"> | number
-    patente?: IntFilter<"Entreprise"> | number
+    ICE?: StringFilter<"Entreprise"> | string
+    CNSS?: StringFilter<"Entreprise"> | string
+    RC?: StringFilter<"Entreprise"> | string
+    IF?: StringFilter<"Entreprise"> | string
+    RIB?: StringFilter<"Entreprise"> | string
+    patente?: StringFilter<"Entreprise"> | string
     adresse?: StringFilter<"Entreprise"> | string
+    email?: StringNullableFilter<"Entreprise"> | string | null
+    numero_telephone?: StringNullableFilter<"Entreprise"> | string | null
     created_at?: DateTimeFilter<"Entreprise"> | Date | string
+    updated_at?: DateTimeFilter<"Entreprise"> | Date | string
   }, "id">
 
   export type EntrepriseOrderByWithAggregationInput = {
@@ -14061,7 +15937,10 @@ export namespace Prisma {
     RIB?: SortOrder
     patente?: SortOrder
     adresse?: SortOrder
+    email?: SortOrderInput | SortOrder
+    numero_telephone?: SortOrderInput | SortOrder
     created_at?: SortOrder
+    updated_at?: SortOrder
     _count?: EntrepriseCountOrderByAggregateInput
     _avg?: EntrepriseAvgOrderByAggregateInput
     _max?: EntrepriseMaxOrderByAggregateInput
@@ -14074,14 +15953,17 @@ export namespace Prisma {
     OR?: EntrepriseScalarWhereWithAggregatesInput[]
     NOT?: EntrepriseScalarWhereWithAggregatesInput | EntrepriseScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"Entreprise"> | number
-    ICE?: IntWithAggregatesFilter<"Entreprise"> | number
-    CNSS?: IntWithAggregatesFilter<"Entreprise"> | number
-    RC?: IntWithAggregatesFilter<"Entreprise"> | number
-    IF?: IntWithAggregatesFilter<"Entreprise"> | number
-    RIB?: IntWithAggregatesFilter<"Entreprise"> | number
-    patente?: IntWithAggregatesFilter<"Entreprise"> | number
+    ICE?: StringWithAggregatesFilter<"Entreprise"> | string
+    CNSS?: StringWithAggregatesFilter<"Entreprise"> | string
+    RC?: StringWithAggregatesFilter<"Entreprise"> | string
+    IF?: StringWithAggregatesFilter<"Entreprise"> | string
+    RIB?: StringWithAggregatesFilter<"Entreprise"> | string
+    patente?: StringWithAggregatesFilter<"Entreprise"> | string
     adresse?: StringWithAggregatesFilter<"Entreprise"> | string
+    email?: StringNullableWithAggregatesFilter<"Entreprise"> | string | null
+    numero_telephone?: StringNullableWithAggregatesFilter<"Entreprise"> | string | null
     created_at?: DateTimeWithAggregatesFilter<"Entreprise"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"Entreprise"> | Date | string
   }
 
   export type ClientWhereInput = {
@@ -14101,10 +15983,12 @@ export namespace Prisma {
     allergies?: StringNullableFilter<"Client"> | string | null
     commentaire?: StringNullableFilter<"Client"> | string | null
     created_at?: DateTimeFilter<"Client"> | Date | string
+    updated_at?: DateTimeFilter<"Client"> | Date | string
     Cree_par?: StringFilter<"Client"> | string
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
     rendez_vous?: Rendez_vousListRelationFilter
     documents?: DocumentListRelationFilter
+    scanned_Documents?: ScannedDocumentListRelationFilter
     factures?: FactureListRelationFilter
   }
 
@@ -14122,10 +16006,12 @@ export namespace Prisma {
     allergies?: SortOrderInput | SortOrder
     commentaire?: SortOrderInput | SortOrder
     created_at?: SortOrder
+    updated_at?: SortOrder
     Cree_par?: SortOrder
     utilisateur?: UtilisateurOrderByWithRelationInput
     rendez_vous?: rendez_vousOrderByRelationAggregateInput
     documents?: documentOrderByRelationAggregateInput
+    scanned_Documents?: scannedDocumentOrderByRelationAggregateInput
     factures?: factureOrderByRelationAggregateInput
   }
 
@@ -14146,10 +16032,12 @@ export namespace Prisma {
     allergies?: StringNullableFilter<"Client"> | string | null
     commentaire?: StringNullableFilter<"Client"> | string | null
     created_at?: DateTimeFilter<"Client"> | Date | string
+    updated_at?: DateTimeFilter<"Client"> | Date | string
     Cree_par?: StringFilter<"Client"> | string
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
     rendez_vous?: Rendez_vousListRelationFilter
     documents?: DocumentListRelationFilter
+    scanned_Documents?: ScannedDocumentListRelationFilter
     factures?: FactureListRelationFilter
   }, "id" | "CIN">
 
@@ -14167,6 +16055,7 @@ export namespace Prisma {
     allergies?: SortOrderInput | SortOrder
     commentaire?: SortOrderInput | SortOrder
     created_at?: SortOrder
+    updated_at?: SortOrder
     Cree_par?: SortOrder
     _count?: ClientCountOrderByAggregateInput
     _avg?: ClientAvgOrderByAggregateInput
@@ -14192,6 +16081,7 @@ export namespace Prisma {
     allergies?: StringNullableWithAggregatesFilter<"Client"> | string | null
     commentaire?: StringNullableWithAggregatesFilter<"Client"> | string | null
     created_at?: DateTimeWithAggregatesFilter<"Client"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"Client"> | Date | string
     Cree_par?: StringWithAggregatesFilter<"Client"> | string
   }
 
@@ -14202,22 +16092,32 @@ export namespace Prisma {
     id?: IntFilter<"rendez_vous"> | number
     CIN?: StringFilter<"rendez_vous"> | string
     sujet?: StringFilter<"rendez_vous"> | string
+    soin_id?: IntFilter<"rendez_vous"> | number
     date_rendez_vous?: DateTimeFilter<"rendez_vous"> | Date | string
     created_at?: DateTimeFilter<"rendez_vous"> | Date | string
     Cree_par?: StringFilter<"rendez_vous"> | string
+    status?: EnumStatusFilter<"rendez_vous"> | $Enums.Status
+    cabinet?: StringFilter<"rendez_vous"> | string
+    updated_at?: DateTimeFilter<"rendez_vous"> | Date | string
     client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
+    bien?: XOR<BienScalarRelationFilter, bienWhereInput>
   }
 
   export type rendez_vousOrderByWithRelationInput = {
     id?: SortOrder
     CIN?: SortOrder
     sujet?: SortOrder
+    soin_id?: SortOrder
     date_rendez_vous?: SortOrder
     created_at?: SortOrder
     Cree_par?: SortOrder
+    status?: SortOrder
+    cabinet?: SortOrder
+    updated_at?: SortOrder
     client?: ClientOrderByWithRelationInput
     utilisateur?: UtilisateurOrderByWithRelationInput
+    bien?: bienOrderByWithRelationInput
   }
 
   export type rendez_vousWhereUniqueInput = Prisma.AtLeast<{
@@ -14227,20 +16127,29 @@ export namespace Prisma {
     NOT?: rendez_vousWhereInput | rendez_vousWhereInput[]
     CIN?: StringFilter<"rendez_vous"> | string
     sujet?: StringFilter<"rendez_vous"> | string
+    soin_id?: IntFilter<"rendez_vous"> | number
     date_rendez_vous?: DateTimeFilter<"rendez_vous"> | Date | string
     created_at?: DateTimeFilter<"rendez_vous"> | Date | string
     Cree_par?: StringFilter<"rendez_vous"> | string
+    status?: EnumStatusFilter<"rendez_vous"> | $Enums.Status
+    cabinet?: StringFilter<"rendez_vous"> | string
+    updated_at?: DateTimeFilter<"rendez_vous"> | Date | string
     client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
+    bien?: XOR<BienScalarRelationFilter, bienWhereInput>
   }, "id">
 
   export type rendez_vousOrderByWithAggregationInput = {
     id?: SortOrder
     CIN?: SortOrder
     sujet?: SortOrder
+    soin_id?: SortOrder
     date_rendez_vous?: SortOrder
     created_at?: SortOrder
     Cree_par?: SortOrder
+    status?: SortOrder
+    cabinet?: SortOrder
+    updated_at?: SortOrder
     _count?: rendez_vousCountOrderByAggregateInput
     _avg?: rendez_vousAvgOrderByAggregateInput
     _max?: rendez_vousMaxOrderByAggregateInput
@@ -14255,9 +16164,13 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"rendez_vous"> | number
     CIN?: StringWithAggregatesFilter<"rendez_vous"> | string
     sujet?: StringWithAggregatesFilter<"rendez_vous"> | string
+    soin_id?: IntWithAggregatesFilter<"rendez_vous"> | number
     date_rendez_vous?: DateTimeWithAggregatesFilter<"rendez_vous"> | Date | string
     created_at?: DateTimeWithAggregatesFilter<"rendez_vous"> | Date | string
     Cree_par?: StringWithAggregatesFilter<"rendez_vous"> | string
+    status?: EnumStatusWithAggregatesFilter<"rendez_vous"> | $Enums.Status
+    cabinet?: StringWithAggregatesFilter<"rendez_vous"> | string
+    updated_at?: DateTimeWithAggregatesFilter<"rendez_vous"> | Date | string
   }
 
   export type document_templatesWhereInput = {
@@ -14266,8 +16179,9 @@ export namespace Prisma {
     NOT?: document_templatesWhereInput | document_templatesWhereInput[]
     id?: IntFilter<"document_templates"> | number
     name?: StringFilter<"document_templates"> | string
-    sections_json?: StringFilter<"document_templates"> | string
+    sections_json?: JsonFilter<"document_templates">
     Cree_par?: StringFilter<"document_templates"> | string
+    created_at?: DateTimeFilter<"document_templates"> | Date | string
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
     documents?: DocumentListRelationFilter
   }
@@ -14277,6 +16191,7 @@ export namespace Prisma {
     name?: SortOrder
     sections_json?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
     utilisateur?: UtilisateurOrderByWithRelationInput
     documents?: documentOrderByRelationAggregateInput
   }
@@ -14287,8 +16202,9 @@ export namespace Prisma {
     OR?: document_templatesWhereInput[]
     NOT?: document_templatesWhereInput | document_templatesWhereInput[]
     name?: StringFilter<"document_templates"> | string
-    sections_json?: StringFilter<"document_templates"> | string
+    sections_json?: JsonFilter<"document_templates">
     Cree_par?: StringFilter<"document_templates"> | string
+    created_at?: DateTimeFilter<"document_templates"> | Date | string
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
     documents?: DocumentListRelationFilter
   }, "id">
@@ -14298,6 +16214,7 @@ export namespace Prisma {
     name?: SortOrder
     sections_json?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
     _count?: document_templatesCountOrderByAggregateInput
     _avg?: document_templatesAvgOrderByAggregateInput
     _max?: document_templatesMaxOrderByAggregateInput
@@ -14311,8 +16228,9 @@ export namespace Prisma {
     NOT?: document_templatesScalarWhereWithAggregatesInput | document_templatesScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"document_templates"> | number
     name?: StringWithAggregatesFilter<"document_templates"> | string
-    sections_json?: StringWithAggregatesFilter<"document_templates"> | string
+    sections_json?: JsonWithAggregatesFilter<"document_templates">
     Cree_par?: StringWithAggregatesFilter<"document_templates"> | string
+    created_at?: DateTimeWithAggregatesFilter<"document_templates"> | Date | string
   }
 
   export type documentWhereInput = {
@@ -14322,8 +16240,10 @@ export namespace Prisma {
     id?: IntFilter<"document"> | number
     template_id?: IntFilter<"document"> | number
     CIN?: StringFilter<"document"> | string
-    data_json?: StringFilter<"document"> | string
+    data_json?: JsonFilter<"document">
     Cree_par?: StringFilter<"document"> | string
+    created_at?: DateTimeFilter<"document"> | Date | string
+    updated_at?: DateTimeFilter<"document"> | Date | string
     template?: XOR<Document_templatesScalarRelationFilter, document_templatesWhereInput>
     client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
@@ -14335,6 +16255,8 @@ export namespace Prisma {
     CIN?: SortOrder
     data_json?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
     template?: document_templatesOrderByWithRelationInput
     client?: ClientOrderByWithRelationInput
     utilisateur?: UtilisateurOrderByWithRelationInput
@@ -14347,8 +16269,10 @@ export namespace Prisma {
     NOT?: documentWhereInput | documentWhereInput[]
     template_id?: IntFilter<"document"> | number
     CIN?: StringFilter<"document"> | string
-    data_json?: StringFilter<"document"> | string
+    data_json?: JsonFilter<"document">
     Cree_par?: StringFilter<"document"> | string
+    created_at?: DateTimeFilter<"document"> | Date | string
+    updated_at?: DateTimeFilter<"document"> | Date | string
     template?: XOR<Document_templatesScalarRelationFilter, document_templatesWhereInput>
     client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
@@ -14360,6 +16284,8 @@ export namespace Prisma {
     CIN?: SortOrder
     data_json?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
     _count?: documentCountOrderByAggregateInput
     _avg?: documentAvgOrderByAggregateInput
     _max?: documentMaxOrderByAggregateInput
@@ -14374,8 +16300,85 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"document"> | number
     template_id?: IntWithAggregatesFilter<"document"> | number
     CIN?: StringWithAggregatesFilter<"document"> | string
-    data_json?: StringWithAggregatesFilter<"document"> | string
+    data_json?: JsonWithAggregatesFilter<"document">
     Cree_par?: StringWithAggregatesFilter<"document"> | string
+    created_at?: DateTimeWithAggregatesFilter<"document"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"document"> | Date | string
+  }
+
+  export type scannedDocumentWhereInput = {
+    AND?: scannedDocumentWhereInput | scannedDocumentWhereInput[]
+    OR?: scannedDocumentWhereInput[]
+    NOT?: scannedDocumentWhereInput | scannedDocumentWhereInput[]
+    id?: IntFilter<"scannedDocument"> | number
+    title?: StringFilter<"scannedDocument"> | string
+    filePath?: StringFilter<"scannedDocument"> | string
+    CIN?: StringFilter<"scannedDocument"> | string
+    description?: StringNullableFilter<"scannedDocument"> | string | null
+    Cree_par?: StringFilter<"scannedDocument"> | string
+    createdAt?: DateTimeFilter<"scannedDocument"> | Date | string
+    updatedAt?: DateTimeFilter<"scannedDocument"> | Date | string
+    client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
+    utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
+  }
+
+  export type scannedDocumentOrderByWithRelationInput = {
+    id?: SortOrder
+    title?: SortOrder
+    filePath?: SortOrder
+    CIN?: SortOrder
+    description?: SortOrderInput | SortOrder
+    Cree_par?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    client?: ClientOrderByWithRelationInput
+    utilisateur?: UtilisateurOrderByWithRelationInput
+  }
+
+  export type scannedDocumentWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: scannedDocumentWhereInput | scannedDocumentWhereInput[]
+    OR?: scannedDocumentWhereInput[]
+    NOT?: scannedDocumentWhereInput | scannedDocumentWhereInput[]
+    title?: StringFilter<"scannedDocument"> | string
+    filePath?: StringFilter<"scannedDocument"> | string
+    CIN?: StringFilter<"scannedDocument"> | string
+    description?: StringNullableFilter<"scannedDocument"> | string | null
+    Cree_par?: StringFilter<"scannedDocument"> | string
+    createdAt?: DateTimeFilter<"scannedDocument"> | Date | string
+    updatedAt?: DateTimeFilter<"scannedDocument"> | Date | string
+    client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
+    utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
+  }, "id">
+
+  export type scannedDocumentOrderByWithAggregationInput = {
+    id?: SortOrder
+    title?: SortOrder
+    filePath?: SortOrder
+    CIN?: SortOrder
+    description?: SortOrderInput | SortOrder
+    Cree_par?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: scannedDocumentCountOrderByAggregateInput
+    _avg?: scannedDocumentAvgOrderByAggregateInput
+    _max?: scannedDocumentMaxOrderByAggregateInput
+    _min?: scannedDocumentMinOrderByAggregateInput
+    _sum?: scannedDocumentSumOrderByAggregateInput
+  }
+
+  export type scannedDocumentScalarWhereWithAggregatesInput = {
+    AND?: scannedDocumentScalarWhereWithAggregatesInput | scannedDocumentScalarWhereWithAggregatesInput[]
+    OR?: scannedDocumentScalarWhereWithAggregatesInput[]
+    NOT?: scannedDocumentScalarWhereWithAggregatesInput | scannedDocumentScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"scannedDocument"> | number
+    title?: StringWithAggregatesFilter<"scannedDocument"> | string
+    filePath?: StringWithAggregatesFilter<"scannedDocument"> | string
+    CIN?: StringWithAggregatesFilter<"scannedDocument"> | string
+    description?: StringNullableWithAggregatesFilter<"scannedDocument"> | string | null
+    Cree_par?: StringWithAggregatesFilter<"scannedDocument"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"scannedDocument"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"scannedDocument"> | Date | string
   }
 
   export type bienWhereInput = {
@@ -14385,12 +16388,18 @@ export namespace Prisma {
     id?: IntFilter<"bien"> | number
     Nom?: StringFilter<"bien"> | string
     bien_type?: EnumBienTypeFilter<"bien"> | $Enums.BienType
-    Type?: EnumServiceTypeFilter<"bien"> | $Enums.ServiceType
+    Type?: StringFilter<"bien"> | string
     prix?: FloatFilter<"bien"> | number
     stock?: IntFilter<"bien"> | number
+    cabinet?: StringFilter<"bien"> | string
     Cree_par?: StringFilter<"bien"> | string
+    therapeute?: StringNullableFilter<"bien"> | string | null
+    created_at?: DateTimeFilter<"bien"> | Date | string
+    updated_at?: DateTimeFilter<"bien"> | Date | string
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
+    therapeuteUser?: XOR<UtilisateurNullableScalarRelationFilter, UtilisateurWhereInput> | null
     factureBiens?: Facture_bienListRelationFilter
+    rendez_vous?: Rendez_vousListRelationFilter
   }
 
   export type bienOrderByWithRelationInput = {
@@ -14400,9 +16409,15 @@ export namespace Prisma {
     Type?: SortOrder
     prix?: SortOrder
     stock?: SortOrder
+    cabinet?: SortOrder
     Cree_par?: SortOrder
+    therapeute?: SortOrderInput | SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
     utilisateur?: UtilisateurOrderByWithRelationInput
+    therapeuteUser?: UtilisateurOrderByWithRelationInput
     factureBiens?: facture_bienOrderByRelationAggregateInput
+    rendez_vous?: rendez_vousOrderByRelationAggregateInput
   }
 
   export type bienWhereUniqueInput = Prisma.AtLeast<{
@@ -14412,12 +16427,18 @@ export namespace Prisma {
     NOT?: bienWhereInput | bienWhereInput[]
     Nom?: StringFilter<"bien"> | string
     bien_type?: EnumBienTypeFilter<"bien"> | $Enums.BienType
-    Type?: EnumServiceTypeFilter<"bien"> | $Enums.ServiceType
+    Type?: StringFilter<"bien"> | string
     prix?: FloatFilter<"bien"> | number
     stock?: IntFilter<"bien"> | number
+    cabinet?: StringFilter<"bien"> | string
     Cree_par?: StringFilter<"bien"> | string
+    therapeute?: StringNullableFilter<"bien"> | string | null
+    created_at?: DateTimeFilter<"bien"> | Date | string
+    updated_at?: DateTimeFilter<"bien"> | Date | string
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
+    therapeuteUser?: XOR<UtilisateurNullableScalarRelationFilter, UtilisateurWhereInput> | null
     factureBiens?: Facture_bienListRelationFilter
+    rendez_vous?: Rendez_vousListRelationFilter
   }, "id">
 
   export type bienOrderByWithAggregationInput = {
@@ -14427,7 +16448,11 @@ export namespace Prisma {
     Type?: SortOrder
     prix?: SortOrder
     stock?: SortOrder
+    cabinet?: SortOrder
     Cree_par?: SortOrder
+    therapeute?: SortOrderInput | SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
     _count?: bienCountOrderByAggregateInput
     _avg?: bienAvgOrderByAggregateInput
     _max?: bienMaxOrderByAggregateInput
@@ -14442,10 +16467,14 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"bien"> | number
     Nom?: StringWithAggregatesFilter<"bien"> | string
     bien_type?: EnumBienTypeWithAggregatesFilter<"bien"> | $Enums.BienType
-    Type?: EnumServiceTypeWithAggregatesFilter<"bien"> | $Enums.ServiceType
+    Type?: StringWithAggregatesFilter<"bien"> | string
     prix?: FloatWithAggregatesFilter<"bien"> | number
     stock?: IntWithAggregatesFilter<"bien"> | number
+    cabinet?: StringWithAggregatesFilter<"bien"> | string
     Cree_par?: StringWithAggregatesFilter<"bien"> | string
+    therapeute?: StringNullableWithAggregatesFilter<"bien"> | string | null
+    created_at?: DateTimeWithAggregatesFilter<"bien"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"bien"> | Date | string
   }
 
   export type factureWhereInput = {
@@ -14456,9 +16485,16 @@ export namespace Prisma {
     CIN?: StringFilter<"facture"> | string
     date?: DateTimeFilter<"facture"> | Date | string
     prix_total?: FloatFilter<"facture"> | number
-    statut?: EnumFactureStatusFilter<"facture"> | $Enums.FactureStatus
+    statut?: StringFilter<"facture"> | string
     notes?: StringNullableFilter<"facture"> | string | null
     Cree_par?: StringFilter<"facture"> | string
+    created_at?: DateTimeFilter<"facture"> | Date | string
+    updated_at?: DateTimeFilter<"facture"> | Date | string
+    date_paiement?: DateTimeNullableFilter<"facture"> | Date | string | null
+    methode_paiement?: StringNullableFilter<"facture"> | string | null
+    cheque_numero?: StringNullableFilter<"facture"> | string | null
+    cheque_banque?: StringNullableFilter<"facture"> | string | null
+    cheque_date_tirage?: DateTimeNullableFilter<"facture"> | Date | string | null
     client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
     factureBiens?: Facture_bienListRelationFilter
@@ -14473,6 +16509,13 @@ export namespace Prisma {
     statut?: SortOrder
     notes?: SortOrderInput | SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    date_paiement?: SortOrderInput | SortOrder
+    methode_paiement?: SortOrderInput | SortOrder
+    cheque_numero?: SortOrderInput | SortOrder
+    cheque_banque?: SortOrderInput | SortOrder
+    cheque_date_tirage?: SortOrderInput | SortOrder
     client?: ClientOrderByWithRelationInput
     utilisateur?: UtilisateurOrderByWithRelationInput
     factureBiens?: facture_bienOrderByRelationAggregateInput
@@ -14487,9 +16530,16 @@ export namespace Prisma {
     CIN?: StringFilter<"facture"> | string
     date?: DateTimeFilter<"facture"> | Date | string
     prix_total?: FloatFilter<"facture"> | number
-    statut?: EnumFactureStatusFilter<"facture"> | $Enums.FactureStatus
+    statut?: StringFilter<"facture"> | string
     notes?: StringNullableFilter<"facture"> | string | null
     Cree_par?: StringFilter<"facture"> | string
+    created_at?: DateTimeFilter<"facture"> | Date | string
+    updated_at?: DateTimeFilter<"facture"> | Date | string
+    date_paiement?: DateTimeNullableFilter<"facture"> | Date | string | null
+    methode_paiement?: StringNullableFilter<"facture"> | string | null
+    cheque_numero?: StringNullableFilter<"facture"> | string | null
+    cheque_banque?: StringNullableFilter<"facture"> | string | null
+    cheque_date_tirage?: DateTimeNullableFilter<"facture"> | Date | string | null
     client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
     factureBiens?: Facture_bienListRelationFilter
@@ -14504,6 +16554,13 @@ export namespace Prisma {
     statut?: SortOrder
     notes?: SortOrderInput | SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    date_paiement?: SortOrderInput | SortOrder
+    methode_paiement?: SortOrderInput | SortOrder
+    cheque_numero?: SortOrderInput | SortOrder
+    cheque_banque?: SortOrderInput | SortOrder
+    cheque_date_tirage?: SortOrderInput | SortOrder
     _count?: factureCountOrderByAggregateInput
     _avg?: factureAvgOrderByAggregateInput
     _max?: factureMaxOrderByAggregateInput
@@ -14519,9 +16576,16 @@ export namespace Prisma {
     CIN?: StringWithAggregatesFilter<"facture"> | string
     date?: DateTimeWithAggregatesFilter<"facture"> | Date | string
     prix_total?: FloatWithAggregatesFilter<"facture"> | number
-    statut?: EnumFactureStatusWithAggregatesFilter<"facture"> | $Enums.FactureStatus
+    statut?: StringWithAggregatesFilter<"facture"> | string
     notes?: StringNullableWithAggregatesFilter<"facture"> | string | null
     Cree_par?: StringWithAggregatesFilter<"facture"> | string
+    created_at?: DateTimeWithAggregatesFilter<"facture"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"facture"> | Date | string
+    date_paiement?: DateTimeNullableWithAggregatesFilter<"facture"> | Date | string | null
+    methode_paiement?: StringNullableWithAggregatesFilter<"facture"> | string | null
+    cheque_numero?: StringNullableWithAggregatesFilter<"facture"> | string | null
+    cheque_banque?: StringNullableWithAggregatesFilter<"facture"> | string | null
+    cheque_date_tirage?: DateTimeNullableWithAggregatesFilter<"facture"> | Date | string | null
   }
 
   export type facture_bienWhereInput = {
@@ -14529,23 +16593,31 @@ export namespace Prisma {
     OR?: facture_bienWhereInput[]
     NOT?: facture_bienWhereInput | facture_bienWhereInput[]
     id?: IntFilter<"facture_bien"> | number
-    id_facture?: IntFilter<"facture_bien"> | number
+    id_facture?: IntNullableFilter<"facture_bien"> | number | null
     id_bien?: IntFilter<"facture_bien"> | number
-    type_bien?: EnumBienTypeFilter<"facture_bien"> | $Enums.BienType
+    type_bien?: StringFilter<"facture_bien"> | string
     quantite?: IntFilter<"facture_bien"> | number
+    prix?: FloatFilter<"facture_bien"> | number
     Cree_par?: StringFilter<"facture_bien"> | string
-    facture?: XOR<FactureScalarRelationFilter, factureWhereInput>
+    movementType?: EnumMovementTypeFilter<"facture_bien"> | $Enums.MovementType
+    created_at?: DateTimeFilter<"facture_bien"> | Date | string
+    updated_at?: DateTimeFilter<"facture_bien"> | Date | string
+    facture?: XOR<FactureNullableScalarRelationFilter, factureWhereInput> | null
     bien?: XOR<BienScalarRelationFilter, bienWhereInput>
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
   }
 
   export type facture_bienOrderByWithRelationInput = {
     id?: SortOrder
-    id_facture?: SortOrder
+    id_facture?: SortOrderInput | SortOrder
     id_bien?: SortOrder
     type_bien?: SortOrder
     quantite?: SortOrder
+    prix?: SortOrder
     Cree_par?: SortOrder
+    movementType?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
     facture?: factureOrderByWithRelationInput
     bien?: bienOrderByWithRelationInput
     utilisateur?: UtilisateurOrderByWithRelationInput
@@ -14556,23 +16628,31 @@ export namespace Prisma {
     AND?: facture_bienWhereInput | facture_bienWhereInput[]
     OR?: facture_bienWhereInput[]
     NOT?: facture_bienWhereInput | facture_bienWhereInput[]
-    id_facture?: IntFilter<"facture_bien"> | number
+    id_facture?: IntNullableFilter<"facture_bien"> | number | null
     id_bien?: IntFilter<"facture_bien"> | number
-    type_bien?: EnumBienTypeFilter<"facture_bien"> | $Enums.BienType
+    type_bien?: StringFilter<"facture_bien"> | string
     quantite?: IntFilter<"facture_bien"> | number
+    prix?: FloatFilter<"facture_bien"> | number
     Cree_par?: StringFilter<"facture_bien"> | string
-    facture?: XOR<FactureScalarRelationFilter, factureWhereInput>
+    movementType?: EnumMovementTypeFilter<"facture_bien"> | $Enums.MovementType
+    created_at?: DateTimeFilter<"facture_bien"> | Date | string
+    updated_at?: DateTimeFilter<"facture_bien"> | Date | string
+    facture?: XOR<FactureNullableScalarRelationFilter, factureWhereInput> | null
     bien?: XOR<BienScalarRelationFilter, bienWhereInput>
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
   }, "id">
 
   export type facture_bienOrderByWithAggregationInput = {
     id?: SortOrder
-    id_facture?: SortOrder
+    id_facture?: SortOrderInput | SortOrder
     id_bien?: SortOrder
     type_bien?: SortOrder
     quantite?: SortOrder
+    prix?: SortOrder
     Cree_par?: SortOrder
+    movementType?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
     _count?: facture_bienCountOrderByAggregateInput
     _avg?: facture_bienAvgOrderByAggregateInput
     _max?: facture_bienMaxOrderByAggregateInput
@@ -14585,11 +16665,15 @@ export namespace Prisma {
     OR?: facture_bienScalarWhereWithAggregatesInput[]
     NOT?: facture_bienScalarWhereWithAggregatesInput | facture_bienScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"facture_bien"> | number
-    id_facture?: IntWithAggregatesFilter<"facture_bien"> | number
+    id_facture?: IntNullableWithAggregatesFilter<"facture_bien"> | number | null
     id_bien?: IntWithAggregatesFilter<"facture_bien"> | number
-    type_bien?: EnumBienTypeWithAggregatesFilter<"facture_bien"> | $Enums.BienType
+    type_bien?: StringWithAggregatesFilter<"facture_bien"> | string
     quantite?: IntWithAggregatesFilter<"facture_bien"> | number
+    prix?: FloatWithAggregatesFilter<"facture_bien"> | number
     Cree_par?: StringWithAggregatesFilter<"facture_bien"> | string
+    movementType?: EnumMovementTypeWithAggregatesFilter<"facture_bien"> | $Enums.MovementType
+    created_at?: DateTimeWithAggregatesFilter<"facture_bien"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"facture_bien"> | Date | string
   }
 
   export type paimentWhereInput = {
@@ -14601,6 +16685,8 @@ export namespace Prisma {
     date?: DateTimeFilter<"paiment"> | Date | string
     montant_totale?: FloatFilter<"paiment"> | number
     Cree_par?: StringFilter<"paiment"> | string
+    created_at?: DateTimeFilter<"paiment"> | Date | string
+    updated_at?: DateTimeFilter<"paiment"> | Date | string
     facture?: XOR<FactureScalarRelationFilter, factureWhereInput>
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
   }
@@ -14611,6 +16697,8 @@ export namespace Prisma {
     date?: SortOrder
     montant_totale?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
     facture?: factureOrderByWithRelationInput
     utilisateur?: UtilisateurOrderByWithRelationInput
   }
@@ -14624,6 +16712,8 @@ export namespace Prisma {
     date?: DateTimeFilter<"paiment"> | Date | string
     montant_totale?: FloatFilter<"paiment"> | number
     Cree_par?: StringFilter<"paiment"> | string
+    created_at?: DateTimeFilter<"paiment"> | Date | string
+    updated_at?: DateTimeFilter<"paiment"> | Date | string
     facture?: XOR<FactureScalarRelationFilter, factureWhereInput>
     utilisateur?: XOR<UtilisateurScalarRelationFilter, UtilisateurWhereInput>
   }, "id">
@@ -14634,6 +16724,8 @@ export namespace Prisma {
     date?: SortOrder
     montant_totale?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
     _count?: paimentCountOrderByAggregateInput
     _avg?: paimentAvgOrderByAggregateInput
     _max?: paimentMaxOrderByAggregateInput
@@ -14650,6 +16742,8 @@ export namespace Prisma {
     date?: DateTimeWithAggregatesFilter<"paiment"> | Date | string
     montant_totale?: FloatWithAggregatesFilter<"paiment"> | number
     Cree_par?: StringWithAggregatesFilter<"paiment"> | string
+    created_at?: DateTimeWithAggregatesFilter<"paiment"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"paiment"> | Date | string
   }
 
   export type UtilisateurCreateInput = {
@@ -14663,14 +16757,17 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesCreateNestedManyWithoutUtilisateurInput
     documents?: documentCreateNestedManyWithoutUtilisateurInput
-    biens?: bienCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurUncheckedCreateInput = {
@@ -14685,14 +16782,17 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientUncheckedCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesUncheckedCreateNestedManyWithoutUtilisateurInput
     documents?: documentUncheckedCreateNestedManyWithoutUtilisateurInput
-    biens?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienUncheckedCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureUncheckedCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentUncheckedCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurUpdateInput = {
@@ -14706,14 +16806,17 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type UtilisateurUncheckedUpdateInput = {
@@ -14728,14 +16831,17 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUncheckedUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUncheckedUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUncheckedUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUncheckedUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUncheckedUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUncheckedUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUncheckedUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUncheckedUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type UtilisateurCreateManyInput = {
@@ -14750,6 +16856,7 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type UtilisateurUpdateManyMutationInput = {
@@ -14763,6 +16870,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UtilisateurUncheckedUpdateManyInput = {
@@ -14777,87 +16885,109 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type EntrepriseCreateInput = {
-    ICE: number
-    CNSS: number
-    RC: number
-    IF: number
-    RIB: number
-    patente: number
+    ICE: string
+    CNSS: string
+    RC: string
+    IF: string
+    RIB: string
+    patente: string
     adresse: string
+    email?: string | null
+    numero_telephone?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type EntrepriseUncheckedCreateInput = {
     id?: number
-    ICE: number
-    CNSS: number
-    RC: number
-    IF: number
-    RIB: number
-    patente: number
+    ICE: string
+    CNSS: string
+    RC: string
+    IF: string
+    RIB: string
+    patente: string
     adresse: string
+    email?: string | null
+    numero_telephone?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type EntrepriseUpdateInput = {
-    ICE?: IntFieldUpdateOperationsInput | number
-    CNSS?: IntFieldUpdateOperationsInput | number
-    RC?: IntFieldUpdateOperationsInput | number
-    IF?: IntFieldUpdateOperationsInput | number
-    RIB?: IntFieldUpdateOperationsInput | number
-    patente?: IntFieldUpdateOperationsInput | number
+    ICE?: StringFieldUpdateOperationsInput | string
+    CNSS?: StringFieldUpdateOperationsInput | string
+    RC?: StringFieldUpdateOperationsInput | string
+    IF?: StringFieldUpdateOperationsInput | string
+    RIB?: StringFieldUpdateOperationsInput | string
+    patente?: StringFieldUpdateOperationsInput | string
     adresse?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    numero_telephone?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type EntrepriseUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
-    ICE?: IntFieldUpdateOperationsInput | number
-    CNSS?: IntFieldUpdateOperationsInput | number
-    RC?: IntFieldUpdateOperationsInput | number
-    IF?: IntFieldUpdateOperationsInput | number
-    RIB?: IntFieldUpdateOperationsInput | number
-    patente?: IntFieldUpdateOperationsInput | number
+    ICE?: StringFieldUpdateOperationsInput | string
+    CNSS?: StringFieldUpdateOperationsInput | string
+    RC?: StringFieldUpdateOperationsInput | string
+    IF?: StringFieldUpdateOperationsInput | string
+    RIB?: StringFieldUpdateOperationsInput | string
+    patente?: StringFieldUpdateOperationsInput | string
     adresse?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    numero_telephone?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type EntrepriseCreateManyInput = {
     id?: number
-    ICE: number
-    CNSS: number
-    RC: number
-    IF: number
-    RIB: number
-    patente: number
+    ICE: string
+    CNSS: string
+    RC: string
+    IF: string
+    RIB: string
+    patente: string
     adresse: string
+    email?: string | null
+    numero_telephone?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type EntrepriseUpdateManyMutationInput = {
-    ICE?: IntFieldUpdateOperationsInput | number
-    CNSS?: IntFieldUpdateOperationsInput | number
-    RC?: IntFieldUpdateOperationsInput | number
-    IF?: IntFieldUpdateOperationsInput | number
-    RIB?: IntFieldUpdateOperationsInput | number
-    patente?: IntFieldUpdateOperationsInput | number
+    ICE?: StringFieldUpdateOperationsInput | string
+    CNSS?: StringFieldUpdateOperationsInput | string
+    RC?: StringFieldUpdateOperationsInput | string
+    IF?: StringFieldUpdateOperationsInput | string
+    RIB?: StringFieldUpdateOperationsInput | string
+    patente?: StringFieldUpdateOperationsInput | string
     adresse?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    numero_telephone?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type EntrepriseUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
-    ICE?: IntFieldUpdateOperationsInput | number
-    CNSS?: IntFieldUpdateOperationsInput | number
-    RC?: IntFieldUpdateOperationsInput | number
-    IF?: IntFieldUpdateOperationsInput | number
-    RIB?: IntFieldUpdateOperationsInput | number
-    patente?: IntFieldUpdateOperationsInput | number
+    ICE?: StringFieldUpdateOperationsInput | string
+    CNSS?: StringFieldUpdateOperationsInput | string
+    RC?: StringFieldUpdateOperationsInput | string
+    IF?: StringFieldUpdateOperationsInput | string
+    RIB?: StringFieldUpdateOperationsInput | string
+    patente?: StringFieldUpdateOperationsInput | string
     adresse?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    numero_telephone?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ClientCreateInput = {
@@ -14873,9 +17003,11 @@ export namespace Prisma {
     allergies?: string | null
     commentaire?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
     utilisateur: UtilisateurCreateNestedOneWithoutClientsInput
     rendez_vous?: rendez_vousCreateNestedManyWithoutClientInput
     documents?: documentCreateNestedManyWithoutClientInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutClientInput
     factures?: factureCreateNestedManyWithoutClientInput
   }
 
@@ -14893,9 +17025,11 @@ export namespace Prisma {
     allergies?: string | null
     commentaire?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
     Cree_par: string
     rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutClientInput
     documents?: documentUncheckedCreateNestedManyWithoutClientInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutClientInput
     factures?: factureUncheckedCreateNestedManyWithoutClientInput
   }
 
@@ -14912,9 +17046,11 @@ export namespace Prisma {
     allergies?: NullableStringFieldUpdateOperationsInput | string | null
     commentaire?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     utilisateur?: UtilisateurUpdateOneRequiredWithoutClientsNestedInput
     rendez_vous?: rendez_vousUpdateManyWithoutClientNestedInput
     documents?: documentUpdateManyWithoutClientNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutClientNestedInput
     factures?: factureUpdateManyWithoutClientNestedInput
   }
 
@@ -14932,9 +17068,11 @@ export namespace Prisma {
     allergies?: NullableStringFieldUpdateOperationsInput | string | null
     commentaire?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     Cree_par?: StringFieldUpdateOperationsInput | string
     rendez_vous?: rendez_vousUncheckedUpdateManyWithoutClientNestedInput
     documents?: documentUncheckedUpdateManyWithoutClientNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutClientNestedInput
     factures?: factureUncheckedUpdateManyWithoutClientNestedInput
   }
 
@@ -14952,6 +17090,7 @@ export namespace Prisma {
     allergies?: string | null
     commentaire?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
     Cree_par: string
   }
 
@@ -14968,6 +17107,7 @@ export namespace Prisma {
     allergies?: NullableStringFieldUpdateOperationsInput | string | null
     commentaire?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ClientUncheckedUpdateManyInput = {
@@ -14984,6 +17124,7 @@ export namespace Prisma {
     allergies?: NullableStringFieldUpdateOperationsInput | string | null
     commentaire?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     Cree_par?: StringFieldUpdateOperationsInput | string
   }
 
@@ -14991,63 +17132,91 @@ export namespace Prisma {
     sujet: string
     date_rendez_vous: Date | string
     created_at?: Date | string
+    status: $Enums.Status
+    cabinet?: string
+    updated_at?: Date | string
     client: ClientCreateNestedOneWithoutRendez_vousInput
     utilisateur: UtilisateurCreateNestedOneWithoutRendez_vousInput
+    bien: bienCreateNestedOneWithoutRendez_vousInput
   }
 
   export type rendez_vousUncheckedCreateInput = {
     id?: number
     CIN: string
     sujet: string
+    soin_id: number
     date_rendez_vous: Date | string
     created_at?: Date | string
     Cree_par: string
+    status: $Enums.Status
+    cabinet?: string
+    updated_at?: Date | string
   }
 
   export type rendez_vousUpdateInput = {
     sujet?: StringFieldUpdateOperationsInput | string
     date_rendez_vous?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    cabinet?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     client?: ClientUpdateOneRequiredWithoutRendez_vousNestedInput
     utilisateur?: UtilisateurUpdateOneRequiredWithoutRendez_vousNestedInput
+    bien?: bienUpdateOneRequiredWithoutRendez_vousNestedInput
   }
 
   export type rendez_vousUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     CIN?: StringFieldUpdateOperationsInput | string
     sujet?: StringFieldUpdateOperationsInput | string
+    soin_id?: IntFieldUpdateOperationsInput | number
     date_rendez_vous?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     Cree_par?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    cabinet?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type rendez_vousCreateManyInput = {
     id?: number
     CIN: string
     sujet: string
+    soin_id: number
     date_rendez_vous: Date | string
     created_at?: Date | string
     Cree_par: string
+    status: $Enums.Status
+    cabinet?: string
+    updated_at?: Date | string
   }
 
   export type rendez_vousUpdateManyMutationInput = {
     sujet?: StringFieldUpdateOperationsInput | string
     date_rendez_vous?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    cabinet?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type rendez_vousUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     CIN?: StringFieldUpdateOperationsInput | string
     sujet?: StringFieldUpdateOperationsInput | string
+    soin_id?: IntFieldUpdateOperationsInput | number
     date_rendez_vous?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     Cree_par?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    cabinet?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type document_templatesCreateInput = {
     name: string
-    sections_json: string
+    sections_json: JsonNullValueInput | InputJsonValue
+    created_at?: Date | string
     utilisateur: UtilisateurCreateNestedOneWithoutDocumentTemplatesInput
     documents?: documentCreateNestedManyWithoutTemplateInput
   }
@@ -15055,14 +17224,16 @@ export namespace Prisma {
   export type document_templatesUncheckedCreateInput = {
     id?: number
     name: string
-    sections_json: string
+    sections_json: JsonNullValueInput | InputJsonValue
     Cree_par: string
+    created_at?: Date | string
     documents?: documentUncheckedCreateNestedManyWithoutTemplateInput
   }
 
   export type document_templatesUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
-    sections_json?: StringFieldUpdateOperationsInput | string
+    sections_json?: JsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     utilisateur?: UtilisateurUpdateOneRequiredWithoutDocumentTemplatesNestedInput
     documents?: documentUpdateManyWithoutTemplateNestedInput
   }
@@ -15070,32 +17241,38 @@ export namespace Prisma {
   export type document_templatesUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
-    sections_json?: StringFieldUpdateOperationsInput | string
+    sections_json?: JsonNullValueInput | InputJsonValue
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: documentUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
   export type document_templatesCreateManyInput = {
     id?: number
     name: string
-    sections_json: string
+    sections_json: JsonNullValueInput | InputJsonValue
     Cree_par: string
+    created_at?: Date | string
   }
 
   export type document_templatesUpdateManyMutationInput = {
     name?: StringFieldUpdateOperationsInput | string
-    sections_json?: StringFieldUpdateOperationsInput | string
+    sections_json?: JsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type document_templatesUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
-    sections_json?: StringFieldUpdateOperationsInput | string
+    sections_json?: JsonNullValueInput | InputJsonValue
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type documentCreateInput = {
-    data_json: string
+    data_json: JsonNullValueInput | InputJsonValue
+    created_at?: Date | string
+    updated_at?: Date | string
     template: document_templatesCreateNestedOneWithoutDocumentsInput
     client: ClientCreateNestedOneWithoutDocumentsInput
     utilisateur: UtilisateurCreateNestedOneWithoutDocumentsInput
@@ -15105,12 +17282,16 @@ export namespace Prisma {
     id?: number
     template_id: number
     CIN: string
-    data_json: string
+    data_json: JsonNullValueInput | InputJsonValue
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type documentUpdateInput = {
-    data_json?: StringFieldUpdateOperationsInput | string
+    data_json?: JsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     template?: document_templatesUpdateOneRequiredWithoutDocumentsNestedInput
     client?: ClientUpdateOneRequiredWithoutDocumentsNestedInput
     utilisateur?: UtilisateurUpdateOneRequiredWithoutDocumentsNestedInput
@@ -15120,105 +17301,223 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     template_id?: IntFieldUpdateOperationsInput | number
     CIN?: StringFieldUpdateOperationsInput | string
-    data_json?: StringFieldUpdateOperationsInput | string
+    data_json?: JsonNullValueInput | InputJsonValue
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type documentCreateManyInput = {
     id?: number
     template_id: number
     CIN: string
-    data_json: string
+    data_json: JsonNullValueInput | InputJsonValue
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type documentUpdateManyMutationInput = {
-    data_json?: StringFieldUpdateOperationsInput | string
+    data_json?: JsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type documentUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     template_id?: IntFieldUpdateOperationsInput | number
     CIN?: StringFieldUpdateOperationsInput | string
-    data_json?: StringFieldUpdateOperationsInput | string
+    data_json?: JsonNullValueInput | InputJsonValue
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scannedDocumentCreateInput = {
+    title: string
+    filePath: string
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    client: ClientCreateNestedOneWithoutScanned_DocumentsInput
+    utilisateur: UtilisateurCreateNestedOneWithoutScanned_DocumentsInput
+  }
+
+  export type scannedDocumentUncheckedCreateInput = {
+    id?: number
+    title: string
+    filePath: string
+    CIN: string
+    description?: string | null
+    Cree_par: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type scannedDocumentUpdateInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    filePath?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    client?: ClientUpdateOneRequiredWithoutScanned_DocumentsNestedInput
+    utilisateur?: UtilisateurUpdateOneRequiredWithoutScanned_DocumentsNestedInput
+  }
+
+  export type scannedDocumentUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    filePath?: StringFieldUpdateOperationsInput | string
+    CIN?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    Cree_par?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scannedDocumentCreateManyInput = {
+    id?: number
+    title: string
+    filePath: string
+    CIN: string
+    description?: string | null
+    Cree_par: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type scannedDocumentUpdateManyMutationInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    filePath?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scannedDocumentUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    filePath?: StringFieldUpdateOperationsInput | string
+    CIN?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    Cree_par?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type bienCreateInput = {
     Nom: string
     bien_type: $Enums.BienType
-    Type: $Enums.ServiceType
+    Type: string
     prix: number
     stock: number
-    utilisateur: UtilisateurCreateNestedOneWithoutBiensInput
+    cabinet?: string
+    created_at?: Date | string
+    updated_at?: Date | string
+    utilisateur: UtilisateurCreateNestedOneWithoutBiensCreatedInput
+    therapeuteUser?: UtilisateurCreateNestedOneWithoutBiensTherapeuteInput
     factureBiens?: facture_bienCreateNestedManyWithoutBienInput
+    rendez_vous?: rendez_vousCreateNestedManyWithoutBienInput
   }
 
   export type bienUncheckedCreateInput = {
     id?: number
     Nom: string
     bien_type: $Enums.BienType
-    Type: $Enums.ServiceType
+    Type: string
     prix: number
     stock: number
+    cabinet?: string
     Cree_par: string
+    therapeute?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutBienInput
+    rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutBienInput
   }
 
   export type bienUpdateInput = {
     Nom?: StringFieldUpdateOperationsInput | string
     bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
-    Type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
+    Type?: StringFieldUpdateOperationsInput | string
     prix?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
-    utilisateur?: UtilisateurUpdateOneRequiredWithoutBiensNestedInput
+    cabinet?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    utilisateur?: UtilisateurUpdateOneRequiredWithoutBiensCreatedNestedInput
+    therapeuteUser?: UtilisateurUpdateOneWithoutBiensTherapeuteNestedInput
     factureBiens?: facture_bienUpdateManyWithoutBienNestedInput
+    rendez_vous?: rendez_vousUpdateManyWithoutBienNestedInput
   }
 
   export type bienUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     Nom?: StringFieldUpdateOperationsInput | string
     bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
-    Type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
+    Type?: StringFieldUpdateOperationsInput | string
     prix?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    cabinet?: StringFieldUpdateOperationsInput | string
     Cree_par?: StringFieldUpdateOperationsInput | string
+    therapeute?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     factureBiens?: facture_bienUncheckedUpdateManyWithoutBienNestedInput
+    rendez_vous?: rendez_vousUncheckedUpdateManyWithoutBienNestedInput
   }
 
   export type bienCreateManyInput = {
     id?: number
     Nom: string
     bien_type: $Enums.BienType
-    Type: $Enums.ServiceType
+    Type: string
     prix: number
     stock: number
+    cabinet?: string
     Cree_par: string
+    therapeute?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type bienUpdateManyMutationInput = {
     Nom?: StringFieldUpdateOperationsInput | string
     bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
-    Type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
+    Type?: StringFieldUpdateOperationsInput | string
     prix?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    cabinet?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type bienUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     Nom?: StringFieldUpdateOperationsInput | string
     bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
-    Type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
+    Type?: StringFieldUpdateOperationsInput | string
     prix?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    cabinet?: StringFieldUpdateOperationsInput | string
     Cree_par?: StringFieldUpdateOperationsInput | string
+    therapeute?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type factureCreateInput = {
     date: Date | string
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    date_paiement?: Date | string | null
+    methode_paiement?: string | null
+    cheque_numero?: string | null
+    cheque_banque?: string | null
+    cheque_date_tirage?: Date | string | null
     client: ClientCreateNestedOneWithoutFacturesInput
     utilisateur: UtilisateurCreateNestedOneWithoutFacturesInput
     factureBiens?: facture_bienCreateNestedManyWithoutFactureInput
@@ -15230,9 +17529,16 @@ export namespace Prisma {
     CIN: string
     date: Date | string
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes?: string | null
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
+    date_paiement?: Date | string | null
+    methode_paiement?: string | null
+    cheque_numero?: string | null
+    cheque_banque?: string | null
+    cheque_date_tirage?: Date | string | null
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutFactureInput
     paiements?: paimentUncheckedCreateNestedManyWithoutFactureInput
   }
@@ -15240,8 +17546,15 @@ export namespace Prisma {
   export type factureUpdateInput = {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     client?: ClientUpdateOneRequiredWithoutFacturesNestedInput
     utilisateur?: UtilisateurUpdateOneRequiredWithoutFacturesNestedInput
     factureBiens?: facture_bienUpdateManyWithoutFactureNestedInput
@@ -15253,9 +17566,16 @@ export namespace Prisma {
     CIN?: StringFieldUpdateOperationsInput | string
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     factureBiens?: facture_bienUncheckedUpdateManyWithoutFactureNestedInput
     paiements?: paimentUncheckedUpdateManyWithoutFactureNestedInput
   }
@@ -15265,16 +17585,30 @@ export namespace Prisma {
     CIN: string
     date: Date | string
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes?: string | null
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
+    date_paiement?: Date | string | null
+    methode_paiement?: string | null
+    cheque_numero?: string | null
+    cheque_banque?: string | null
+    cheque_date_tirage?: Date | string | null
   }
 
   export type factureUpdateManyMutationInput = {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type factureUncheckedUpdateManyInput = {
@@ -15282,71 +17616,108 @@ export namespace Prisma {
     CIN?: StringFieldUpdateOperationsInput | string
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type facture_bienCreateInput = {
-    type_bien: $Enums.BienType
+    type_bien: string
     quantite: number
-    facture: factureCreateNestedOneWithoutFactureBiensInput
+    prix: number
+    movementType?: $Enums.MovementType
+    created_at?: Date | string
+    updated_at?: Date | string
+    facture?: factureCreateNestedOneWithoutFactureBiensInput
     bien: bienCreateNestedOneWithoutFactureBiensInput
     utilisateur: UtilisateurCreateNestedOneWithoutFactureBiensInput
   }
 
   export type facture_bienUncheckedCreateInput = {
     id?: number
-    id_facture: number
+    id_facture?: number | null
     id_bien: number
-    type_bien: $Enums.BienType
+    type_bien: string
     quantite: number
+    prix: number
     Cree_par: string
+    movementType?: $Enums.MovementType
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type facture_bienUpdateInput = {
-    type_bien?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    type_bien?: StringFieldUpdateOperationsInput | string
     quantite?: IntFieldUpdateOperationsInput | number
-    facture?: factureUpdateOneRequiredWithoutFactureBiensNestedInput
+    prix?: FloatFieldUpdateOperationsInput | number
+    movementType?: EnumMovementTypeFieldUpdateOperationsInput | $Enums.MovementType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    facture?: factureUpdateOneWithoutFactureBiensNestedInput
     bien?: bienUpdateOneRequiredWithoutFactureBiensNestedInput
     utilisateur?: UtilisateurUpdateOneRequiredWithoutFactureBiensNestedInput
   }
 
   export type facture_bienUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
-    id_facture?: IntFieldUpdateOperationsInput | number
+    id_facture?: NullableIntFieldUpdateOperationsInput | number | null
     id_bien?: IntFieldUpdateOperationsInput | number
-    type_bien?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    type_bien?: StringFieldUpdateOperationsInput | string
     quantite?: IntFieldUpdateOperationsInput | number
+    prix?: FloatFieldUpdateOperationsInput | number
     Cree_par?: StringFieldUpdateOperationsInput | string
+    movementType?: EnumMovementTypeFieldUpdateOperationsInput | $Enums.MovementType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type facture_bienCreateManyInput = {
     id?: number
-    id_facture: number
+    id_facture?: number | null
     id_bien: number
-    type_bien: $Enums.BienType
+    type_bien: string
     quantite: number
+    prix: number
     Cree_par: string
+    movementType?: $Enums.MovementType
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type facture_bienUpdateManyMutationInput = {
-    type_bien?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    type_bien?: StringFieldUpdateOperationsInput | string
     quantite?: IntFieldUpdateOperationsInput | number
+    prix?: FloatFieldUpdateOperationsInput | number
+    movementType?: EnumMovementTypeFieldUpdateOperationsInput | $Enums.MovementType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type facture_bienUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
-    id_facture?: IntFieldUpdateOperationsInput | number
+    id_facture?: NullableIntFieldUpdateOperationsInput | number | null
     id_bien?: IntFieldUpdateOperationsInput | number
-    type_bien?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    type_bien?: StringFieldUpdateOperationsInput | string
     quantite?: IntFieldUpdateOperationsInput | number
+    prix?: FloatFieldUpdateOperationsInput | number
     Cree_par?: StringFieldUpdateOperationsInput | string
+    movementType?: EnumMovementTypeFieldUpdateOperationsInput | $Enums.MovementType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type paimentCreateInput = {
     date: Date | string
     montant_totale: number
+    created_at?: Date | string
+    updated_at?: Date | string
     facture: factureCreateNestedOneWithoutPaiementsInput
     utilisateur: UtilisateurCreateNestedOneWithoutPaiementsInput
   }
@@ -15357,11 +17728,15 @@ export namespace Prisma {
     date: Date | string
     montant_totale: number
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type paimentUpdateInput = {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     montant_totale?: FloatFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     facture?: factureUpdateOneRequiredWithoutPaiementsNestedInput
     utilisateur?: UtilisateurUpdateOneRequiredWithoutPaiementsNestedInput
   }
@@ -15372,6 +17747,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     montant_totale?: FloatFieldUpdateOperationsInput | number
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type paimentCreateManyInput = {
@@ -15380,11 +17757,15 @@ export namespace Prisma {
     date: Date | string
     montant_totale: number
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type paimentUpdateManyMutationInput = {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     montant_totale?: FloatFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type paimentUncheckedUpdateManyInput = {
@@ -15393,6 +17774,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     montant_totale?: FloatFieldUpdateOperationsInput | number
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -15486,6 +17869,12 @@ export namespace Prisma {
     none?: paimentWhereInput
   }
 
+  export type ScannedDocumentListRelationFilter = {
+    every?: scannedDocumentWhereInput
+    some?: scannedDocumentWhereInput
+    none?: scannedDocumentWhereInput
+  }
+
   export type ClientOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -15518,6 +17907,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type scannedDocumentOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type UtilisateurCountOrderByAggregateInput = {
     id?: SortOrder
     CIN?: SortOrder
@@ -15530,6 +17923,7 @@ export namespace Prisma {
     password?: SortOrder
     role?: SortOrder
     created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type UtilisateurAvgOrderByAggregateInput = {
@@ -15548,6 +17942,7 @@ export namespace Prisma {
     password?: SortOrder
     role?: SortOrder
     created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type UtilisateurMinOrderByAggregateInput = {
@@ -15562,6 +17957,7 @@ export namespace Prisma {
     password?: SortOrder
     role?: SortOrder
     created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type UtilisateurSumOrderByAggregateInput = {
@@ -15625,62 +18021,6 @@ export namespace Prisma {
     _max?: NestedEnumRoleFilter<$PrismaModel>
   }
 
-  export type EntrepriseCountOrderByAggregateInput = {
-    id?: SortOrder
-    ICE?: SortOrder
-    CNSS?: SortOrder
-    RC?: SortOrder
-    IF?: SortOrder
-    RIB?: SortOrder
-    patente?: SortOrder
-    adresse?: SortOrder
-    created_at?: SortOrder
-  }
-
-  export type EntrepriseAvgOrderByAggregateInput = {
-    id?: SortOrder
-    ICE?: SortOrder
-    CNSS?: SortOrder
-    RC?: SortOrder
-    IF?: SortOrder
-    RIB?: SortOrder
-    patente?: SortOrder
-  }
-
-  export type EntrepriseMaxOrderByAggregateInput = {
-    id?: SortOrder
-    ICE?: SortOrder
-    CNSS?: SortOrder
-    RC?: SortOrder
-    IF?: SortOrder
-    RIB?: SortOrder
-    patente?: SortOrder
-    adresse?: SortOrder
-    created_at?: SortOrder
-  }
-
-  export type EntrepriseMinOrderByAggregateInput = {
-    id?: SortOrder
-    ICE?: SortOrder
-    CNSS?: SortOrder
-    RC?: SortOrder
-    IF?: SortOrder
-    RIB?: SortOrder
-    patente?: SortOrder
-    adresse?: SortOrder
-    created_at?: SortOrder
-  }
-
-  export type EntrepriseSumOrderByAggregateInput = {
-    id?: SortOrder
-    ICE?: SortOrder
-    CNSS?: SortOrder
-    RC?: SortOrder
-    IF?: SortOrder
-    RIB?: SortOrder
-    patente?: SortOrder
-  }
-
   export type StringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | null
@@ -15695,14 +18035,84 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type UtilisateurScalarRelationFilter = {
-    is?: UtilisateurWhereInput
-    isNot?: UtilisateurWhereInput
-  }
-
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
+  }
+
+  export type EntrepriseCountOrderByAggregateInput = {
+    id?: SortOrder
+    ICE?: SortOrder
+    CNSS?: SortOrder
+    RC?: SortOrder
+    IF?: SortOrder
+    RIB?: SortOrder
+    patente?: SortOrder
+    adresse?: SortOrder
+    email?: SortOrder
+    numero_telephone?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type EntrepriseAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type EntrepriseMaxOrderByAggregateInput = {
+    id?: SortOrder
+    ICE?: SortOrder
+    CNSS?: SortOrder
+    RC?: SortOrder
+    IF?: SortOrder
+    RIB?: SortOrder
+    patente?: SortOrder
+    adresse?: SortOrder
+    email?: SortOrder
+    numero_telephone?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type EntrepriseMinOrderByAggregateInput = {
+    id?: SortOrder
+    ICE?: SortOrder
+    CNSS?: SortOrder
+    RC?: SortOrder
+    IF?: SortOrder
+    RIB?: SortOrder
+    patente?: SortOrder
+    adresse?: SortOrder
+    email?: SortOrder
+    numero_telephone?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type EntrepriseSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | null
+    notIn?: string[] | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type UtilisateurScalarRelationFilter = {
+    is?: UtilisateurWhereInput
+    isNot?: UtilisateurWhereInput
   }
 
   export type ClientCountOrderByAggregateInput = {
@@ -15719,6 +18129,7 @@ export namespace Prisma {
     allergies?: SortOrder
     commentaire?: SortOrder
     created_at?: SortOrder
+    updated_at?: SortOrder
     Cree_par?: SortOrder
   }
 
@@ -15740,6 +18151,7 @@ export namespace Prisma {
     allergies?: SortOrder
     commentaire?: SortOrder
     created_at?: SortOrder
+    updated_at?: SortOrder
     Cree_par?: SortOrder
   }
 
@@ -15757,6 +18169,7 @@ export namespace Prisma {
     allergies?: SortOrder
     commentaire?: SortOrder
     created_at?: SortOrder
+    updated_at?: SortOrder
     Cree_par?: SortOrder
   }
 
@@ -15764,21 +18177,11 @@ export namespace Prisma {
     id?: SortOrder
   }
 
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
+  export type EnumStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.Status | EnumStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.Status[]
+    notIn?: $Enums.Status[]
+    not?: NestedEnumStatusFilter<$PrismaModel> | $Enums.Status
   }
 
   export type ClientScalarRelationFilter = {
@@ -15786,39 +18189,86 @@ export namespace Prisma {
     isNot?: ClientWhereInput
   }
 
+  export type BienScalarRelationFilter = {
+    is?: bienWhereInput
+    isNot?: bienWhereInput
+  }
+
   export type rendez_vousCountOrderByAggregateInput = {
     id?: SortOrder
     CIN?: SortOrder
     sujet?: SortOrder
+    soin_id?: SortOrder
     date_rendez_vous?: SortOrder
     created_at?: SortOrder
     Cree_par?: SortOrder
+    status?: SortOrder
+    cabinet?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type rendez_vousAvgOrderByAggregateInput = {
     id?: SortOrder
+    soin_id?: SortOrder
   }
 
   export type rendez_vousMaxOrderByAggregateInput = {
     id?: SortOrder
     CIN?: SortOrder
     sujet?: SortOrder
+    soin_id?: SortOrder
     date_rendez_vous?: SortOrder
     created_at?: SortOrder
     Cree_par?: SortOrder
+    status?: SortOrder
+    cabinet?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type rendez_vousMinOrderByAggregateInput = {
     id?: SortOrder
     CIN?: SortOrder
     sujet?: SortOrder
+    soin_id?: SortOrder
     date_rendez_vous?: SortOrder
     created_at?: SortOrder
     Cree_par?: SortOrder
+    status?: SortOrder
+    cabinet?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type rendez_vousSumOrderByAggregateInput = {
     id?: SortOrder
+    soin_id?: SortOrder
+  }
+
+  export type EnumStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Status | EnumStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.Status[]
+    notIn?: $Enums.Status[]
+    not?: NestedEnumStatusWithAggregatesFilter<$PrismaModel> | $Enums.Status
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusFilter<$PrismaModel>
+    _max?: NestedEnumStatusFilter<$PrismaModel>
+  }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type document_templatesCountOrderByAggregateInput = {
@@ -15826,6 +18276,7 @@ export namespace Prisma {
     name?: SortOrder
     sections_json?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
   }
 
   export type document_templatesAvgOrderByAggregateInput = {
@@ -15835,19 +18286,40 @@ export namespace Prisma {
   export type document_templatesMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
-    sections_json?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
   }
 
   export type document_templatesMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
-    sections_json?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
   }
 
   export type document_templatesSumOrderByAggregateInput = {
     id?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
   }
 
   export type Document_templatesScalarRelationFilter = {
@@ -15861,6 +18333,8 @@ export namespace Prisma {
     CIN?: SortOrder
     data_json?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type documentAvgOrderByAggregateInput = {
@@ -15872,16 +18346,18 @@ export namespace Prisma {
     id?: SortOrder
     template_id?: SortOrder
     CIN?: SortOrder
-    data_json?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type documentMinOrderByAggregateInput = {
     id?: SortOrder
     template_id?: SortOrder
     CIN?: SortOrder
-    data_json?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type documentSumOrderByAggregateInput = {
@@ -15889,18 +18365,52 @@ export namespace Prisma {
     template_id?: SortOrder
   }
 
+  export type scannedDocumentCountOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    filePath?: SortOrder
+    CIN?: SortOrder
+    description?: SortOrder
+    Cree_par?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type scannedDocumentAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type scannedDocumentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    filePath?: SortOrder
+    CIN?: SortOrder
+    description?: SortOrder
+    Cree_par?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type scannedDocumentMinOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    filePath?: SortOrder
+    CIN?: SortOrder
+    description?: SortOrder
+    Cree_par?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type scannedDocumentSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
   export type EnumBienTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.BienType | EnumBienTypeFieldRefInput<$PrismaModel>
     in?: $Enums.BienType[]
     notIn?: $Enums.BienType[]
     not?: NestedEnumBienTypeFilter<$PrismaModel> | $Enums.BienType
-  }
-
-  export type EnumServiceTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.ServiceType | EnumServiceTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.ServiceType[]
-    notIn?: $Enums.ServiceType[]
-    not?: NestedEnumServiceTypeFilter<$PrismaModel> | $Enums.ServiceType
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -15914,6 +18424,11 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type UtilisateurNullableScalarRelationFilter = {
+    is?: UtilisateurWhereInput | null
+    isNot?: UtilisateurWhereInput | null
+  }
+
   export type bienCountOrderByAggregateInput = {
     id?: SortOrder
     Nom?: SortOrder
@@ -15921,7 +18436,11 @@ export namespace Prisma {
     Type?: SortOrder
     prix?: SortOrder
     stock?: SortOrder
+    cabinet?: SortOrder
     Cree_par?: SortOrder
+    therapeute?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type bienAvgOrderByAggregateInput = {
@@ -15937,7 +18456,11 @@ export namespace Prisma {
     Type?: SortOrder
     prix?: SortOrder
     stock?: SortOrder
+    cabinet?: SortOrder
     Cree_par?: SortOrder
+    therapeute?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type bienMinOrderByAggregateInput = {
@@ -15947,7 +18470,11 @@ export namespace Prisma {
     Type?: SortOrder
     prix?: SortOrder
     stock?: SortOrder
+    cabinet?: SortOrder
     Cree_par?: SortOrder
+    therapeute?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type bienSumOrderByAggregateInput = {
@@ -15966,16 +18493,6 @@ export namespace Prisma {
     _max?: NestedEnumBienTypeFilter<$PrismaModel>
   }
 
-  export type EnumServiceTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.ServiceType | EnumServiceTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.ServiceType[]
-    notIn?: $Enums.ServiceType[]
-    not?: NestedEnumServiceTypeWithAggregatesFilter<$PrismaModel> | $Enums.ServiceType
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumServiceTypeFilter<$PrismaModel>
-    _max?: NestedEnumServiceTypeFilter<$PrismaModel>
-  }
-
   export type FloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[]
@@ -15992,11 +18509,15 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
-  export type EnumFactureStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.FactureStatus | EnumFactureStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.FactureStatus[]
-    notIn?: $Enums.FactureStatus[]
-    not?: NestedEnumFactureStatusFilter<$PrismaModel> | $Enums.FactureStatus
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type factureCountOrderByAggregateInput = {
@@ -16007,6 +18528,13 @@ export namespace Prisma {
     statut?: SortOrder
     notes?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    date_paiement?: SortOrder
+    methode_paiement?: SortOrder
+    cheque_numero?: SortOrder
+    cheque_banque?: SortOrder
+    cheque_date_tirage?: SortOrder
   }
 
   export type factureAvgOrderByAggregateInput = {
@@ -16022,6 +18550,13 @@ export namespace Prisma {
     statut?: SortOrder
     notes?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    date_paiement?: SortOrder
+    methode_paiement?: SortOrder
+    cheque_numero?: SortOrder
+    cheque_banque?: SortOrder
+    cheque_date_tirage?: SortOrder
   }
 
   export type factureMinOrderByAggregateInput = {
@@ -16032,6 +18567,13 @@ export namespace Prisma {
     statut?: SortOrder
     notes?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    date_paiement?: SortOrder
+    methode_paiement?: SortOrder
+    cheque_numero?: SortOrder
+    cheque_banque?: SortOrder
+    cheque_date_tirage?: SortOrder
   }
 
   export type factureSumOrderByAggregateInput = {
@@ -16039,24 +18581,41 @@ export namespace Prisma {
     prix_total?: SortOrder
   }
 
-  export type EnumFactureStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.FactureStatus | EnumFactureStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.FactureStatus[]
-    notIn?: $Enums.FactureStatus[]
-    not?: NestedEnumFactureStatusWithAggregatesFilter<$PrismaModel> | $Enums.FactureStatus
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumFactureStatusFilter<$PrismaModel>
-    _max?: NestedEnumFactureStatusFilter<$PrismaModel>
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
-  export type FactureScalarRelationFilter = {
-    is?: factureWhereInput
-    isNot?: factureWhereInput
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
-  export type BienScalarRelationFilter = {
-    is?: bienWhereInput
-    isNot?: bienWhereInput
+  export type EnumMovementTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.MovementType | EnumMovementTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.MovementType[]
+    notIn?: $Enums.MovementType[]
+    not?: NestedEnumMovementTypeFilter<$PrismaModel> | $Enums.MovementType
+  }
+
+  export type FactureNullableScalarRelationFilter = {
+    is?: factureWhereInput | null
+    isNot?: factureWhereInput | null
   }
 
   export type facture_bienCountOrderByAggregateInput = {
@@ -16065,7 +18624,11 @@ export namespace Prisma {
     id_bien?: SortOrder
     type_bien?: SortOrder
     quantite?: SortOrder
+    prix?: SortOrder
     Cree_par?: SortOrder
+    movementType?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type facture_bienAvgOrderByAggregateInput = {
@@ -16073,6 +18636,7 @@ export namespace Prisma {
     id_facture?: SortOrder
     id_bien?: SortOrder
     quantite?: SortOrder
+    prix?: SortOrder
   }
 
   export type facture_bienMaxOrderByAggregateInput = {
@@ -16081,7 +18645,11 @@ export namespace Prisma {
     id_bien?: SortOrder
     type_bien?: SortOrder
     quantite?: SortOrder
+    prix?: SortOrder
     Cree_par?: SortOrder
+    movementType?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type facture_bienMinOrderByAggregateInput = {
@@ -16090,7 +18658,11 @@ export namespace Prisma {
     id_bien?: SortOrder
     type_bien?: SortOrder
     quantite?: SortOrder
+    prix?: SortOrder
     Cree_par?: SortOrder
+    movementType?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type facture_bienSumOrderByAggregateInput = {
@@ -16098,6 +18670,38 @@ export namespace Prisma {
     id_facture?: SortOrder
     id_bien?: SortOrder
     quantite?: SortOrder
+    prix?: SortOrder
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type EnumMovementTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MovementType | EnumMovementTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.MovementType[]
+    notIn?: $Enums.MovementType[]
+    not?: NestedEnumMovementTypeWithAggregatesFilter<$PrismaModel> | $Enums.MovementType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumMovementTypeFilter<$PrismaModel>
+    _max?: NestedEnumMovementTypeFilter<$PrismaModel>
+  }
+
+  export type FactureScalarRelationFilter = {
+    is?: factureWhereInput
+    isNot?: factureWhereInput
   }
 
   export type paimentCountOrderByAggregateInput = {
@@ -16106,6 +18710,8 @@ export namespace Prisma {
     date?: SortOrder
     montant_totale?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type paimentAvgOrderByAggregateInput = {
@@ -16120,6 +18726,8 @@ export namespace Prisma {
     date?: SortOrder
     montant_totale?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type paimentMinOrderByAggregateInput = {
@@ -16128,6 +18736,8 @@ export namespace Prisma {
     date?: SortOrder
     montant_totale?: SortOrder
     Cree_par?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type paimentSumOrderByAggregateInput = {
@@ -16171,6 +18781,13 @@ export namespace Prisma {
     connect?: bienWhereUniqueInput | bienWhereUniqueInput[]
   }
 
+  export type bienCreateNestedManyWithoutTherapeuteUserInput = {
+    create?: XOR<bienCreateWithoutTherapeuteUserInput, bienUncheckedCreateWithoutTherapeuteUserInput> | bienCreateWithoutTherapeuteUserInput[] | bienUncheckedCreateWithoutTherapeuteUserInput[]
+    connectOrCreate?: bienCreateOrConnectWithoutTherapeuteUserInput | bienCreateOrConnectWithoutTherapeuteUserInput[]
+    createMany?: bienCreateManyTherapeuteUserInputEnvelope
+    connect?: bienWhereUniqueInput | bienWhereUniqueInput[]
+  }
+
   export type factureCreateNestedManyWithoutUtilisateurInput = {
     create?: XOR<factureCreateWithoutUtilisateurInput, factureUncheckedCreateWithoutUtilisateurInput> | factureCreateWithoutUtilisateurInput[] | factureUncheckedCreateWithoutUtilisateurInput[]
     connectOrCreate?: factureCreateOrConnectWithoutUtilisateurInput | factureCreateOrConnectWithoutUtilisateurInput[]
@@ -16190,6 +18807,13 @@ export namespace Prisma {
     connectOrCreate?: paimentCreateOrConnectWithoutUtilisateurInput | paimentCreateOrConnectWithoutUtilisateurInput[]
     createMany?: paimentCreateManyUtilisateurInputEnvelope
     connect?: paimentWhereUniqueInput | paimentWhereUniqueInput[]
+  }
+
+  export type scannedDocumentCreateNestedManyWithoutUtilisateurInput = {
+    create?: XOR<scannedDocumentCreateWithoutUtilisateurInput, scannedDocumentUncheckedCreateWithoutUtilisateurInput> | scannedDocumentCreateWithoutUtilisateurInput[] | scannedDocumentUncheckedCreateWithoutUtilisateurInput[]
+    connectOrCreate?: scannedDocumentCreateOrConnectWithoutUtilisateurInput | scannedDocumentCreateOrConnectWithoutUtilisateurInput[]
+    createMany?: scannedDocumentCreateManyUtilisateurInputEnvelope
+    connect?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
   }
 
   export type ClientUncheckedCreateNestedManyWithoutUtilisateurInput = {
@@ -16227,6 +18851,13 @@ export namespace Prisma {
     connect?: bienWhereUniqueInput | bienWhereUniqueInput[]
   }
 
+  export type bienUncheckedCreateNestedManyWithoutTherapeuteUserInput = {
+    create?: XOR<bienCreateWithoutTherapeuteUserInput, bienUncheckedCreateWithoutTherapeuteUserInput> | bienCreateWithoutTherapeuteUserInput[] | bienUncheckedCreateWithoutTherapeuteUserInput[]
+    connectOrCreate?: bienCreateOrConnectWithoutTherapeuteUserInput | bienCreateOrConnectWithoutTherapeuteUserInput[]
+    createMany?: bienCreateManyTherapeuteUserInputEnvelope
+    connect?: bienWhereUniqueInput | bienWhereUniqueInput[]
+  }
+
   export type factureUncheckedCreateNestedManyWithoutUtilisateurInput = {
     create?: XOR<factureCreateWithoutUtilisateurInput, factureUncheckedCreateWithoutUtilisateurInput> | factureCreateWithoutUtilisateurInput[] | factureUncheckedCreateWithoutUtilisateurInput[]
     connectOrCreate?: factureCreateOrConnectWithoutUtilisateurInput | factureCreateOrConnectWithoutUtilisateurInput[]
@@ -16246,6 +18877,13 @@ export namespace Prisma {
     connectOrCreate?: paimentCreateOrConnectWithoutUtilisateurInput | paimentCreateOrConnectWithoutUtilisateurInput[]
     createMany?: paimentCreateManyUtilisateurInputEnvelope
     connect?: paimentWhereUniqueInput | paimentWhereUniqueInput[]
+  }
+
+  export type scannedDocumentUncheckedCreateNestedManyWithoutUtilisateurInput = {
+    create?: XOR<scannedDocumentCreateWithoutUtilisateurInput, scannedDocumentUncheckedCreateWithoutUtilisateurInput> | scannedDocumentCreateWithoutUtilisateurInput[] | scannedDocumentUncheckedCreateWithoutUtilisateurInput[]
+    connectOrCreate?: scannedDocumentCreateOrConnectWithoutUtilisateurInput | scannedDocumentCreateOrConnectWithoutUtilisateurInput[]
+    createMany?: scannedDocumentCreateManyUtilisateurInputEnvelope
+    connect?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -16330,6 +18968,20 @@ export namespace Prisma {
     deleteMany?: bienScalarWhereInput | bienScalarWhereInput[]
   }
 
+  export type bienUpdateManyWithoutTherapeuteUserNestedInput = {
+    create?: XOR<bienCreateWithoutTherapeuteUserInput, bienUncheckedCreateWithoutTherapeuteUserInput> | bienCreateWithoutTherapeuteUserInput[] | bienUncheckedCreateWithoutTherapeuteUserInput[]
+    connectOrCreate?: bienCreateOrConnectWithoutTherapeuteUserInput | bienCreateOrConnectWithoutTherapeuteUserInput[]
+    upsert?: bienUpsertWithWhereUniqueWithoutTherapeuteUserInput | bienUpsertWithWhereUniqueWithoutTherapeuteUserInput[]
+    createMany?: bienCreateManyTherapeuteUserInputEnvelope
+    set?: bienWhereUniqueInput | bienWhereUniqueInput[]
+    disconnect?: bienWhereUniqueInput | bienWhereUniqueInput[]
+    delete?: bienWhereUniqueInput | bienWhereUniqueInput[]
+    connect?: bienWhereUniqueInput | bienWhereUniqueInput[]
+    update?: bienUpdateWithWhereUniqueWithoutTherapeuteUserInput | bienUpdateWithWhereUniqueWithoutTherapeuteUserInput[]
+    updateMany?: bienUpdateManyWithWhereWithoutTherapeuteUserInput | bienUpdateManyWithWhereWithoutTherapeuteUserInput[]
+    deleteMany?: bienScalarWhereInput | bienScalarWhereInput[]
+  }
+
   export type factureUpdateManyWithoutUtilisateurNestedInput = {
     create?: XOR<factureCreateWithoutUtilisateurInput, factureUncheckedCreateWithoutUtilisateurInput> | factureCreateWithoutUtilisateurInput[] | factureUncheckedCreateWithoutUtilisateurInput[]
     connectOrCreate?: factureCreateOrConnectWithoutUtilisateurInput | factureCreateOrConnectWithoutUtilisateurInput[]
@@ -16370,6 +19022,20 @@ export namespace Prisma {
     update?: paimentUpdateWithWhereUniqueWithoutUtilisateurInput | paimentUpdateWithWhereUniqueWithoutUtilisateurInput[]
     updateMany?: paimentUpdateManyWithWhereWithoutUtilisateurInput | paimentUpdateManyWithWhereWithoutUtilisateurInput[]
     deleteMany?: paimentScalarWhereInput | paimentScalarWhereInput[]
+  }
+
+  export type scannedDocumentUpdateManyWithoutUtilisateurNestedInput = {
+    create?: XOR<scannedDocumentCreateWithoutUtilisateurInput, scannedDocumentUncheckedCreateWithoutUtilisateurInput> | scannedDocumentCreateWithoutUtilisateurInput[] | scannedDocumentUncheckedCreateWithoutUtilisateurInput[]
+    connectOrCreate?: scannedDocumentCreateOrConnectWithoutUtilisateurInput | scannedDocumentCreateOrConnectWithoutUtilisateurInput[]
+    upsert?: scannedDocumentUpsertWithWhereUniqueWithoutUtilisateurInput | scannedDocumentUpsertWithWhereUniqueWithoutUtilisateurInput[]
+    createMany?: scannedDocumentCreateManyUtilisateurInputEnvelope
+    set?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    disconnect?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    delete?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    connect?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    update?: scannedDocumentUpdateWithWhereUniqueWithoutUtilisateurInput | scannedDocumentUpdateWithWhereUniqueWithoutUtilisateurInput[]
+    updateMany?: scannedDocumentUpdateManyWithWhereWithoutUtilisateurInput | scannedDocumentUpdateManyWithWhereWithoutUtilisateurInput[]
+    deleteMany?: scannedDocumentScalarWhereInput | scannedDocumentScalarWhereInput[]
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -16450,6 +19116,20 @@ export namespace Prisma {
     deleteMany?: bienScalarWhereInput | bienScalarWhereInput[]
   }
 
+  export type bienUncheckedUpdateManyWithoutTherapeuteUserNestedInput = {
+    create?: XOR<bienCreateWithoutTherapeuteUserInput, bienUncheckedCreateWithoutTherapeuteUserInput> | bienCreateWithoutTherapeuteUserInput[] | bienUncheckedCreateWithoutTherapeuteUserInput[]
+    connectOrCreate?: bienCreateOrConnectWithoutTherapeuteUserInput | bienCreateOrConnectWithoutTherapeuteUserInput[]
+    upsert?: bienUpsertWithWhereUniqueWithoutTherapeuteUserInput | bienUpsertWithWhereUniqueWithoutTherapeuteUserInput[]
+    createMany?: bienCreateManyTherapeuteUserInputEnvelope
+    set?: bienWhereUniqueInput | bienWhereUniqueInput[]
+    disconnect?: bienWhereUniqueInput | bienWhereUniqueInput[]
+    delete?: bienWhereUniqueInput | bienWhereUniqueInput[]
+    connect?: bienWhereUniqueInput | bienWhereUniqueInput[]
+    update?: bienUpdateWithWhereUniqueWithoutTherapeuteUserInput | bienUpdateWithWhereUniqueWithoutTherapeuteUserInput[]
+    updateMany?: bienUpdateManyWithWhereWithoutTherapeuteUserInput | bienUpdateManyWithWhereWithoutTherapeuteUserInput[]
+    deleteMany?: bienScalarWhereInput | bienScalarWhereInput[]
+  }
+
   export type factureUncheckedUpdateManyWithoutUtilisateurNestedInput = {
     create?: XOR<factureCreateWithoutUtilisateurInput, factureUncheckedCreateWithoutUtilisateurInput> | factureCreateWithoutUtilisateurInput[] | factureUncheckedCreateWithoutUtilisateurInput[]
     connectOrCreate?: factureCreateOrConnectWithoutUtilisateurInput | factureCreateOrConnectWithoutUtilisateurInput[]
@@ -16492,6 +19172,24 @@ export namespace Prisma {
     deleteMany?: paimentScalarWhereInput | paimentScalarWhereInput[]
   }
 
+  export type scannedDocumentUncheckedUpdateManyWithoutUtilisateurNestedInput = {
+    create?: XOR<scannedDocumentCreateWithoutUtilisateurInput, scannedDocumentUncheckedCreateWithoutUtilisateurInput> | scannedDocumentCreateWithoutUtilisateurInput[] | scannedDocumentUncheckedCreateWithoutUtilisateurInput[]
+    connectOrCreate?: scannedDocumentCreateOrConnectWithoutUtilisateurInput | scannedDocumentCreateOrConnectWithoutUtilisateurInput[]
+    upsert?: scannedDocumentUpsertWithWhereUniqueWithoutUtilisateurInput | scannedDocumentUpsertWithWhereUniqueWithoutUtilisateurInput[]
+    createMany?: scannedDocumentCreateManyUtilisateurInputEnvelope
+    set?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    disconnect?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    delete?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    connect?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    update?: scannedDocumentUpdateWithWhereUniqueWithoutUtilisateurInput | scannedDocumentUpdateWithWhereUniqueWithoutUtilisateurInput[]
+    updateMany?: scannedDocumentUpdateManyWithWhereWithoutUtilisateurInput | scannedDocumentUpdateManyWithWhereWithoutUtilisateurInput[]
+    deleteMany?: scannedDocumentScalarWhereInput | scannedDocumentScalarWhereInput[]
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
   export type UtilisateurCreateNestedOneWithoutClientsInput = {
     create?: XOR<UtilisateurCreateWithoutClientsInput, UtilisateurUncheckedCreateWithoutClientsInput>
     connectOrCreate?: UtilisateurCreateOrConnectWithoutClientsInput
@@ -16510,6 +19208,13 @@ export namespace Prisma {
     connectOrCreate?: documentCreateOrConnectWithoutClientInput | documentCreateOrConnectWithoutClientInput[]
     createMany?: documentCreateManyClientInputEnvelope
     connect?: documentWhereUniqueInput | documentWhereUniqueInput[]
+  }
+
+  export type scannedDocumentCreateNestedManyWithoutClientInput = {
+    create?: XOR<scannedDocumentCreateWithoutClientInput, scannedDocumentUncheckedCreateWithoutClientInput> | scannedDocumentCreateWithoutClientInput[] | scannedDocumentUncheckedCreateWithoutClientInput[]
+    connectOrCreate?: scannedDocumentCreateOrConnectWithoutClientInput | scannedDocumentCreateOrConnectWithoutClientInput[]
+    createMany?: scannedDocumentCreateManyClientInputEnvelope
+    connect?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
   }
 
   export type factureCreateNestedManyWithoutClientInput = {
@@ -16533,15 +19238,18 @@ export namespace Prisma {
     connect?: documentWhereUniqueInput | documentWhereUniqueInput[]
   }
 
+  export type scannedDocumentUncheckedCreateNestedManyWithoutClientInput = {
+    create?: XOR<scannedDocumentCreateWithoutClientInput, scannedDocumentUncheckedCreateWithoutClientInput> | scannedDocumentCreateWithoutClientInput[] | scannedDocumentUncheckedCreateWithoutClientInput[]
+    connectOrCreate?: scannedDocumentCreateOrConnectWithoutClientInput | scannedDocumentCreateOrConnectWithoutClientInput[]
+    createMany?: scannedDocumentCreateManyClientInputEnvelope
+    connect?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+  }
+
   export type factureUncheckedCreateNestedManyWithoutClientInput = {
     create?: XOR<factureCreateWithoutClientInput, factureUncheckedCreateWithoutClientInput> | factureCreateWithoutClientInput[] | factureUncheckedCreateWithoutClientInput[]
     connectOrCreate?: factureCreateOrConnectWithoutClientInput | factureCreateOrConnectWithoutClientInput[]
     createMany?: factureCreateManyClientInputEnvelope
     connect?: factureWhereUniqueInput | factureWhereUniqueInput[]
-  }
-
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
   }
 
   export type UtilisateurUpdateOneRequiredWithoutClientsNestedInput = {
@@ -16578,6 +19286,20 @@ export namespace Prisma {
     update?: documentUpdateWithWhereUniqueWithoutClientInput | documentUpdateWithWhereUniqueWithoutClientInput[]
     updateMany?: documentUpdateManyWithWhereWithoutClientInput | documentUpdateManyWithWhereWithoutClientInput[]
     deleteMany?: documentScalarWhereInput | documentScalarWhereInput[]
+  }
+
+  export type scannedDocumentUpdateManyWithoutClientNestedInput = {
+    create?: XOR<scannedDocumentCreateWithoutClientInput, scannedDocumentUncheckedCreateWithoutClientInput> | scannedDocumentCreateWithoutClientInput[] | scannedDocumentUncheckedCreateWithoutClientInput[]
+    connectOrCreate?: scannedDocumentCreateOrConnectWithoutClientInput | scannedDocumentCreateOrConnectWithoutClientInput[]
+    upsert?: scannedDocumentUpsertWithWhereUniqueWithoutClientInput | scannedDocumentUpsertWithWhereUniqueWithoutClientInput[]
+    createMany?: scannedDocumentCreateManyClientInputEnvelope
+    set?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    disconnect?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    delete?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    connect?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    update?: scannedDocumentUpdateWithWhereUniqueWithoutClientInput | scannedDocumentUpdateWithWhereUniqueWithoutClientInput[]
+    updateMany?: scannedDocumentUpdateManyWithWhereWithoutClientInput | scannedDocumentUpdateManyWithWhereWithoutClientInput[]
+    deleteMany?: scannedDocumentScalarWhereInput | scannedDocumentScalarWhereInput[]
   }
 
   export type factureUpdateManyWithoutClientNestedInput = {
@@ -16622,6 +19344,20 @@ export namespace Prisma {
     deleteMany?: documentScalarWhereInput | documentScalarWhereInput[]
   }
 
+  export type scannedDocumentUncheckedUpdateManyWithoutClientNestedInput = {
+    create?: XOR<scannedDocumentCreateWithoutClientInput, scannedDocumentUncheckedCreateWithoutClientInput> | scannedDocumentCreateWithoutClientInput[] | scannedDocumentUncheckedCreateWithoutClientInput[]
+    connectOrCreate?: scannedDocumentCreateOrConnectWithoutClientInput | scannedDocumentCreateOrConnectWithoutClientInput[]
+    upsert?: scannedDocumentUpsertWithWhereUniqueWithoutClientInput | scannedDocumentUpsertWithWhereUniqueWithoutClientInput[]
+    createMany?: scannedDocumentCreateManyClientInputEnvelope
+    set?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    disconnect?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    delete?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    connect?: scannedDocumentWhereUniqueInput | scannedDocumentWhereUniqueInput[]
+    update?: scannedDocumentUpdateWithWhereUniqueWithoutClientInput | scannedDocumentUpdateWithWhereUniqueWithoutClientInput[]
+    updateMany?: scannedDocumentUpdateManyWithWhereWithoutClientInput | scannedDocumentUpdateManyWithWhereWithoutClientInput[]
+    deleteMany?: scannedDocumentScalarWhereInput | scannedDocumentScalarWhereInput[]
+  }
+
   export type factureUncheckedUpdateManyWithoutClientNestedInput = {
     create?: XOR<factureCreateWithoutClientInput, factureUncheckedCreateWithoutClientInput> | factureCreateWithoutClientInput[] | factureUncheckedCreateWithoutClientInput[]
     connectOrCreate?: factureCreateOrConnectWithoutClientInput | factureCreateOrConnectWithoutClientInput[]
@@ -16648,6 +19384,16 @@ export namespace Prisma {
     connect?: UtilisateurWhereUniqueInput
   }
 
+  export type bienCreateNestedOneWithoutRendez_vousInput = {
+    create?: XOR<bienCreateWithoutRendez_vousInput, bienUncheckedCreateWithoutRendez_vousInput>
+    connectOrCreate?: bienCreateOrConnectWithoutRendez_vousInput
+    connect?: bienWhereUniqueInput
+  }
+
+  export type EnumStatusFieldUpdateOperationsInput = {
+    set?: $Enums.Status
+  }
+
   export type ClientUpdateOneRequiredWithoutRendez_vousNestedInput = {
     create?: XOR<ClientCreateWithoutRendez_vousInput, ClientUncheckedCreateWithoutRendez_vousInput>
     connectOrCreate?: ClientCreateOrConnectWithoutRendez_vousInput
@@ -16662,6 +19408,14 @@ export namespace Prisma {
     upsert?: UtilisateurUpsertWithoutRendez_vousInput
     connect?: UtilisateurWhereUniqueInput
     update?: XOR<XOR<UtilisateurUpdateToOneWithWhereWithoutRendez_vousInput, UtilisateurUpdateWithoutRendez_vousInput>, UtilisateurUncheckedUpdateWithoutRendez_vousInput>
+  }
+
+  export type bienUpdateOneRequiredWithoutRendez_vousNestedInput = {
+    create?: XOR<bienCreateWithoutRendez_vousInput, bienUncheckedCreateWithoutRendez_vousInput>
+    connectOrCreate?: bienCreateOrConnectWithoutRendez_vousInput
+    upsert?: bienUpsertWithoutRendez_vousInput
+    connect?: bienWhereUniqueInput
+    update?: XOR<XOR<bienUpdateToOneWithWhereWithoutRendez_vousInput, bienUpdateWithoutRendez_vousInput>, bienUncheckedUpdateWithoutRendez_vousInput>
   }
 
   export type UtilisateurCreateNestedOneWithoutDocumentTemplatesInput = {
@@ -16762,9 +19516,43 @@ export namespace Prisma {
     update?: XOR<XOR<UtilisateurUpdateToOneWithWhereWithoutDocumentsInput, UtilisateurUpdateWithoutDocumentsInput>, UtilisateurUncheckedUpdateWithoutDocumentsInput>
   }
 
-  export type UtilisateurCreateNestedOneWithoutBiensInput = {
-    create?: XOR<UtilisateurCreateWithoutBiensInput, UtilisateurUncheckedCreateWithoutBiensInput>
-    connectOrCreate?: UtilisateurCreateOrConnectWithoutBiensInput
+  export type ClientCreateNestedOneWithoutScanned_DocumentsInput = {
+    create?: XOR<ClientCreateWithoutScanned_DocumentsInput, ClientUncheckedCreateWithoutScanned_DocumentsInput>
+    connectOrCreate?: ClientCreateOrConnectWithoutScanned_DocumentsInput
+    connect?: ClientWhereUniqueInput
+  }
+
+  export type UtilisateurCreateNestedOneWithoutScanned_DocumentsInput = {
+    create?: XOR<UtilisateurCreateWithoutScanned_DocumentsInput, UtilisateurUncheckedCreateWithoutScanned_DocumentsInput>
+    connectOrCreate?: UtilisateurCreateOrConnectWithoutScanned_DocumentsInput
+    connect?: UtilisateurWhereUniqueInput
+  }
+
+  export type ClientUpdateOneRequiredWithoutScanned_DocumentsNestedInput = {
+    create?: XOR<ClientCreateWithoutScanned_DocumentsInput, ClientUncheckedCreateWithoutScanned_DocumentsInput>
+    connectOrCreate?: ClientCreateOrConnectWithoutScanned_DocumentsInput
+    upsert?: ClientUpsertWithoutScanned_DocumentsInput
+    connect?: ClientWhereUniqueInput
+    update?: XOR<XOR<ClientUpdateToOneWithWhereWithoutScanned_DocumentsInput, ClientUpdateWithoutScanned_DocumentsInput>, ClientUncheckedUpdateWithoutScanned_DocumentsInput>
+  }
+
+  export type UtilisateurUpdateOneRequiredWithoutScanned_DocumentsNestedInput = {
+    create?: XOR<UtilisateurCreateWithoutScanned_DocumentsInput, UtilisateurUncheckedCreateWithoutScanned_DocumentsInput>
+    connectOrCreate?: UtilisateurCreateOrConnectWithoutScanned_DocumentsInput
+    upsert?: UtilisateurUpsertWithoutScanned_DocumentsInput
+    connect?: UtilisateurWhereUniqueInput
+    update?: XOR<XOR<UtilisateurUpdateToOneWithWhereWithoutScanned_DocumentsInput, UtilisateurUpdateWithoutScanned_DocumentsInput>, UtilisateurUncheckedUpdateWithoutScanned_DocumentsInput>
+  }
+
+  export type UtilisateurCreateNestedOneWithoutBiensCreatedInput = {
+    create?: XOR<UtilisateurCreateWithoutBiensCreatedInput, UtilisateurUncheckedCreateWithoutBiensCreatedInput>
+    connectOrCreate?: UtilisateurCreateOrConnectWithoutBiensCreatedInput
+    connect?: UtilisateurWhereUniqueInput
+  }
+
+  export type UtilisateurCreateNestedOneWithoutBiensTherapeuteInput = {
+    create?: XOR<UtilisateurCreateWithoutBiensTherapeuteInput, UtilisateurUncheckedCreateWithoutBiensTherapeuteInput>
+    connectOrCreate?: UtilisateurCreateOrConnectWithoutBiensTherapeuteInput
     connect?: UtilisateurWhereUniqueInput
   }
 
@@ -16775,6 +19563,13 @@ export namespace Prisma {
     connect?: facture_bienWhereUniqueInput | facture_bienWhereUniqueInput[]
   }
 
+  export type rendez_vousCreateNestedManyWithoutBienInput = {
+    create?: XOR<rendez_vousCreateWithoutBienInput, rendez_vousUncheckedCreateWithoutBienInput> | rendez_vousCreateWithoutBienInput[] | rendez_vousUncheckedCreateWithoutBienInput[]
+    connectOrCreate?: rendez_vousCreateOrConnectWithoutBienInput | rendez_vousCreateOrConnectWithoutBienInput[]
+    createMany?: rendez_vousCreateManyBienInputEnvelope
+    connect?: rendez_vousWhereUniqueInput | rendez_vousWhereUniqueInput[]
+  }
+
   export type facture_bienUncheckedCreateNestedManyWithoutBienInput = {
     create?: XOR<facture_bienCreateWithoutBienInput, facture_bienUncheckedCreateWithoutBienInput> | facture_bienCreateWithoutBienInput[] | facture_bienUncheckedCreateWithoutBienInput[]
     connectOrCreate?: facture_bienCreateOrConnectWithoutBienInput | facture_bienCreateOrConnectWithoutBienInput[]
@@ -16782,12 +19577,15 @@ export namespace Prisma {
     connect?: facture_bienWhereUniqueInput | facture_bienWhereUniqueInput[]
   }
 
-  export type EnumBienTypeFieldUpdateOperationsInput = {
-    set?: $Enums.BienType
+  export type rendez_vousUncheckedCreateNestedManyWithoutBienInput = {
+    create?: XOR<rendez_vousCreateWithoutBienInput, rendez_vousUncheckedCreateWithoutBienInput> | rendez_vousCreateWithoutBienInput[] | rendez_vousUncheckedCreateWithoutBienInput[]
+    connectOrCreate?: rendez_vousCreateOrConnectWithoutBienInput | rendez_vousCreateOrConnectWithoutBienInput[]
+    createMany?: rendez_vousCreateManyBienInputEnvelope
+    connect?: rendez_vousWhereUniqueInput | rendez_vousWhereUniqueInput[]
   }
 
-  export type EnumServiceTypeFieldUpdateOperationsInput = {
-    set?: $Enums.ServiceType
+  export type EnumBienTypeFieldUpdateOperationsInput = {
+    set?: $Enums.BienType
   }
 
   export type FloatFieldUpdateOperationsInput = {
@@ -16798,12 +19596,22 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type UtilisateurUpdateOneRequiredWithoutBiensNestedInput = {
-    create?: XOR<UtilisateurCreateWithoutBiensInput, UtilisateurUncheckedCreateWithoutBiensInput>
-    connectOrCreate?: UtilisateurCreateOrConnectWithoutBiensInput
-    upsert?: UtilisateurUpsertWithoutBiensInput
+  export type UtilisateurUpdateOneRequiredWithoutBiensCreatedNestedInput = {
+    create?: XOR<UtilisateurCreateWithoutBiensCreatedInput, UtilisateurUncheckedCreateWithoutBiensCreatedInput>
+    connectOrCreate?: UtilisateurCreateOrConnectWithoutBiensCreatedInput
+    upsert?: UtilisateurUpsertWithoutBiensCreatedInput
     connect?: UtilisateurWhereUniqueInput
-    update?: XOR<XOR<UtilisateurUpdateToOneWithWhereWithoutBiensInput, UtilisateurUpdateWithoutBiensInput>, UtilisateurUncheckedUpdateWithoutBiensInput>
+    update?: XOR<XOR<UtilisateurUpdateToOneWithWhereWithoutBiensCreatedInput, UtilisateurUpdateWithoutBiensCreatedInput>, UtilisateurUncheckedUpdateWithoutBiensCreatedInput>
+  }
+
+  export type UtilisateurUpdateOneWithoutBiensTherapeuteNestedInput = {
+    create?: XOR<UtilisateurCreateWithoutBiensTherapeuteInput, UtilisateurUncheckedCreateWithoutBiensTherapeuteInput>
+    connectOrCreate?: UtilisateurCreateOrConnectWithoutBiensTherapeuteInput
+    upsert?: UtilisateurUpsertWithoutBiensTherapeuteInput
+    disconnect?: UtilisateurWhereInput | boolean
+    delete?: UtilisateurWhereInput | boolean
+    connect?: UtilisateurWhereUniqueInput
+    update?: XOR<XOR<UtilisateurUpdateToOneWithWhereWithoutBiensTherapeuteInput, UtilisateurUpdateWithoutBiensTherapeuteInput>, UtilisateurUncheckedUpdateWithoutBiensTherapeuteInput>
   }
 
   export type facture_bienUpdateManyWithoutBienNestedInput = {
@@ -16820,6 +19628,20 @@ export namespace Prisma {
     deleteMany?: facture_bienScalarWhereInput | facture_bienScalarWhereInput[]
   }
 
+  export type rendez_vousUpdateManyWithoutBienNestedInput = {
+    create?: XOR<rendez_vousCreateWithoutBienInput, rendez_vousUncheckedCreateWithoutBienInput> | rendez_vousCreateWithoutBienInput[] | rendez_vousUncheckedCreateWithoutBienInput[]
+    connectOrCreate?: rendez_vousCreateOrConnectWithoutBienInput | rendez_vousCreateOrConnectWithoutBienInput[]
+    upsert?: rendez_vousUpsertWithWhereUniqueWithoutBienInput | rendez_vousUpsertWithWhereUniqueWithoutBienInput[]
+    createMany?: rendez_vousCreateManyBienInputEnvelope
+    set?: rendez_vousWhereUniqueInput | rendez_vousWhereUniqueInput[]
+    disconnect?: rendez_vousWhereUniqueInput | rendez_vousWhereUniqueInput[]
+    delete?: rendez_vousWhereUniqueInput | rendez_vousWhereUniqueInput[]
+    connect?: rendez_vousWhereUniqueInput | rendez_vousWhereUniqueInput[]
+    update?: rendez_vousUpdateWithWhereUniqueWithoutBienInput | rendez_vousUpdateWithWhereUniqueWithoutBienInput[]
+    updateMany?: rendez_vousUpdateManyWithWhereWithoutBienInput | rendez_vousUpdateManyWithWhereWithoutBienInput[]
+    deleteMany?: rendez_vousScalarWhereInput | rendez_vousScalarWhereInput[]
+  }
+
   export type facture_bienUncheckedUpdateManyWithoutBienNestedInput = {
     create?: XOR<facture_bienCreateWithoutBienInput, facture_bienUncheckedCreateWithoutBienInput> | facture_bienCreateWithoutBienInput[] | facture_bienUncheckedCreateWithoutBienInput[]
     connectOrCreate?: facture_bienCreateOrConnectWithoutBienInput | facture_bienCreateOrConnectWithoutBienInput[]
@@ -16832,6 +19654,20 @@ export namespace Prisma {
     update?: facture_bienUpdateWithWhereUniqueWithoutBienInput | facture_bienUpdateWithWhereUniqueWithoutBienInput[]
     updateMany?: facture_bienUpdateManyWithWhereWithoutBienInput | facture_bienUpdateManyWithWhereWithoutBienInput[]
     deleteMany?: facture_bienScalarWhereInput | facture_bienScalarWhereInput[]
+  }
+
+  export type rendez_vousUncheckedUpdateManyWithoutBienNestedInput = {
+    create?: XOR<rendez_vousCreateWithoutBienInput, rendez_vousUncheckedCreateWithoutBienInput> | rendez_vousCreateWithoutBienInput[] | rendez_vousUncheckedCreateWithoutBienInput[]
+    connectOrCreate?: rendez_vousCreateOrConnectWithoutBienInput | rendez_vousCreateOrConnectWithoutBienInput[]
+    upsert?: rendez_vousUpsertWithWhereUniqueWithoutBienInput | rendez_vousUpsertWithWhereUniqueWithoutBienInput[]
+    createMany?: rendez_vousCreateManyBienInputEnvelope
+    set?: rendez_vousWhereUniqueInput | rendez_vousWhereUniqueInput[]
+    disconnect?: rendez_vousWhereUniqueInput | rendez_vousWhereUniqueInput[]
+    delete?: rendez_vousWhereUniqueInput | rendez_vousWhereUniqueInput[]
+    connect?: rendez_vousWhereUniqueInput | rendez_vousWhereUniqueInput[]
+    update?: rendez_vousUpdateWithWhereUniqueWithoutBienInput | rendez_vousUpdateWithWhereUniqueWithoutBienInput[]
+    updateMany?: rendez_vousUpdateManyWithWhereWithoutBienInput | rendez_vousUpdateManyWithWhereWithoutBienInput[]
+    deleteMany?: rendez_vousScalarWhereInput | rendez_vousScalarWhereInput[]
   }
 
   export type ClientCreateNestedOneWithoutFacturesInput = {
@@ -16874,8 +19710,8 @@ export namespace Prisma {
     connect?: paimentWhereUniqueInput | paimentWhereUniqueInput[]
   }
 
-  export type EnumFactureStatusFieldUpdateOperationsInput = {
-    set?: $Enums.FactureStatus
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
   }
 
   export type ClientUpdateOneRequiredWithoutFacturesNestedInput = {
@@ -16968,10 +19804,16 @@ export namespace Prisma {
     connect?: UtilisateurWhereUniqueInput
   }
 
-  export type factureUpdateOneRequiredWithoutFactureBiensNestedInput = {
+  export type EnumMovementTypeFieldUpdateOperationsInput = {
+    set?: $Enums.MovementType
+  }
+
+  export type factureUpdateOneWithoutFactureBiensNestedInput = {
     create?: XOR<factureCreateWithoutFactureBiensInput, factureUncheckedCreateWithoutFactureBiensInput>
     connectOrCreate?: factureCreateOrConnectWithoutFactureBiensInput
     upsert?: factureUpsertWithoutFactureBiensInput
+    disconnect?: factureWhereInput | boolean
+    delete?: factureWhereInput | boolean
     connect?: factureWhereUniqueInput
     update?: XOR<XOR<factureUpdateToOneWithWhereWithoutFactureBiensInput, factureUpdateWithoutFactureBiensInput>, factureUncheckedUpdateWithoutFactureBiensInput>
   }
@@ -16990,6 +19832,14 @@ export namespace Prisma {
     upsert?: UtilisateurUpsertWithoutFactureBiensInput
     connect?: UtilisateurWhereUniqueInput
     update?: XOR<XOR<UtilisateurUpdateToOneWithWhereWithoutFactureBiensInput, UtilisateurUpdateWithoutFactureBiensInput>, UtilisateurUncheckedUpdateWithoutFactureBiensInput>
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type factureCreateNestedOneWithoutPaiementsInput = {
@@ -17173,18 +20023,46 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedEnumStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.Status | EnumStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.Status[]
+    notIn?: $Enums.Status[]
+    not?: NestedEnumStatusFilter<$PrismaModel> | $Enums.Status
+  }
+
+  export type NestedEnumStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Status | EnumStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.Status[]
+    notIn?: $Enums.Status[]
+    not?: NestedEnumStatusWithAggregatesFilter<$PrismaModel> | $Enums.Status
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusFilter<$PrismaModel>
+    _max?: NestedEnumStatusFilter<$PrismaModel>
+  }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
   export type NestedEnumBienTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.BienType | EnumBienTypeFieldRefInput<$PrismaModel>
     in?: $Enums.BienType[]
     notIn?: $Enums.BienType[]
     not?: NestedEnumBienTypeFilter<$PrismaModel> | $Enums.BienType
-  }
-
-  export type NestedEnumServiceTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.ServiceType | EnumServiceTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.ServiceType[]
-    notIn?: $Enums.ServiceType[]
-    not?: NestedEnumServiceTypeFilter<$PrismaModel> | $Enums.ServiceType
   }
 
   export type NestedEnumBienTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -17195,16 +20073,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumBienTypeFilter<$PrismaModel>
     _max?: NestedEnumBienTypeFilter<$PrismaModel>
-  }
-
-  export type NestedEnumServiceTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.ServiceType | EnumServiceTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.ServiceType[]
-    notIn?: $Enums.ServiceType[]
-    not?: NestedEnumServiceTypeWithAggregatesFilter<$PrismaModel> | $Enums.ServiceType
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumServiceTypeFilter<$PrismaModel>
-    _max?: NestedEnumServiceTypeFilter<$PrismaModel>
   }
 
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -17223,21 +20091,73 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
-  export type NestedEnumFactureStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.FactureStatus | EnumFactureStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.FactureStatus[]
-    notIn?: $Enums.FactureStatus[]
-    not?: NestedEnumFactureStatusFilter<$PrismaModel> | $Enums.FactureStatus
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
-  export type NestedEnumFactureStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.FactureStatus | EnumFactureStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.FactureStatus[]
-    notIn?: $Enums.FactureStatus[]
-    not?: NestedEnumFactureStatusWithAggregatesFilter<$PrismaModel> | $Enums.FactureStatus
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumMovementTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.MovementType | EnumMovementTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.MovementType[]
+    notIn?: $Enums.MovementType[]
+    not?: NestedEnumMovementTypeFilter<$PrismaModel> | $Enums.MovementType
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedEnumMovementTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MovementType | EnumMovementTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.MovementType[]
+    notIn?: $Enums.MovementType[]
+    not?: NestedEnumMovementTypeWithAggregatesFilter<$PrismaModel> | $Enums.MovementType
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumFactureStatusFilter<$PrismaModel>
-    _max?: NestedEnumFactureStatusFilter<$PrismaModel>
+    _min?: NestedEnumMovementTypeFilter<$PrismaModel>
+    _max?: NestedEnumMovementTypeFilter<$PrismaModel>
   }
 
   export type ClientCreateWithoutUtilisateurInput = {
@@ -17253,8 +20173,10 @@ export namespace Prisma {
     allergies?: string | null
     commentaire?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
     rendez_vous?: rendez_vousCreateNestedManyWithoutClientInput
     documents?: documentCreateNestedManyWithoutClientInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutClientInput
     factures?: factureCreateNestedManyWithoutClientInput
   }
 
@@ -17272,8 +20194,10 @@ export namespace Prisma {
     allergies?: string | null
     commentaire?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
     rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutClientInput
     documents?: documentUncheckedCreateNestedManyWithoutClientInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutClientInput
     factures?: factureUncheckedCreateNestedManyWithoutClientInput
   }
 
@@ -17290,15 +20214,23 @@ export namespace Prisma {
     sujet: string
     date_rendez_vous: Date | string
     created_at?: Date | string
+    status: $Enums.Status
+    cabinet?: string
+    updated_at?: Date | string
     client: ClientCreateNestedOneWithoutRendez_vousInput
+    bien: bienCreateNestedOneWithoutRendez_vousInput
   }
 
   export type rendez_vousUncheckedCreateWithoutUtilisateurInput = {
     id?: number
     CIN: string
     sujet: string
+    soin_id: number
     date_rendez_vous: Date | string
     created_at?: Date | string
+    status: $Enums.Status
+    cabinet?: string
+    updated_at?: Date | string
   }
 
   export type rendez_vousCreateOrConnectWithoutUtilisateurInput = {
@@ -17312,14 +20244,16 @@ export namespace Prisma {
 
   export type document_templatesCreateWithoutUtilisateurInput = {
     name: string
-    sections_json: string
+    sections_json: JsonNullValueInput | InputJsonValue
+    created_at?: Date | string
     documents?: documentCreateNestedManyWithoutTemplateInput
   }
 
   export type document_templatesUncheckedCreateWithoutUtilisateurInput = {
     id?: number
     name: string
-    sections_json: string
+    sections_json: JsonNullValueInput | InputJsonValue
+    created_at?: Date | string
     documents?: documentUncheckedCreateNestedManyWithoutTemplateInput
   }
 
@@ -17333,7 +20267,9 @@ export namespace Prisma {
   }
 
   export type documentCreateWithoutUtilisateurInput = {
-    data_json: string
+    data_json: JsonNullValueInput | InputJsonValue
+    created_at?: Date | string
+    updated_at?: Date | string
     template: document_templatesCreateNestedOneWithoutDocumentsInput
     client: ClientCreateNestedOneWithoutDocumentsInput
   }
@@ -17342,7 +20278,9 @@ export namespace Prisma {
     id?: number
     template_id: number
     CIN: string
-    data_json: string
+    data_json: JsonNullValueInput | InputJsonValue
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type documentCreateOrConnectWithoutUtilisateurInput = {
@@ -17357,20 +20295,30 @@ export namespace Prisma {
   export type bienCreateWithoutUtilisateurInput = {
     Nom: string
     bien_type: $Enums.BienType
-    Type: $Enums.ServiceType
+    Type: string
     prix: number
     stock: number
+    cabinet?: string
+    created_at?: Date | string
+    updated_at?: Date | string
+    therapeuteUser?: UtilisateurCreateNestedOneWithoutBiensTherapeuteInput
     factureBiens?: facture_bienCreateNestedManyWithoutBienInput
+    rendez_vous?: rendez_vousCreateNestedManyWithoutBienInput
   }
 
   export type bienUncheckedCreateWithoutUtilisateurInput = {
     id?: number
     Nom: string
     bien_type: $Enums.BienType
-    Type: $Enums.ServiceType
+    Type: string
     prix: number
     stock: number
+    cabinet?: string
+    therapeute?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutBienInput
+    rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutBienInput
   }
 
   export type bienCreateOrConnectWithoutUtilisateurInput = {
@@ -17382,11 +20330,56 @@ export namespace Prisma {
     data: bienCreateManyUtilisateurInput | bienCreateManyUtilisateurInput[]
   }
 
+  export type bienCreateWithoutTherapeuteUserInput = {
+    Nom: string
+    bien_type: $Enums.BienType
+    Type: string
+    prix: number
+    stock: number
+    cabinet?: string
+    created_at?: Date | string
+    updated_at?: Date | string
+    utilisateur: UtilisateurCreateNestedOneWithoutBiensCreatedInput
+    factureBiens?: facture_bienCreateNestedManyWithoutBienInput
+    rendez_vous?: rendez_vousCreateNestedManyWithoutBienInput
+  }
+
+  export type bienUncheckedCreateWithoutTherapeuteUserInput = {
+    id?: number
+    Nom: string
+    bien_type: $Enums.BienType
+    Type: string
+    prix: number
+    stock: number
+    cabinet?: string
+    Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
+    factureBiens?: facture_bienUncheckedCreateNestedManyWithoutBienInput
+    rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutBienInput
+  }
+
+  export type bienCreateOrConnectWithoutTherapeuteUserInput = {
+    where: bienWhereUniqueInput
+    create: XOR<bienCreateWithoutTherapeuteUserInput, bienUncheckedCreateWithoutTherapeuteUserInput>
+  }
+
+  export type bienCreateManyTherapeuteUserInputEnvelope = {
+    data: bienCreateManyTherapeuteUserInput | bienCreateManyTherapeuteUserInput[]
+  }
+
   export type factureCreateWithoutUtilisateurInput = {
     date: Date | string
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    date_paiement?: Date | string | null
+    methode_paiement?: string | null
+    cheque_numero?: string | null
+    cheque_banque?: string | null
+    cheque_date_tirage?: Date | string | null
     client: ClientCreateNestedOneWithoutFacturesInput
     factureBiens?: facture_bienCreateNestedManyWithoutFactureInput
     paiements?: paimentCreateNestedManyWithoutFactureInput
@@ -17397,8 +20390,15 @@ export namespace Prisma {
     CIN: string
     date: Date | string
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    date_paiement?: Date | string | null
+    methode_paiement?: string | null
+    cheque_numero?: string | null
+    cheque_banque?: string | null
+    cheque_date_tirage?: Date | string | null
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutFactureInput
     paiements?: paimentUncheckedCreateNestedManyWithoutFactureInput
   }
@@ -17413,18 +20413,26 @@ export namespace Prisma {
   }
 
   export type facture_bienCreateWithoutUtilisateurInput = {
-    type_bien: $Enums.BienType
+    type_bien: string
     quantite: number
-    facture: factureCreateNestedOneWithoutFactureBiensInput
+    prix: number
+    movementType?: $Enums.MovementType
+    created_at?: Date | string
+    updated_at?: Date | string
+    facture?: factureCreateNestedOneWithoutFactureBiensInput
     bien: bienCreateNestedOneWithoutFactureBiensInput
   }
 
   export type facture_bienUncheckedCreateWithoutUtilisateurInput = {
     id?: number
-    id_facture: number
+    id_facture?: number | null
     id_bien: number
-    type_bien: $Enums.BienType
+    type_bien: string
     quantite: number
+    prix: number
+    movementType?: $Enums.MovementType
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type facture_bienCreateOrConnectWithoutUtilisateurInput = {
@@ -17439,6 +20447,8 @@ export namespace Prisma {
   export type paimentCreateWithoutUtilisateurInput = {
     date: Date | string
     montant_totale: number
+    created_at?: Date | string
+    updated_at?: Date | string
     facture: factureCreateNestedOneWithoutPaiementsInput
   }
 
@@ -17447,6 +20457,8 @@ export namespace Prisma {
     id_facture: number
     date: Date | string
     montant_totale: number
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type paimentCreateOrConnectWithoutUtilisateurInput = {
@@ -17456,6 +20468,34 @@ export namespace Prisma {
 
   export type paimentCreateManyUtilisateurInputEnvelope = {
     data: paimentCreateManyUtilisateurInput | paimentCreateManyUtilisateurInput[]
+  }
+
+  export type scannedDocumentCreateWithoutUtilisateurInput = {
+    title: string
+    filePath: string
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    client: ClientCreateNestedOneWithoutScanned_DocumentsInput
+  }
+
+  export type scannedDocumentUncheckedCreateWithoutUtilisateurInput = {
+    id?: number
+    title: string
+    filePath: string
+    CIN: string
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type scannedDocumentCreateOrConnectWithoutUtilisateurInput = {
+    where: scannedDocumentWhereUniqueInput
+    create: XOR<scannedDocumentCreateWithoutUtilisateurInput, scannedDocumentUncheckedCreateWithoutUtilisateurInput>
+  }
+
+  export type scannedDocumentCreateManyUtilisateurInputEnvelope = {
+    data: scannedDocumentCreateManyUtilisateurInput | scannedDocumentCreateManyUtilisateurInput[]
   }
 
   export type ClientUpsertWithWhereUniqueWithoutUtilisateurInput = {
@@ -17491,6 +20531,7 @@ export namespace Prisma {
     allergies?: StringNullableFilter<"Client"> | string | null
     commentaire?: StringNullableFilter<"Client"> | string | null
     created_at?: DateTimeFilter<"Client"> | Date | string
+    updated_at?: DateTimeFilter<"Client"> | Date | string
     Cree_par?: StringFilter<"Client"> | string
   }
 
@@ -17517,9 +20558,13 @@ export namespace Prisma {
     id?: IntFilter<"rendez_vous"> | number
     CIN?: StringFilter<"rendez_vous"> | string
     sujet?: StringFilter<"rendez_vous"> | string
+    soin_id?: IntFilter<"rendez_vous"> | number
     date_rendez_vous?: DateTimeFilter<"rendez_vous"> | Date | string
     created_at?: DateTimeFilter<"rendez_vous"> | Date | string
     Cree_par?: StringFilter<"rendez_vous"> | string
+    status?: EnumStatusFilter<"rendez_vous"> | $Enums.Status
+    cabinet?: StringFilter<"rendez_vous"> | string
+    updated_at?: DateTimeFilter<"rendez_vous"> | Date | string
   }
 
   export type document_templatesUpsertWithWhereUniqueWithoutUtilisateurInput = {
@@ -17544,8 +20589,9 @@ export namespace Prisma {
     NOT?: document_templatesScalarWhereInput | document_templatesScalarWhereInput[]
     id?: IntFilter<"document_templates"> | number
     name?: StringFilter<"document_templates"> | string
-    sections_json?: StringFilter<"document_templates"> | string
+    sections_json?: JsonFilter<"document_templates">
     Cree_par?: StringFilter<"document_templates"> | string
+    created_at?: DateTimeFilter<"document_templates"> | Date | string
   }
 
   export type documentUpsertWithWhereUniqueWithoutUtilisateurInput = {
@@ -17571,8 +20617,10 @@ export namespace Prisma {
     id?: IntFilter<"document"> | number
     template_id?: IntFilter<"document"> | number
     CIN?: StringFilter<"document"> | string
-    data_json?: StringFilter<"document"> | string
+    data_json?: JsonFilter<"document">
     Cree_par?: StringFilter<"document"> | string
+    created_at?: DateTimeFilter<"document"> | Date | string
+    updated_at?: DateTimeFilter<"document"> | Date | string
   }
 
   export type bienUpsertWithWhereUniqueWithoutUtilisateurInput = {
@@ -17598,10 +20646,30 @@ export namespace Prisma {
     id?: IntFilter<"bien"> | number
     Nom?: StringFilter<"bien"> | string
     bien_type?: EnumBienTypeFilter<"bien"> | $Enums.BienType
-    Type?: EnumServiceTypeFilter<"bien"> | $Enums.ServiceType
+    Type?: StringFilter<"bien"> | string
     prix?: FloatFilter<"bien"> | number
     stock?: IntFilter<"bien"> | number
+    cabinet?: StringFilter<"bien"> | string
     Cree_par?: StringFilter<"bien"> | string
+    therapeute?: StringNullableFilter<"bien"> | string | null
+    created_at?: DateTimeFilter<"bien"> | Date | string
+    updated_at?: DateTimeFilter<"bien"> | Date | string
+  }
+
+  export type bienUpsertWithWhereUniqueWithoutTherapeuteUserInput = {
+    where: bienWhereUniqueInput
+    update: XOR<bienUpdateWithoutTherapeuteUserInput, bienUncheckedUpdateWithoutTherapeuteUserInput>
+    create: XOR<bienCreateWithoutTherapeuteUserInput, bienUncheckedCreateWithoutTherapeuteUserInput>
+  }
+
+  export type bienUpdateWithWhereUniqueWithoutTherapeuteUserInput = {
+    where: bienWhereUniqueInput
+    data: XOR<bienUpdateWithoutTherapeuteUserInput, bienUncheckedUpdateWithoutTherapeuteUserInput>
+  }
+
+  export type bienUpdateManyWithWhereWithoutTherapeuteUserInput = {
+    where: bienScalarWhereInput
+    data: XOR<bienUpdateManyMutationInput, bienUncheckedUpdateManyWithoutTherapeuteUserInput>
   }
 
   export type factureUpsertWithWhereUniqueWithoutUtilisateurInput = {
@@ -17628,9 +20696,16 @@ export namespace Prisma {
     CIN?: StringFilter<"facture"> | string
     date?: DateTimeFilter<"facture"> | Date | string
     prix_total?: FloatFilter<"facture"> | number
-    statut?: EnumFactureStatusFilter<"facture"> | $Enums.FactureStatus
+    statut?: StringFilter<"facture"> | string
     notes?: StringNullableFilter<"facture"> | string | null
     Cree_par?: StringFilter<"facture"> | string
+    created_at?: DateTimeFilter<"facture"> | Date | string
+    updated_at?: DateTimeFilter<"facture"> | Date | string
+    date_paiement?: DateTimeNullableFilter<"facture"> | Date | string | null
+    methode_paiement?: StringNullableFilter<"facture"> | string | null
+    cheque_numero?: StringNullableFilter<"facture"> | string | null
+    cheque_banque?: StringNullableFilter<"facture"> | string | null
+    cheque_date_tirage?: DateTimeNullableFilter<"facture"> | Date | string | null
   }
 
   export type facture_bienUpsertWithWhereUniqueWithoutUtilisateurInput = {
@@ -17654,11 +20729,15 @@ export namespace Prisma {
     OR?: facture_bienScalarWhereInput[]
     NOT?: facture_bienScalarWhereInput | facture_bienScalarWhereInput[]
     id?: IntFilter<"facture_bien"> | number
-    id_facture?: IntFilter<"facture_bien"> | number
+    id_facture?: IntNullableFilter<"facture_bien"> | number | null
     id_bien?: IntFilter<"facture_bien"> | number
-    type_bien?: EnumBienTypeFilter<"facture_bien"> | $Enums.BienType
+    type_bien?: StringFilter<"facture_bien"> | string
     quantite?: IntFilter<"facture_bien"> | number
+    prix?: FloatFilter<"facture_bien"> | number
     Cree_par?: StringFilter<"facture_bien"> | string
+    movementType?: EnumMovementTypeFilter<"facture_bien"> | $Enums.MovementType
+    created_at?: DateTimeFilter<"facture_bien"> | Date | string
+    updated_at?: DateTimeFilter<"facture_bien"> | Date | string
   }
 
   export type paimentUpsertWithWhereUniqueWithoutUtilisateurInput = {
@@ -17686,6 +20765,38 @@ export namespace Prisma {
     date?: DateTimeFilter<"paiment"> | Date | string
     montant_totale?: FloatFilter<"paiment"> | number
     Cree_par?: StringFilter<"paiment"> | string
+    created_at?: DateTimeFilter<"paiment"> | Date | string
+    updated_at?: DateTimeFilter<"paiment"> | Date | string
+  }
+
+  export type scannedDocumentUpsertWithWhereUniqueWithoutUtilisateurInput = {
+    where: scannedDocumentWhereUniqueInput
+    update: XOR<scannedDocumentUpdateWithoutUtilisateurInput, scannedDocumentUncheckedUpdateWithoutUtilisateurInput>
+    create: XOR<scannedDocumentCreateWithoutUtilisateurInput, scannedDocumentUncheckedCreateWithoutUtilisateurInput>
+  }
+
+  export type scannedDocumentUpdateWithWhereUniqueWithoutUtilisateurInput = {
+    where: scannedDocumentWhereUniqueInput
+    data: XOR<scannedDocumentUpdateWithoutUtilisateurInput, scannedDocumentUncheckedUpdateWithoutUtilisateurInput>
+  }
+
+  export type scannedDocumentUpdateManyWithWhereWithoutUtilisateurInput = {
+    where: scannedDocumentScalarWhereInput
+    data: XOR<scannedDocumentUpdateManyMutationInput, scannedDocumentUncheckedUpdateManyWithoutUtilisateurInput>
+  }
+
+  export type scannedDocumentScalarWhereInput = {
+    AND?: scannedDocumentScalarWhereInput | scannedDocumentScalarWhereInput[]
+    OR?: scannedDocumentScalarWhereInput[]
+    NOT?: scannedDocumentScalarWhereInput | scannedDocumentScalarWhereInput[]
+    id?: IntFilter<"scannedDocument"> | number
+    title?: StringFilter<"scannedDocument"> | string
+    filePath?: StringFilter<"scannedDocument"> | string
+    CIN?: StringFilter<"scannedDocument"> | string
+    description?: StringNullableFilter<"scannedDocument"> | string | null
+    Cree_par?: StringFilter<"scannedDocument"> | string
+    createdAt?: DateTimeFilter<"scannedDocument"> | Date | string
+    updatedAt?: DateTimeFilter<"scannedDocument"> | Date | string
   }
 
   export type UtilisateurCreateWithoutClientsInput = {
@@ -17699,13 +20810,16 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     rendez_vous?: rendez_vousCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesCreateNestedManyWithoutUtilisateurInput
     documents?: documentCreateNestedManyWithoutUtilisateurInput
-    biens?: bienCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurUncheckedCreateWithoutClientsInput = {
@@ -17720,13 +20834,16 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesUncheckedCreateNestedManyWithoutUtilisateurInput
     documents?: documentUncheckedCreateNestedManyWithoutUtilisateurInput
-    biens?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienUncheckedCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureUncheckedCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentUncheckedCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurCreateOrConnectWithoutClientsInput = {
@@ -17738,15 +20855,23 @@ export namespace Prisma {
     sujet: string
     date_rendez_vous: Date | string
     created_at?: Date | string
+    status: $Enums.Status
+    cabinet?: string
+    updated_at?: Date | string
     utilisateur: UtilisateurCreateNestedOneWithoutRendez_vousInput
+    bien: bienCreateNestedOneWithoutRendez_vousInput
   }
 
   export type rendez_vousUncheckedCreateWithoutClientInput = {
     id?: number
     sujet: string
+    soin_id: number
     date_rendez_vous: Date | string
     created_at?: Date | string
     Cree_par: string
+    status: $Enums.Status
+    cabinet?: string
+    updated_at?: Date | string
   }
 
   export type rendez_vousCreateOrConnectWithoutClientInput = {
@@ -17759,7 +20884,9 @@ export namespace Prisma {
   }
 
   export type documentCreateWithoutClientInput = {
-    data_json: string
+    data_json: JsonNullValueInput | InputJsonValue
+    created_at?: Date | string
+    updated_at?: Date | string
     template: document_templatesCreateNestedOneWithoutDocumentsInput
     utilisateur: UtilisateurCreateNestedOneWithoutDocumentsInput
   }
@@ -17767,8 +20894,10 @@ export namespace Prisma {
   export type documentUncheckedCreateWithoutClientInput = {
     id?: number
     template_id: number
-    data_json: string
+    data_json: JsonNullValueInput | InputJsonValue
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type documentCreateOrConnectWithoutClientInput = {
@@ -17780,11 +20909,46 @@ export namespace Prisma {
     data: documentCreateManyClientInput | documentCreateManyClientInput[]
   }
 
+  export type scannedDocumentCreateWithoutClientInput = {
+    title: string
+    filePath: string
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    utilisateur: UtilisateurCreateNestedOneWithoutScanned_DocumentsInput
+  }
+
+  export type scannedDocumentUncheckedCreateWithoutClientInput = {
+    id?: number
+    title: string
+    filePath: string
+    description?: string | null
+    Cree_par: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type scannedDocumentCreateOrConnectWithoutClientInput = {
+    where: scannedDocumentWhereUniqueInput
+    create: XOR<scannedDocumentCreateWithoutClientInput, scannedDocumentUncheckedCreateWithoutClientInput>
+  }
+
+  export type scannedDocumentCreateManyClientInputEnvelope = {
+    data: scannedDocumentCreateManyClientInput | scannedDocumentCreateManyClientInput[]
+  }
+
   export type factureCreateWithoutClientInput = {
     date: Date | string
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    date_paiement?: Date | string | null
+    methode_paiement?: string | null
+    cheque_numero?: string | null
+    cheque_banque?: string | null
+    cheque_date_tirage?: Date | string | null
     utilisateur: UtilisateurCreateNestedOneWithoutFacturesInput
     factureBiens?: facture_bienCreateNestedManyWithoutFactureInput
     paiements?: paimentCreateNestedManyWithoutFactureInput
@@ -17794,9 +20958,16 @@ export namespace Prisma {
     id?: number
     date: Date | string
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes?: string | null
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
+    date_paiement?: Date | string | null
+    methode_paiement?: string | null
+    cheque_numero?: string | null
+    cheque_banque?: string | null
+    cheque_date_tirage?: Date | string | null
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutFactureInput
     paiements?: paimentUncheckedCreateNestedManyWithoutFactureInput
   }
@@ -17832,13 +21003,16 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     rendez_vous?: rendez_vousUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type UtilisateurUncheckedUpdateWithoutClientsInput = {
@@ -17853,13 +21027,16 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     rendez_vous?: rendez_vousUncheckedUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUncheckedUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUncheckedUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUncheckedUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUncheckedUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUncheckedUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUncheckedUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type rendez_vousUpsertWithWhereUniqueWithoutClientInput = {
@@ -17894,6 +21071,22 @@ export namespace Prisma {
     data: XOR<documentUpdateManyMutationInput, documentUncheckedUpdateManyWithoutClientInput>
   }
 
+  export type scannedDocumentUpsertWithWhereUniqueWithoutClientInput = {
+    where: scannedDocumentWhereUniqueInput
+    update: XOR<scannedDocumentUpdateWithoutClientInput, scannedDocumentUncheckedUpdateWithoutClientInput>
+    create: XOR<scannedDocumentCreateWithoutClientInput, scannedDocumentUncheckedCreateWithoutClientInput>
+  }
+
+  export type scannedDocumentUpdateWithWhereUniqueWithoutClientInput = {
+    where: scannedDocumentWhereUniqueInput
+    data: XOR<scannedDocumentUpdateWithoutClientInput, scannedDocumentUncheckedUpdateWithoutClientInput>
+  }
+
+  export type scannedDocumentUpdateManyWithWhereWithoutClientInput = {
+    where: scannedDocumentScalarWhereInput
+    data: XOR<scannedDocumentUpdateManyMutationInput, scannedDocumentUncheckedUpdateManyWithoutClientInput>
+  }
+
   export type factureUpsertWithWhereUniqueWithoutClientInput = {
     where: factureWhereUniqueInput
     update: XOR<factureUpdateWithoutClientInput, factureUncheckedUpdateWithoutClientInput>
@@ -17923,8 +21116,10 @@ export namespace Prisma {
     allergies?: string | null
     commentaire?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
     utilisateur: UtilisateurCreateNestedOneWithoutClientsInput
     documents?: documentCreateNestedManyWithoutClientInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutClientInput
     factures?: factureCreateNestedManyWithoutClientInput
   }
 
@@ -17942,8 +21137,10 @@ export namespace Prisma {
     allergies?: string | null
     commentaire?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
     Cree_par: string
     documents?: documentUncheckedCreateNestedManyWithoutClientInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutClientInput
     factures?: factureUncheckedCreateNestedManyWithoutClientInput
   }
 
@@ -17963,13 +21160,16 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesCreateNestedManyWithoutUtilisateurInput
     documents?: documentCreateNestedManyWithoutUtilisateurInput
-    biens?: bienCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurUncheckedCreateWithoutRendez_vousInput = {
@@ -17984,18 +21184,55 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientUncheckedCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesUncheckedCreateNestedManyWithoutUtilisateurInput
     documents?: documentUncheckedCreateNestedManyWithoutUtilisateurInput
-    biens?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienUncheckedCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureUncheckedCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentUncheckedCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurCreateOrConnectWithoutRendez_vousInput = {
     where: UtilisateurWhereUniqueInput
     create: XOR<UtilisateurCreateWithoutRendez_vousInput, UtilisateurUncheckedCreateWithoutRendez_vousInput>
+  }
+
+  export type bienCreateWithoutRendez_vousInput = {
+    Nom: string
+    bien_type: $Enums.BienType
+    Type: string
+    prix: number
+    stock: number
+    cabinet?: string
+    created_at?: Date | string
+    updated_at?: Date | string
+    utilisateur: UtilisateurCreateNestedOneWithoutBiensCreatedInput
+    therapeuteUser?: UtilisateurCreateNestedOneWithoutBiensTherapeuteInput
+    factureBiens?: facture_bienCreateNestedManyWithoutBienInput
+  }
+
+  export type bienUncheckedCreateWithoutRendez_vousInput = {
+    id?: number
+    Nom: string
+    bien_type: $Enums.BienType
+    Type: string
+    prix: number
+    stock: number
+    cabinet?: string
+    Cree_par: string
+    therapeute?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    factureBiens?: facture_bienUncheckedCreateNestedManyWithoutBienInput
+  }
+
+  export type bienCreateOrConnectWithoutRendez_vousInput = {
+    where: bienWhereUniqueInput
+    create: XOR<bienCreateWithoutRendez_vousInput, bienUncheckedCreateWithoutRendez_vousInput>
   }
 
   export type ClientUpsertWithoutRendez_vousInput = {
@@ -18022,8 +21259,10 @@ export namespace Prisma {
     allergies?: NullableStringFieldUpdateOperationsInput | string | null
     commentaire?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     utilisateur?: UtilisateurUpdateOneRequiredWithoutClientsNestedInput
     documents?: documentUpdateManyWithoutClientNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutClientNestedInput
     factures?: factureUpdateManyWithoutClientNestedInput
   }
 
@@ -18041,8 +21280,10 @@ export namespace Prisma {
     allergies?: NullableStringFieldUpdateOperationsInput | string | null
     commentaire?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     Cree_par?: StringFieldUpdateOperationsInput | string
     documents?: documentUncheckedUpdateManyWithoutClientNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutClientNestedInput
     factures?: factureUncheckedUpdateManyWithoutClientNestedInput
   }
 
@@ -18068,13 +21309,16 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type UtilisateurUncheckedUpdateWithoutRendez_vousInput = {
@@ -18089,13 +21333,56 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUncheckedUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUncheckedUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUncheckedUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUncheckedUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUncheckedUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUncheckedUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUncheckedUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutUtilisateurNestedInput
+  }
+
+  export type bienUpsertWithoutRendez_vousInput = {
+    update: XOR<bienUpdateWithoutRendez_vousInput, bienUncheckedUpdateWithoutRendez_vousInput>
+    create: XOR<bienCreateWithoutRendez_vousInput, bienUncheckedCreateWithoutRendez_vousInput>
+    where?: bienWhereInput
+  }
+
+  export type bienUpdateToOneWithWhereWithoutRendez_vousInput = {
+    where?: bienWhereInput
+    data: XOR<bienUpdateWithoutRendez_vousInput, bienUncheckedUpdateWithoutRendez_vousInput>
+  }
+
+  export type bienUpdateWithoutRendez_vousInput = {
+    Nom?: StringFieldUpdateOperationsInput | string
+    bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    Type?: StringFieldUpdateOperationsInput | string
+    prix?: FloatFieldUpdateOperationsInput | number
+    stock?: IntFieldUpdateOperationsInput | number
+    cabinet?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    utilisateur?: UtilisateurUpdateOneRequiredWithoutBiensCreatedNestedInput
+    therapeuteUser?: UtilisateurUpdateOneWithoutBiensTherapeuteNestedInput
+    factureBiens?: facture_bienUpdateManyWithoutBienNestedInput
+  }
+
+  export type bienUncheckedUpdateWithoutRendez_vousInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    Nom?: StringFieldUpdateOperationsInput | string
+    bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    Type?: StringFieldUpdateOperationsInput | string
+    prix?: FloatFieldUpdateOperationsInput | number
+    stock?: IntFieldUpdateOperationsInput | number
+    cabinet?: StringFieldUpdateOperationsInput | string
+    Cree_par?: StringFieldUpdateOperationsInput | string
+    therapeute?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    factureBiens?: facture_bienUncheckedUpdateManyWithoutBienNestedInput
   }
 
   export type UtilisateurCreateWithoutDocumentTemplatesInput = {
@@ -18109,13 +21396,16 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousCreateNestedManyWithoutUtilisateurInput
     documents?: documentCreateNestedManyWithoutUtilisateurInput
-    biens?: bienCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurUncheckedCreateWithoutDocumentTemplatesInput = {
@@ -18130,13 +21420,16 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientUncheckedCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutUtilisateurInput
     documents?: documentUncheckedCreateNestedManyWithoutUtilisateurInput
-    biens?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienUncheckedCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureUncheckedCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentUncheckedCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurCreateOrConnectWithoutDocumentTemplatesInput = {
@@ -18145,7 +21438,9 @@ export namespace Prisma {
   }
 
   export type documentCreateWithoutTemplateInput = {
-    data_json: string
+    data_json: JsonNullValueInput | InputJsonValue
+    created_at?: Date | string
+    updated_at?: Date | string
     client: ClientCreateNestedOneWithoutDocumentsInput
     utilisateur: UtilisateurCreateNestedOneWithoutDocumentsInput
   }
@@ -18153,8 +21448,10 @@ export namespace Prisma {
   export type documentUncheckedCreateWithoutTemplateInput = {
     id?: number
     CIN: string
-    data_json: string
+    data_json: JsonNullValueInput | InputJsonValue
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type documentCreateOrConnectWithoutTemplateInput = {
@@ -18188,13 +21485,16 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type UtilisateurUncheckedUpdateWithoutDocumentTemplatesInput = {
@@ -18209,13 +21509,16 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUncheckedUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUncheckedUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUncheckedUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUncheckedUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUncheckedUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUncheckedUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUncheckedUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type documentUpsertWithWhereUniqueWithoutTemplateInput = {
@@ -18236,15 +21539,17 @@ export namespace Prisma {
 
   export type document_templatesCreateWithoutDocumentsInput = {
     name: string
-    sections_json: string
+    sections_json: JsonNullValueInput | InputJsonValue
+    created_at?: Date | string
     utilisateur: UtilisateurCreateNestedOneWithoutDocumentTemplatesInput
   }
 
   export type document_templatesUncheckedCreateWithoutDocumentsInput = {
     id?: number
     name: string
-    sections_json: string
+    sections_json: JsonNullValueInput | InputJsonValue
     Cree_par: string
+    created_at?: Date | string
   }
 
   export type document_templatesCreateOrConnectWithoutDocumentsInput = {
@@ -18265,8 +21570,10 @@ export namespace Prisma {
     allergies?: string | null
     commentaire?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
     utilisateur: UtilisateurCreateNestedOneWithoutClientsInput
     rendez_vous?: rendez_vousCreateNestedManyWithoutClientInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutClientInput
     factures?: factureCreateNestedManyWithoutClientInput
   }
 
@@ -18284,8 +21591,10 @@ export namespace Prisma {
     allergies?: string | null
     commentaire?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
     Cree_par: string
     rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutClientInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutClientInput
     factures?: factureUncheckedCreateNestedManyWithoutClientInput
   }
 
@@ -18305,13 +21614,16 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesCreateNestedManyWithoutUtilisateurInput
-    biens?: bienCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurUncheckedCreateWithoutDocumentsInput = {
@@ -18326,13 +21638,16 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientUncheckedCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesUncheckedCreateNestedManyWithoutUtilisateurInput
-    biens?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienUncheckedCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureUncheckedCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentUncheckedCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurCreateOrConnectWithoutDocumentsInput = {
@@ -18353,15 +21668,17 @@ export namespace Prisma {
 
   export type document_templatesUpdateWithoutDocumentsInput = {
     name?: StringFieldUpdateOperationsInput | string
-    sections_json?: StringFieldUpdateOperationsInput | string
+    sections_json?: JsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     utilisateur?: UtilisateurUpdateOneRequiredWithoutDocumentTemplatesNestedInput
   }
 
   export type document_templatesUncheckedUpdateWithoutDocumentsInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
-    sections_json?: StringFieldUpdateOperationsInput | string
+    sections_json?: JsonNullValueInput | InputJsonValue
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ClientUpsertWithoutDocumentsInput = {
@@ -18388,8 +21705,10 @@ export namespace Prisma {
     allergies?: NullableStringFieldUpdateOperationsInput | string | null
     commentaire?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     utilisateur?: UtilisateurUpdateOneRequiredWithoutClientsNestedInput
     rendez_vous?: rendez_vousUpdateManyWithoutClientNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutClientNestedInput
     factures?: factureUpdateManyWithoutClientNestedInput
   }
 
@@ -18407,8 +21726,10 @@ export namespace Prisma {
     allergies?: NullableStringFieldUpdateOperationsInput | string | null
     commentaire?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     Cree_par?: StringFieldUpdateOperationsInput | string
     rendez_vous?: rendez_vousUncheckedUpdateManyWithoutClientNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutClientNestedInput
     factures?: factureUncheckedUpdateManyWithoutClientNestedInput
   }
 
@@ -18434,13 +21755,16 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type UtilisateurUncheckedUpdateWithoutDocumentsInput = {
@@ -18455,16 +21779,65 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUncheckedUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUncheckedUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUncheckedUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUncheckedUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUncheckedUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUncheckedUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUncheckedUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutUtilisateurNestedInput
   }
 
-  export type UtilisateurCreateWithoutBiensInput = {
+  export type ClientCreateWithoutScanned_DocumentsInput = {
+    CIN: string
+    nom: string
+    prenom: string
+    date_naissance: Date | string
+    adresse: string
+    numero_telephone: string
+    email: string
+    groupe_sanguin: string
+    antecedents?: string | null
+    allergies?: string | null
+    commentaire?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    utilisateur: UtilisateurCreateNestedOneWithoutClientsInput
+    rendez_vous?: rendez_vousCreateNestedManyWithoutClientInput
+    documents?: documentCreateNestedManyWithoutClientInput
+    factures?: factureCreateNestedManyWithoutClientInput
+  }
+
+  export type ClientUncheckedCreateWithoutScanned_DocumentsInput = {
+    id?: number
+    CIN: string
+    nom: string
+    prenom: string
+    date_naissance: Date | string
+    adresse: string
+    numero_telephone: string
+    email: string
+    groupe_sanguin: string
+    antecedents?: string | null
+    allergies?: string | null
+    commentaire?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    Cree_par: string
+    rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutClientInput
+    documents?: documentUncheckedCreateNestedManyWithoutClientInput
+    factures?: factureUncheckedCreateNestedManyWithoutClientInput
+  }
+
+  export type ClientCreateOrConnectWithoutScanned_DocumentsInput = {
+    where: ClientWhereUniqueInput
+    create: XOR<ClientCreateWithoutScanned_DocumentsInput, ClientUncheckedCreateWithoutScanned_DocumentsInput>
+  }
+
+  export type UtilisateurCreateWithoutScanned_DocumentsInput = {
     CIN: string
     nom: string
     prenom: string
@@ -18475,16 +21848,19 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesCreateNestedManyWithoutUtilisateurInput
     documents?: documentCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentCreateNestedManyWithoutUtilisateurInput
   }
 
-  export type UtilisateurUncheckedCreateWithoutBiensInput = {
+  export type UtilisateurUncheckedCreateWithoutScanned_DocumentsInput = {
     id?: number
     CIN: string
     nom: string
@@ -18496,56 +21872,87 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientUncheckedCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesUncheckedCreateNestedManyWithoutUtilisateurInput
     documents?: documentUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienUncheckedCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureUncheckedCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentUncheckedCreateNestedManyWithoutUtilisateurInput
   }
 
-  export type UtilisateurCreateOrConnectWithoutBiensInput = {
+  export type UtilisateurCreateOrConnectWithoutScanned_DocumentsInput = {
     where: UtilisateurWhereUniqueInput
-    create: XOR<UtilisateurCreateWithoutBiensInput, UtilisateurUncheckedCreateWithoutBiensInput>
+    create: XOR<UtilisateurCreateWithoutScanned_DocumentsInput, UtilisateurUncheckedCreateWithoutScanned_DocumentsInput>
   }
 
-  export type facture_bienCreateWithoutBienInput = {
-    type_bien: $Enums.BienType
-    quantite: number
-    facture: factureCreateNestedOneWithoutFactureBiensInput
-    utilisateur: UtilisateurCreateNestedOneWithoutFactureBiensInput
+  export type ClientUpsertWithoutScanned_DocumentsInput = {
+    update: XOR<ClientUpdateWithoutScanned_DocumentsInput, ClientUncheckedUpdateWithoutScanned_DocumentsInput>
+    create: XOR<ClientCreateWithoutScanned_DocumentsInput, ClientUncheckedCreateWithoutScanned_DocumentsInput>
+    where?: ClientWhereInput
   }
 
-  export type facture_bienUncheckedCreateWithoutBienInput = {
-    id?: number
-    id_facture: number
-    type_bien: $Enums.BienType
-    quantite: number
-    Cree_par: string
+  export type ClientUpdateToOneWithWhereWithoutScanned_DocumentsInput = {
+    where?: ClientWhereInput
+    data: XOR<ClientUpdateWithoutScanned_DocumentsInput, ClientUncheckedUpdateWithoutScanned_DocumentsInput>
   }
 
-  export type facture_bienCreateOrConnectWithoutBienInput = {
-    where: facture_bienWhereUniqueInput
-    create: XOR<facture_bienCreateWithoutBienInput, facture_bienUncheckedCreateWithoutBienInput>
+  export type ClientUpdateWithoutScanned_DocumentsInput = {
+    CIN?: StringFieldUpdateOperationsInput | string
+    nom?: StringFieldUpdateOperationsInput | string
+    prenom?: StringFieldUpdateOperationsInput | string
+    date_naissance?: DateTimeFieldUpdateOperationsInput | Date | string
+    adresse?: StringFieldUpdateOperationsInput | string
+    numero_telephone?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    groupe_sanguin?: StringFieldUpdateOperationsInput | string
+    antecedents?: NullableStringFieldUpdateOperationsInput | string | null
+    allergies?: NullableStringFieldUpdateOperationsInput | string | null
+    commentaire?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    utilisateur?: UtilisateurUpdateOneRequiredWithoutClientsNestedInput
+    rendez_vous?: rendez_vousUpdateManyWithoutClientNestedInput
+    documents?: documentUpdateManyWithoutClientNestedInput
+    factures?: factureUpdateManyWithoutClientNestedInput
   }
 
-  export type facture_bienCreateManyBienInputEnvelope = {
-    data: facture_bienCreateManyBienInput | facture_bienCreateManyBienInput[]
+  export type ClientUncheckedUpdateWithoutScanned_DocumentsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    CIN?: StringFieldUpdateOperationsInput | string
+    nom?: StringFieldUpdateOperationsInput | string
+    prenom?: StringFieldUpdateOperationsInput | string
+    date_naissance?: DateTimeFieldUpdateOperationsInput | Date | string
+    adresse?: StringFieldUpdateOperationsInput | string
+    numero_telephone?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    groupe_sanguin?: StringFieldUpdateOperationsInput | string
+    antecedents?: NullableStringFieldUpdateOperationsInput | string | null
+    allergies?: NullableStringFieldUpdateOperationsInput | string | null
+    commentaire?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    Cree_par?: StringFieldUpdateOperationsInput | string
+    rendez_vous?: rendez_vousUncheckedUpdateManyWithoutClientNestedInput
+    documents?: documentUncheckedUpdateManyWithoutClientNestedInput
+    factures?: factureUncheckedUpdateManyWithoutClientNestedInput
   }
 
-  export type UtilisateurUpsertWithoutBiensInput = {
-    update: XOR<UtilisateurUpdateWithoutBiensInput, UtilisateurUncheckedUpdateWithoutBiensInput>
-    create: XOR<UtilisateurCreateWithoutBiensInput, UtilisateurUncheckedCreateWithoutBiensInput>
+  export type UtilisateurUpsertWithoutScanned_DocumentsInput = {
+    update: XOR<UtilisateurUpdateWithoutScanned_DocumentsInput, UtilisateurUncheckedUpdateWithoutScanned_DocumentsInput>
+    create: XOR<UtilisateurCreateWithoutScanned_DocumentsInput, UtilisateurUncheckedCreateWithoutScanned_DocumentsInput>
     where?: UtilisateurWhereInput
   }
 
-  export type UtilisateurUpdateToOneWithWhereWithoutBiensInput = {
+  export type UtilisateurUpdateToOneWithWhereWithoutScanned_DocumentsInput = {
     where?: UtilisateurWhereInput
-    data: XOR<UtilisateurUpdateWithoutBiensInput, UtilisateurUncheckedUpdateWithoutBiensInput>
+    data: XOR<UtilisateurUpdateWithoutScanned_DocumentsInput, UtilisateurUncheckedUpdateWithoutScanned_DocumentsInput>
   }
 
-  export type UtilisateurUpdateWithoutBiensInput = {
+  export type UtilisateurUpdateWithoutScanned_DocumentsInput = {
     CIN?: StringFieldUpdateOperationsInput | string
     nom?: StringFieldUpdateOperationsInput | string
     prenom?: StringFieldUpdateOperationsInput | string
@@ -18556,16 +21963,19 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUpdateManyWithoutUtilisateurNestedInput
   }
 
-  export type UtilisateurUncheckedUpdateWithoutBiensInput = {
+  export type UtilisateurUncheckedUpdateWithoutScanned_DocumentsInput = {
     id?: IntFieldUpdateOperationsInput | number
     CIN?: StringFieldUpdateOperationsInput | string
     nom?: StringFieldUpdateOperationsInput | string
@@ -18577,13 +21987,300 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUncheckedUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUncheckedUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUncheckedUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUncheckedUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUncheckedUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUncheckedUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUncheckedUpdateManyWithoutUtilisateurNestedInput
+  }
+
+  export type UtilisateurCreateWithoutBiensCreatedInput = {
+    CIN: string
+    nom: string
+    prenom: string
+    date_naissance: Date | string
+    adresse: string
+    numero_telephone: string
+    email: string
+    password: string
+    role: $Enums.Role
+    created_at?: Date | string
+    updated_at?: Date | string
+    clients?: ClientCreateNestedManyWithoutUtilisateurInput
+    rendez_vous?: rendez_vousCreateNestedManyWithoutUtilisateurInput
+    documentTemplates?: document_templatesCreateNestedManyWithoutUtilisateurInput
+    documents?: documentCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienCreateNestedManyWithoutTherapeuteUserInput
+    factures?: factureCreateNestedManyWithoutUtilisateurInput
+    factureBiens?: facture_bienCreateNestedManyWithoutUtilisateurInput
+    paiements?: paimentCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutUtilisateurInput
+  }
+
+  export type UtilisateurUncheckedCreateWithoutBiensCreatedInput = {
+    id?: number
+    CIN: string
+    nom: string
+    prenom: string
+    date_naissance: Date | string
+    adresse: string
+    numero_telephone: string
+    email: string
+    password: string
+    role: $Enums.Role
+    created_at?: Date | string
+    updated_at?: Date | string
+    clients?: ClientUncheckedCreateNestedManyWithoutUtilisateurInput
+    rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutUtilisateurInput
+    documentTemplates?: document_templatesUncheckedCreateNestedManyWithoutUtilisateurInput
+    documents?: documentUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienUncheckedCreateNestedManyWithoutTherapeuteUserInput
+    factures?: factureUncheckedCreateNestedManyWithoutUtilisateurInput
+    factureBiens?: facture_bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    paiements?: paimentUncheckedCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutUtilisateurInput
+  }
+
+  export type UtilisateurCreateOrConnectWithoutBiensCreatedInput = {
+    where: UtilisateurWhereUniqueInput
+    create: XOR<UtilisateurCreateWithoutBiensCreatedInput, UtilisateurUncheckedCreateWithoutBiensCreatedInput>
+  }
+
+  export type UtilisateurCreateWithoutBiensTherapeuteInput = {
+    CIN: string
+    nom: string
+    prenom: string
+    date_naissance: Date | string
+    adresse: string
+    numero_telephone: string
+    email: string
+    password: string
+    role: $Enums.Role
+    created_at?: Date | string
+    updated_at?: Date | string
+    clients?: ClientCreateNestedManyWithoutUtilisateurInput
+    rendez_vous?: rendez_vousCreateNestedManyWithoutUtilisateurInput
+    documentTemplates?: document_templatesCreateNestedManyWithoutUtilisateurInput
+    documents?: documentCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienCreateNestedManyWithoutUtilisateurInput
+    factures?: factureCreateNestedManyWithoutUtilisateurInput
+    factureBiens?: facture_bienCreateNestedManyWithoutUtilisateurInput
+    paiements?: paimentCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutUtilisateurInput
+  }
+
+  export type UtilisateurUncheckedCreateWithoutBiensTherapeuteInput = {
+    id?: number
+    CIN: string
+    nom: string
+    prenom: string
+    date_naissance: Date | string
+    adresse: string
+    numero_telephone: string
+    email: string
+    password: string
+    role: $Enums.Role
+    created_at?: Date | string
+    updated_at?: Date | string
+    clients?: ClientUncheckedCreateNestedManyWithoutUtilisateurInput
+    rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutUtilisateurInput
+    documentTemplates?: document_templatesUncheckedCreateNestedManyWithoutUtilisateurInput
+    documents?: documentUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    factures?: factureUncheckedCreateNestedManyWithoutUtilisateurInput
+    factureBiens?: facture_bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    paiements?: paimentUncheckedCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutUtilisateurInput
+  }
+
+  export type UtilisateurCreateOrConnectWithoutBiensTherapeuteInput = {
+    where: UtilisateurWhereUniqueInput
+    create: XOR<UtilisateurCreateWithoutBiensTherapeuteInput, UtilisateurUncheckedCreateWithoutBiensTherapeuteInput>
+  }
+
+  export type facture_bienCreateWithoutBienInput = {
+    type_bien: string
+    quantite: number
+    prix: number
+    movementType?: $Enums.MovementType
+    created_at?: Date | string
+    updated_at?: Date | string
+    facture?: factureCreateNestedOneWithoutFactureBiensInput
+    utilisateur: UtilisateurCreateNestedOneWithoutFactureBiensInput
+  }
+
+  export type facture_bienUncheckedCreateWithoutBienInput = {
+    id?: number
+    id_facture?: number | null
+    type_bien: string
+    quantite: number
+    prix: number
+    Cree_par: string
+    movementType?: $Enums.MovementType
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type facture_bienCreateOrConnectWithoutBienInput = {
+    where: facture_bienWhereUniqueInput
+    create: XOR<facture_bienCreateWithoutBienInput, facture_bienUncheckedCreateWithoutBienInput>
+  }
+
+  export type facture_bienCreateManyBienInputEnvelope = {
+    data: facture_bienCreateManyBienInput | facture_bienCreateManyBienInput[]
+  }
+
+  export type rendez_vousCreateWithoutBienInput = {
+    sujet: string
+    date_rendez_vous: Date | string
+    created_at?: Date | string
+    status: $Enums.Status
+    cabinet?: string
+    updated_at?: Date | string
+    client: ClientCreateNestedOneWithoutRendez_vousInput
+    utilisateur: UtilisateurCreateNestedOneWithoutRendez_vousInput
+  }
+
+  export type rendez_vousUncheckedCreateWithoutBienInput = {
+    id?: number
+    CIN: string
+    sujet: string
+    date_rendez_vous: Date | string
+    created_at?: Date | string
+    Cree_par: string
+    status: $Enums.Status
+    cabinet?: string
+    updated_at?: Date | string
+  }
+
+  export type rendez_vousCreateOrConnectWithoutBienInput = {
+    where: rendez_vousWhereUniqueInput
+    create: XOR<rendez_vousCreateWithoutBienInput, rendez_vousUncheckedCreateWithoutBienInput>
+  }
+
+  export type rendez_vousCreateManyBienInputEnvelope = {
+    data: rendez_vousCreateManyBienInput | rendez_vousCreateManyBienInput[]
+  }
+
+  export type UtilisateurUpsertWithoutBiensCreatedInput = {
+    update: XOR<UtilisateurUpdateWithoutBiensCreatedInput, UtilisateurUncheckedUpdateWithoutBiensCreatedInput>
+    create: XOR<UtilisateurCreateWithoutBiensCreatedInput, UtilisateurUncheckedCreateWithoutBiensCreatedInput>
+    where?: UtilisateurWhereInput
+  }
+
+  export type UtilisateurUpdateToOneWithWhereWithoutBiensCreatedInput = {
+    where?: UtilisateurWhereInput
+    data: XOR<UtilisateurUpdateWithoutBiensCreatedInput, UtilisateurUncheckedUpdateWithoutBiensCreatedInput>
+  }
+
+  export type UtilisateurUpdateWithoutBiensCreatedInput = {
+    CIN?: StringFieldUpdateOperationsInput | string
+    nom?: StringFieldUpdateOperationsInput | string
+    prenom?: StringFieldUpdateOperationsInput | string
+    date_naissance?: DateTimeFieldUpdateOperationsInput | Date | string
+    adresse?: StringFieldUpdateOperationsInput | string
+    numero_telephone?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    clients?: ClientUpdateManyWithoutUtilisateurNestedInput
+    rendez_vous?: rendez_vousUpdateManyWithoutUtilisateurNestedInput
+    documentTemplates?: document_templatesUpdateManyWithoutUtilisateurNestedInput
+    documents?: documentUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUpdateManyWithoutTherapeuteUserNestedInput
+    factures?: factureUpdateManyWithoutUtilisateurNestedInput
+    factureBiens?: facture_bienUpdateManyWithoutUtilisateurNestedInput
+    paiements?: paimentUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutUtilisateurNestedInput
+  }
+
+  export type UtilisateurUncheckedUpdateWithoutBiensCreatedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    CIN?: StringFieldUpdateOperationsInput | string
+    nom?: StringFieldUpdateOperationsInput | string
+    prenom?: StringFieldUpdateOperationsInput | string
+    date_naissance?: DateTimeFieldUpdateOperationsInput | Date | string
+    adresse?: StringFieldUpdateOperationsInput | string
+    numero_telephone?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    clients?: ClientUncheckedUpdateManyWithoutUtilisateurNestedInput
+    rendez_vous?: rendez_vousUncheckedUpdateManyWithoutUtilisateurNestedInput
+    documentTemplates?: document_templatesUncheckedUpdateManyWithoutUtilisateurNestedInput
+    documents?: documentUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUncheckedUpdateManyWithoutTherapeuteUserNestedInput
+    factures?: factureUncheckedUpdateManyWithoutUtilisateurNestedInput
+    factureBiens?: facture_bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    paiements?: paimentUncheckedUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutUtilisateurNestedInput
+  }
+
+  export type UtilisateurUpsertWithoutBiensTherapeuteInput = {
+    update: XOR<UtilisateurUpdateWithoutBiensTherapeuteInput, UtilisateurUncheckedUpdateWithoutBiensTherapeuteInput>
+    create: XOR<UtilisateurCreateWithoutBiensTherapeuteInput, UtilisateurUncheckedCreateWithoutBiensTherapeuteInput>
+    where?: UtilisateurWhereInput
+  }
+
+  export type UtilisateurUpdateToOneWithWhereWithoutBiensTherapeuteInput = {
+    where?: UtilisateurWhereInput
+    data: XOR<UtilisateurUpdateWithoutBiensTherapeuteInput, UtilisateurUncheckedUpdateWithoutBiensTherapeuteInput>
+  }
+
+  export type UtilisateurUpdateWithoutBiensTherapeuteInput = {
+    CIN?: StringFieldUpdateOperationsInput | string
+    nom?: StringFieldUpdateOperationsInput | string
+    prenom?: StringFieldUpdateOperationsInput | string
+    date_naissance?: DateTimeFieldUpdateOperationsInput | Date | string
+    adresse?: StringFieldUpdateOperationsInput | string
+    numero_telephone?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    clients?: ClientUpdateManyWithoutUtilisateurNestedInput
+    rendez_vous?: rendez_vousUpdateManyWithoutUtilisateurNestedInput
+    documentTemplates?: document_templatesUpdateManyWithoutUtilisateurNestedInput
+    documents?: documentUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUpdateManyWithoutUtilisateurNestedInput
+    factures?: factureUpdateManyWithoutUtilisateurNestedInput
+    factureBiens?: facture_bienUpdateManyWithoutUtilisateurNestedInput
+    paiements?: paimentUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutUtilisateurNestedInput
+  }
+
+  export type UtilisateurUncheckedUpdateWithoutBiensTherapeuteInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    CIN?: StringFieldUpdateOperationsInput | string
+    nom?: StringFieldUpdateOperationsInput | string
+    prenom?: StringFieldUpdateOperationsInput | string
+    date_naissance?: DateTimeFieldUpdateOperationsInput | Date | string
+    adresse?: StringFieldUpdateOperationsInput | string
+    numero_telephone?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    clients?: ClientUncheckedUpdateManyWithoutUtilisateurNestedInput
+    rendez_vous?: rendez_vousUncheckedUpdateManyWithoutUtilisateurNestedInput
+    documentTemplates?: document_templatesUncheckedUpdateManyWithoutUtilisateurNestedInput
+    documents?: documentUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    factures?: factureUncheckedUpdateManyWithoutUtilisateurNestedInput
+    factureBiens?: facture_bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    paiements?: paimentUncheckedUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type facture_bienUpsertWithWhereUniqueWithoutBienInput = {
@@ -18602,6 +22299,22 @@ export namespace Prisma {
     data: XOR<facture_bienUpdateManyMutationInput, facture_bienUncheckedUpdateManyWithoutBienInput>
   }
 
+  export type rendez_vousUpsertWithWhereUniqueWithoutBienInput = {
+    where: rendez_vousWhereUniqueInput
+    update: XOR<rendez_vousUpdateWithoutBienInput, rendez_vousUncheckedUpdateWithoutBienInput>
+    create: XOR<rendez_vousCreateWithoutBienInput, rendez_vousUncheckedCreateWithoutBienInput>
+  }
+
+  export type rendez_vousUpdateWithWhereUniqueWithoutBienInput = {
+    where: rendez_vousWhereUniqueInput
+    data: XOR<rendez_vousUpdateWithoutBienInput, rendez_vousUncheckedUpdateWithoutBienInput>
+  }
+
+  export type rendez_vousUpdateManyWithWhereWithoutBienInput = {
+    where: rendez_vousScalarWhereInput
+    data: XOR<rendez_vousUpdateManyMutationInput, rendez_vousUncheckedUpdateManyWithoutBienInput>
+  }
+
   export type ClientCreateWithoutFacturesInput = {
     CIN: string
     nom: string
@@ -18615,9 +22328,11 @@ export namespace Prisma {
     allergies?: string | null
     commentaire?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
     utilisateur: UtilisateurCreateNestedOneWithoutClientsInput
     rendez_vous?: rendez_vousCreateNestedManyWithoutClientInput
     documents?: documentCreateNestedManyWithoutClientInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutClientInput
   }
 
   export type ClientUncheckedCreateWithoutFacturesInput = {
@@ -18634,9 +22349,11 @@ export namespace Prisma {
     allergies?: string | null
     commentaire?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
     Cree_par: string
     rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutClientInput
     documents?: documentUncheckedCreateNestedManyWithoutClientInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type ClientCreateOrConnectWithoutFacturesInput = {
@@ -18655,13 +22372,16 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesCreateNestedManyWithoutUtilisateurInput
     documents?: documentCreateNestedManyWithoutUtilisateurInput
-    biens?: bienCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienCreateNestedManyWithoutTherapeuteUserInput
     factureBiens?: facture_bienCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurUncheckedCreateWithoutFacturesInput = {
@@ -18676,13 +22396,16 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientUncheckedCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesUncheckedCreateNestedManyWithoutUtilisateurInput
     documents?: documentUncheckedCreateNestedManyWithoutUtilisateurInput
-    biens?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienUncheckedCreateNestedManyWithoutTherapeuteUserInput
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentUncheckedCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurCreateOrConnectWithoutFacturesInput = {
@@ -18691,8 +22414,12 @@ export namespace Prisma {
   }
 
   export type facture_bienCreateWithoutFactureInput = {
-    type_bien: $Enums.BienType
+    type_bien: string
     quantite: number
+    prix: number
+    movementType?: $Enums.MovementType
+    created_at?: Date | string
+    updated_at?: Date | string
     bien: bienCreateNestedOneWithoutFactureBiensInput
     utilisateur: UtilisateurCreateNestedOneWithoutFactureBiensInput
   }
@@ -18700,9 +22427,13 @@ export namespace Prisma {
   export type facture_bienUncheckedCreateWithoutFactureInput = {
     id?: number
     id_bien: number
-    type_bien: $Enums.BienType
+    type_bien: string
     quantite: number
+    prix: number
     Cree_par: string
+    movementType?: $Enums.MovementType
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type facture_bienCreateOrConnectWithoutFactureInput = {
@@ -18717,6 +22448,8 @@ export namespace Prisma {
   export type paimentCreateWithoutFactureInput = {
     date: Date | string
     montant_totale: number
+    created_at?: Date | string
+    updated_at?: Date | string
     utilisateur: UtilisateurCreateNestedOneWithoutPaiementsInput
   }
 
@@ -18725,6 +22458,8 @@ export namespace Prisma {
     date: Date | string
     montant_totale: number
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type paimentCreateOrConnectWithoutFactureInput = {
@@ -18760,9 +22495,11 @@ export namespace Prisma {
     allergies?: NullableStringFieldUpdateOperationsInput | string | null
     commentaire?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     utilisateur?: UtilisateurUpdateOneRequiredWithoutClientsNestedInput
     rendez_vous?: rendez_vousUpdateManyWithoutClientNestedInput
     documents?: documentUpdateManyWithoutClientNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutClientNestedInput
   }
 
   export type ClientUncheckedUpdateWithoutFacturesInput = {
@@ -18779,9 +22516,11 @@ export namespace Prisma {
     allergies?: NullableStringFieldUpdateOperationsInput | string | null
     commentaire?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     Cree_par?: StringFieldUpdateOperationsInput | string
     rendez_vous?: rendez_vousUncheckedUpdateManyWithoutClientNestedInput
     documents?: documentUncheckedUpdateManyWithoutClientNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type UtilisateurUpsertWithoutFacturesInput = {
@@ -18806,13 +22545,16 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUpdateManyWithoutTherapeuteUserNestedInput
     factureBiens?: facture_bienUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type UtilisateurUncheckedUpdateWithoutFacturesInput = {
@@ -18827,13 +22569,16 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUncheckedUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUncheckedUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUncheckedUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUncheckedUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUncheckedUpdateManyWithoutTherapeuteUserNestedInput
     factureBiens?: facture_bienUncheckedUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUncheckedUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type facture_bienUpsertWithWhereUniqueWithoutFactureInput = {
@@ -18871,8 +22616,15 @@ export namespace Prisma {
   export type factureCreateWithoutFactureBiensInput = {
     date: Date | string
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    date_paiement?: Date | string | null
+    methode_paiement?: string | null
+    cheque_numero?: string | null
+    cheque_banque?: string | null
+    cheque_date_tirage?: Date | string | null
     client: ClientCreateNestedOneWithoutFacturesInput
     utilisateur: UtilisateurCreateNestedOneWithoutFacturesInput
     paiements?: paimentCreateNestedManyWithoutFactureInput
@@ -18883,9 +22635,16 @@ export namespace Prisma {
     CIN: string
     date: Date | string
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes?: string | null
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
+    date_paiement?: Date | string | null
+    methode_paiement?: string | null
+    cheque_numero?: string | null
+    cheque_banque?: string | null
+    cheque_date_tirage?: Date | string | null
     paiements?: paimentUncheckedCreateNestedManyWithoutFactureInput
   }
 
@@ -18897,20 +22656,30 @@ export namespace Prisma {
   export type bienCreateWithoutFactureBiensInput = {
     Nom: string
     bien_type: $Enums.BienType
-    Type: $Enums.ServiceType
+    Type: string
     prix: number
     stock: number
-    utilisateur: UtilisateurCreateNestedOneWithoutBiensInput
+    cabinet?: string
+    created_at?: Date | string
+    updated_at?: Date | string
+    utilisateur: UtilisateurCreateNestedOneWithoutBiensCreatedInput
+    therapeuteUser?: UtilisateurCreateNestedOneWithoutBiensTherapeuteInput
+    rendez_vous?: rendez_vousCreateNestedManyWithoutBienInput
   }
 
   export type bienUncheckedCreateWithoutFactureBiensInput = {
     id?: number
     Nom: string
     bien_type: $Enums.BienType
-    Type: $Enums.ServiceType
+    Type: string
     prix: number
     stock: number
+    cabinet?: string
     Cree_par: string
+    therapeute?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutBienInput
   }
 
   export type bienCreateOrConnectWithoutFactureBiensInput = {
@@ -18929,13 +22698,16 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesCreateNestedManyWithoutUtilisateurInput
     documents?: documentCreateNestedManyWithoutUtilisateurInput
-    biens?: bienCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurUncheckedCreateWithoutFactureBiensInput = {
@@ -18950,13 +22722,16 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientUncheckedCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesUncheckedCreateNestedManyWithoutUtilisateurInput
     documents?: documentUncheckedCreateNestedManyWithoutUtilisateurInput
-    biens?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienUncheckedCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureUncheckedCreateNestedManyWithoutUtilisateurInput
     paiements?: paimentUncheckedCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurCreateOrConnectWithoutFactureBiensInput = {
@@ -18978,8 +22753,15 @@ export namespace Prisma {
   export type factureUpdateWithoutFactureBiensInput = {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     client?: ClientUpdateOneRequiredWithoutFacturesNestedInput
     utilisateur?: UtilisateurUpdateOneRequiredWithoutFacturesNestedInput
     paiements?: paimentUpdateManyWithoutFactureNestedInput
@@ -18990,9 +22772,16 @@ export namespace Prisma {
     CIN?: StringFieldUpdateOperationsInput | string
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paiements?: paimentUncheckedUpdateManyWithoutFactureNestedInput
   }
 
@@ -19010,20 +22799,30 @@ export namespace Prisma {
   export type bienUpdateWithoutFactureBiensInput = {
     Nom?: StringFieldUpdateOperationsInput | string
     bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
-    Type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
+    Type?: StringFieldUpdateOperationsInput | string
     prix?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
-    utilisateur?: UtilisateurUpdateOneRequiredWithoutBiensNestedInput
+    cabinet?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    utilisateur?: UtilisateurUpdateOneRequiredWithoutBiensCreatedNestedInput
+    therapeuteUser?: UtilisateurUpdateOneWithoutBiensTherapeuteNestedInput
+    rendez_vous?: rendez_vousUpdateManyWithoutBienNestedInput
   }
 
   export type bienUncheckedUpdateWithoutFactureBiensInput = {
     id?: IntFieldUpdateOperationsInput | number
     Nom?: StringFieldUpdateOperationsInput | string
     bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
-    Type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
+    Type?: StringFieldUpdateOperationsInput | string
     prix?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    cabinet?: StringFieldUpdateOperationsInput | string
     Cree_par?: StringFieldUpdateOperationsInput | string
+    therapeute?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    rendez_vous?: rendez_vousUncheckedUpdateManyWithoutBienNestedInput
   }
 
   export type UtilisateurUpsertWithoutFactureBiensInput = {
@@ -19048,13 +22847,16 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type UtilisateurUncheckedUpdateWithoutFactureBiensInput = {
@@ -19069,20 +22871,30 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUncheckedUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUncheckedUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUncheckedUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUncheckedUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUncheckedUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUncheckedUpdateManyWithoutUtilisateurNestedInput
     paiements?: paimentUncheckedUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type factureCreateWithoutPaiementsInput = {
     date: Date | string
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    date_paiement?: Date | string | null
+    methode_paiement?: string | null
+    cheque_numero?: string | null
+    cheque_banque?: string | null
+    cheque_date_tirage?: Date | string | null
     client: ClientCreateNestedOneWithoutFacturesInput
     utilisateur: UtilisateurCreateNestedOneWithoutFacturesInput
     factureBiens?: facture_bienCreateNestedManyWithoutFactureInput
@@ -19093,9 +22905,16 @@ export namespace Prisma {
     CIN: string
     date: Date | string
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes?: string | null
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
+    date_paiement?: Date | string | null
+    methode_paiement?: string | null
+    cheque_numero?: string | null
+    cheque_banque?: string | null
+    cheque_date_tirage?: Date | string | null
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutFactureInput
   }
 
@@ -19115,13 +22934,16 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesCreateNestedManyWithoutUtilisateurInput
     documents?: documentCreateNestedManyWithoutUtilisateurInput
-    biens?: bienCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurUncheckedCreateWithoutPaiementsInput = {
@@ -19136,13 +22958,16 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     created_at?: Date | string
+    updated_at?: Date | string
     clients?: ClientUncheckedCreateNestedManyWithoutUtilisateurInput
     rendez_vous?: rendez_vousUncheckedCreateNestedManyWithoutUtilisateurInput
     documentTemplates?: document_templatesUncheckedCreateNestedManyWithoutUtilisateurInput
     documents?: documentUncheckedCreateNestedManyWithoutUtilisateurInput
-    biens?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensCreated?: bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    biensTherapeute?: bienUncheckedCreateNestedManyWithoutTherapeuteUserInput
     factures?: factureUncheckedCreateNestedManyWithoutUtilisateurInput
     factureBiens?: facture_bienUncheckedCreateNestedManyWithoutUtilisateurInput
+    scanned_Documents?: scannedDocumentUncheckedCreateNestedManyWithoutUtilisateurInput
   }
 
   export type UtilisateurCreateOrConnectWithoutPaiementsInput = {
@@ -19164,8 +22989,15 @@ export namespace Prisma {
   export type factureUpdateWithoutPaiementsInput = {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     client?: ClientUpdateOneRequiredWithoutFacturesNestedInput
     utilisateur?: UtilisateurUpdateOneRequiredWithoutFacturesNestedInput
     factureBiens?: facture_bienUpdateManyWithoutFactureNestedInput
@@ -19176,9 +23008,16 @@ export namespace Prisma {
     CIN?: StringFieldUpdateOperationsInput | string
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     factureBiens?: facture_bienUncheckedUpdateManyWithoutFactureNestedInput
   }
 
@@ -19204,13 +23043,16 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type UtilisateurUncheckedUpdateWithoutPaiementsInput = {
@@ -19225,13 +23067,16 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     clients?: ClientUncheckedUpdateManyWithoutUtilisateurNestedInput
     rendez_vous?: rendez_vousUncheckedUpdateManyWithoutUtilisateurNestedInput
     documentTemplates?: document_templatesUncheckedUpdateManyWithoutUtilisateurNestedInput
     documents?: documentUncheckedUpdateManyWithoutUtilisateurNestedInput
-    biens?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensCreated?: bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    biensTherapeute?: bienUncheckedUpdateManyWithoutTherapeuteUserNestedInput
     factures?: factureUncheckedUpdateManyWithoutUtilisateurNestedInput
     factureBiens?: facture_bienUncheckedUpdateManyWithoutUtilisateurNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutUtilisateurNestedInput
   }
 
   export type ClientCreateManyUtilisateurInput = {
@@ -19248,36 +23093,61 @@ export namespace Prisma {
     allergies?: string | null
     commentaire?: string | null
     created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type rendez_vousCreateManyUtilisateurInput = {
     id?: number
     CIN: string
     sujet: string
+    soin_id: number
     date_rendez_vous: Date | string
     created_at?: Date | string
+    status: $Enums.Status
+    cabinet?: string
+    updated_at?: Date | string
   }
 
   export type document_templatesCreateManyUtilisateurInput = {
     id?: number
     name: string
-    sections_json: string
+    sections_json: JsonNullValueInput | InputJsonValue
+    created_at?: Date | string
   }
 
   export type documentCreateManyUtilisateurInput = {
     id?: number
     template_id: number
     CIN: string
-    data_json: string
+    data_json: JsonNullValueInput | InputJsonValue
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type bienCreateManyUtilisateurInput = {
     id?: number
     Nom: string
     bien_type: $Enums.BienType
-    Type: $Enums.ServiceType
+    Type: string
     prix: number
     stock: number
+    cabinet?: string
+    therapeute?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type bienCreateManyTherapeuteUserInput = {
+    id?: number
+    Nom: string
+    bien_type: $Enums.BienType
+    Type: string
+    prix: number
+    stock: number
+    cabinet?: string
+    Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type factureCreateManyUtilisateurInput = {
@@ -19285,16 +23155,27 @@ export namespace Prisma {
     CIN: string
     date: Date | string
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    date_paiement?: Date | string | null
+    methode_paiement?: string | null
+    cheque_numero?: string | null
+    cheque_banque?: string | null
+    cheque_date_tirage?: Date | string | null
   }
 
   export type facture_bienCreateManyUtilisateurInput = {
     id?: number
-    id_facture: number
+    id_facture?: number | null
     id_bien: number
-    type_bien: $Enums.BienType
+    type_bien: string
     quantite: number
+    prix: number
+    movementType?: $Enums.MovementType
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type paimentCreateManyUtilisateurInput = {
@@ -19302,6 +23183,18 @@ export namespace Prisma {
     id_facture: number
     date: Date | string
     montant_totale: number
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type scannedDocumentCreateManyUtilisateurInput = {
+    id?: number
+    title: string
+    filePath: string
+    CIN: string
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type ClientUpdateWithoutUtilisateurInput = {
@@ -19317,8 +23210,10 @@ export namespace Prisma {
     allergies?: NullableStringFieldUpdateOperationsInput | string | null
     commentaire?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     rendez_vous?: rendez_vousUpdateManyWithoutClientNestedInput
     documents?: documentUpdateManyWithoutClientNestedInput
+    scanned_Documents?: scannedDocumentUpdateManyWithoutClientNestedInput
     factures?: factureUpdateManyWithoutClientNestedInput
   }
 
@@ -19336,8 +23231,10 @@ export namespace Prisma {
     allergies?: NullableStringFieldUpdateOperationsInput | string | null
     commentaire?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     rendez_vous?: rendez_vousUncheckedUpdateManyWithoutClientNestedInput
     documents?: documentUncheckedUpdateManyWithoutClientNestedInput
+    scanned_Documents?: scannedDocumentUncheckedUpdateManyWithoutClientNestedInput
     factures?: factureUncheckedUpdateManyWithoutClientNestedInput
   }
 
@@ -19355,52 +23252,70 @@ export namespace Prisma {
     allergies?: NullableStringFieldUpdateOperationsInput | string | null
     commentaire?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type rendez_vousUpdateWithoutUtilisateurInput = {
     sujet?: StringFieldUpdateOperationsInput | string
     date_rendez_vous?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    cabinet?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     client?: ClientUpdateOneRequiredWithoutRendez_vousNestedInput
+    bien?: bienUpdateOneRequiredWithoutRendez_vousNestedInput
   }
 
   export type rendez_vousUncheckedUpdateWithoutUtilisateurInput = {
     id?: IntFieldUpdateOperationsInput | number
     CIN?: StringFieldUpdateOperationsInput | string
     sujet?: StringFieldUpdateOperationsInput | string
+    soin_id?: IntFieldUpdateOperationsInput | number
     date_rendez_vous?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    cabinet?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type rendez_vousUncheckedUpdateManyWithoutUtilisateurInput = {
     id?: IntFieldUpdateOperationsInput | number
     CIN?: StringFieldUpdateOperationsInput | string
     sujet?: StringFieldUpdateOperationsInput | string
+    soin_id?: IntFieldUpdateOperationsInput | number
     date_rendez_vous?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    cabinet?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type document_templatesUpdateWithoutUtilisateurInput = {
     name?: StringFieldUpdateOperationsInput | string
-    sections_json?: StringFieldUpdateOperationsInput | string
+    sections_json?: JsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: documentUpdateManyWithoutTemplateNestedInput
   }
 
   export type document_templatesUncheckedUpdateWithoutUtilisateurInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
-    sections_json?: StringFieldUpdateOperationsInput | string
+    sections_json?: JsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: documentUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
   export type document_templatesUncheckedUpdateManyWithoutUtilisateurInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
-    sections_json?: StringFieldUpdateOperationsInput | string
+    sections_json?: JsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type documentUpdateWithoutUtilisateurInput = {
-    data_json?: StringFieldUpdateOperationsInput | string
+    data_json?: JsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     template?: document_templatesUpdateOneRequiredWithoutDocumentsNestedInput
     client?: ClientUpdateOneRequiredWithoutDocumentsNestedInput
   }
@@ -19409,49 +23324,116 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     template_id?: IntFieldUpdateOperationsInput | number
     CIN?: StringFieldUpdateOperationsInput | string
-    data_json?: StringFieldUpdateOperationsInput | string
+    data_json?: JsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type documentUncheckedUpdateManyWithoutUtilisateurInput = {
     id?: IntFieldUpdateOperationsInput | number
     template_id?: IntFieldUpdateOperationsInput | number
     CIN?: StringFieldUpdateOperationsInput | string
-    data_json?: StringFieldUpdateOperationsInput | string
+    data_json?: JsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type bienUpdateWithoutUtilisateurInput = {
     Nom?: StringFieldUpdateOperationsInput | string
     bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
-    Type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
+    Type?: StringFieldUpdateOperationsInput | string
     prix?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    cabinet?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    therapeuteUser?: UtilisateurUpdateOneWithoutBiensTherapeuteNestedInput
     factureBiens?: facture_bienUpdateManyWithoutBienNestedInput
+    rendez_vous?: rendez_vousUpdateManyWithoutBienNestedInput
   }
 
   export type bienUncheckedUpdateWithoutUtilisateurInput = {
     id?: IntFieldUpdateOperationsInput | number
     Nom?: StringFieldUpdateOperationsInput | string
     bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
-    Type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
+    Type?: StringFieldUpdateOperationsInput | string
     prix?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    cabinet?: StringFieldUpdateOperationsInput | string
+    therapeute?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     factureBiens?: facture_bienUncheckedUpdateManyWithoutBienNestedInput
+    rendez_vous?: rendez_vousUncheckedUpdateManyWithoutBienNestedInput
   }
 
   export type bienUncheckedUpdateManyWithoutUtilisateurInput = {
     id?: IntFieldUpdateOperationsInput | number
     Nom?: StringFieldUpdateOperationsInput | string
     bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
-    Type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
+    Type?: StringFieldUpdateOperationsInput | string
     prix?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    cabinet?: StringFieldUpdateOperationsInput | string
+    therapeute?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type bienUpdateWithoutTherapeuteUserInput = {
+    Nom?: StringFieldUpdateOperationsInput | string
+    bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    Type?: StringFieldUpdateOperationsInput | string
+    prix?: FloatFieldUpdateOperationsInput | number
+    stock?: IntFieldUpdateOperationsInput | number
+    cabinet?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    utilisateur?: UtilisateurUpdateOneRequiredWithoutBiensCreatedNestedInput
+    factureBiens?: facture_bienUpdateManyWithoutBienNestedInput
+    rendez_vous?: rendez_vousUpdateManyWithoutBienNestedInput
+  }
+
+  export type bienUncheckedUpdateWithoutTherapeuteUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    Nom?: StringFieldUpdateOperationsInput | string
+    bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    Type?: StringFieldUpdateOperationsInput | string
+    prix?: FloatFieldUpdateOperationsInput | number
+    stock?: IntFieldUpdateOperationsInput | number
+    cabinet?: StringFieldUpdateOperationsInput | string
+    Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    factureBiens?: facture_bienUncheckedUpdateManyWithoutBienNestedInput
+    rendez_vous?: rendez_vousUncheckedUpdateManyWithoutBienNestedInput
+  }
+
+  export type bienUncheckedUpdateManyWithoutTherapeuteUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    Nom?: StringFieldUpdateOperationsInput | string
+    bien_type?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    Type?: StringFieldUpdateOperationsInput | string
+    prix?: FloatFieldUpdateOperationsInput | number
+    stock?: IntFieldUpdateOperationsInput | number
+    cabinet?: StringFieldUpdateOperationsInput | string
+    Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type factureUpdateWithoutUtilisateurInput = {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     client?: ClientUpdateOneRequiredWithoutFacturesNestedInput
     factureBiens?: facture_bienUpdateManyWithoutFactureNestedInput
     paiements?: paimentUpdateManyWithoutFactureNestedInput
@@ -19462,8 +23444,15 @@ export namespace Prisma {
     CIN?: StringFieldUpdateOperationsInput | string
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     factureBiens?: facture_bienUncheckedUpdateManyWithoutFactureNestedInput
     paiements?: paimentUncheckedUpdateManyWithoutFactureNestedInput
   }
@@ -19473,36 +23462,57 @@ export namespace Prisma {
     CIN?: StringFieldUpdateOperationsInput | string
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type facture_bienUpdateWithoutUtilisateurInput = {
-    type_bien?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    type_bien?: StringFieldUpdateOperationsInput | string
     quantite?: IntFieldUpdateOperationsInput | number
-    facture?: factureUpdateOneRequiredWithoutFactureBiensNestedInput
+    prix?: FloatFieldUpdateOperationsInput | number
+    movementType?: EnumMovementTypeFieldUpdateOperationsInput | $Enums.MovementType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    facture?: factureUpdateOneWithoutFactureBiensNestedInput
     bien?: bienUpdateOneRequiredWithoutFactureBiensNestedInput
   }
 
   export type facture_bienUncheckedUpdateWithoutUtilisateurInput = {
     id?: IntFieldUpdateOperationsInput | number
-    id_facture?: IntFieldUpdateOperationsInput | number
+    id_facture?: NullableIntFieldUpdateOperationsInput | number | null
     id_bien?: IntFieldUpdateOperationsInput | number
-    type_bien?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    type_bien?: StringFieldUpdateOperationsInput | string
     quantite?: IntFieldUpdateOperationsInput | number
+    prix?: FloatFieldUpdateOperationsInput | number
+    movementType?: EnumMovementTypeFieldUpdateOperationsInput | $Enums.MovementType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type facture_bienUncheckedUpdateManyWithoutUtilisateurInput = {
     id?: IntFieldUpdateOperationsInput | number
-    id_facture?: IntFieldUpdateOperationsInput | number
+    id_facture?: NullableIntFieldUpdateOperationsInput | number | null
     id_bien?: IntFieldUpdateOperationsInput | number
-    type_bien?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    type_bien?: StringFieldUpdateOperationsInput | string
     quantite?: IntFieldUpdateOperationsInput | number
+    prix?: FloatFieldUpdateOperationsInput | number
+    movementType?: EnumMovementTypeFieldUpdateOperationsInput | $Enums.MovementType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type paimentUpdateWithoutUtilisateurInput = {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     montant_totale?: FloatFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     facture?: factureUpdateOneRequiredWithoutPaiementsNestedInput
   }
 
@@ -19511,6 +23521,8 @@ export namespace Prisma {
     id_facture?: IntFieldUpdateOperationsInput | number
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     montant_totale?: FloatFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type paimentUncheckedUpdateManyWithoutUtilisateurInput = {
@@ -19518,57 +23530,125 @@ export namespace Prisma {
     id_facture?: IntFieldUpdateOperationsInput | number
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     montant_totale?: FloatFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scannedDocumentUpdateWithoutUtilisateurInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    filePath?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    client?: ClientUpdateOneRequiredWithoutScanned_DocumentsNestedInput
+  }
+
+  export type scannedDocumentUncheckedUpdateWithoutUtilisateurInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    filePath?: StringFieldUpdateOperationsInput | string
+    CIN?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scannedDocumentUncheckedUpdateManyWithoutUtilisateurInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    filePath?: StringFieldUpdateOperationsInput | string
+    CIN?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type rendez_vousCreateManyClientInput = {
     id?: number
     sujet: string
+    soin_id: number
     date_rendez_vous: Date | string
     created_at?: Date | string
     Cree_par: string
+    status: $Enums.Status
+    cabinet?: string
+    updated_at?: Date | string
   }
 
   export type documentCreateManyClientInput = {
     id?: number
     template_id: number
-    data_json: string
+    data_json: JsonNullValueInput | InputJsonValue
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type scannedDocumentCreateManyClientInput = {
+    id?: number
+    title: string
+    filePath: string
+    description?: string | null
+    Cree_par: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type factureCreateManyClientInput = {
     id?: number
     date: Date | string
     prix_total: number
-    statut: $Enums.FactureStatus
+    statut: string
     notes?: string | null
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
+    date_paiement?: Date | string | null
+    methode_paiement?: string | null
+    cheque_numero?: string | null
+    cheque_banque?: string | null
+    cheque_date_tirage?: Date | string | null
   }
 
   export type rendez_vousUpdateWithoutClientInput = {
     sujet?: StringFieldUpdateOperationsInput | string
     date_rendez_vous?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    cabinet?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     utilisateur?: UtilisateurUpdateOneRequiredWithoutRendez_vousNestedInput
+    bien?: bienUpdateOneRequiredWithoutRendez_vousNestedInput
   }
 
   export type rendez_vousUncheckedUpdateWithoutClientInput = {
     id?: IntFieldUpdateOperationsInput | number
     sujet?: StringFieldUpdateOperationsInput | string
+    soin_id?: IntFieldUpdateOperationsInput | number
     date_rendez_vous?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     Cree_par?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    cabinet?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type rendez_vousUncheckedUpdateManyWithoutClientInput = {
     id?: IntFieldUpdateOperationsInput | number
     sujet?: StringFieldUpdateOperationsInput | string
+    soin_id?: IntFieldUpdateOperationsInput | number
     date_rendez_vous?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     Cree_par?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    cabinet?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type documentUpdateWithoutClientInput = {
-    data_json?: StringFieldUpdateOperationsInput | string
+    data_json?: JsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     template?: document_templatesUpdateOneRequiredWithoutDocumentsNestedInput
     utilisateur?: UtilisateurUpdateOneRequiredWithoutDocumentsNestedInput
   }
@@ -19576,22 +23656,62 @@ export namespace Prisma {
   export type documentUncheckedUpdateWithoutClientInput = {
     id?: IntFieldUpdateOperationsInput | number
     template_id?: IntFieldUpdateOperationsInput | number
-    data_json?: StringFieldUpdateOperationsInput | string
+    data_json?: JsonNullValueInput | InputJsonValue
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type documentUncheckedUpdateManyWithoutClientInput = {
     id?: IntFieldUpdateOperationsInput | number
     template_id?: IntFieldUpdateOperationsInput | number
-    data_json?: StringFieldUpdateOperationsInput | string
+    data_json?: JsonNullValueInput | InputJsonValue
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scannedDocumentUpdateWithoutClientInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    filePath?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    utilisateur?: UtilisateurUpdateOneRequiredWithoutScanned_DocumentsNestedInput
+  }
+
+  export type scannedDocumentUncheckedUpdateWithoutClientInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    filePath?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    Cree_par?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type scannedDocumentUncheckedUpdateManyWithoutClientInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    filePath?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    Cree_par?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type factureUpdateWithoutClientInput = {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     utilisateur?: UtilisateurUpdateOneRequiredWithoutFacturesNestedInput
     factureBiens?: facture_bienUpdateManyWithoutFactureNestedInput
     paiements?: paimentUpdateManyWithoutFactureNestedInput
@@ -19601,9 +23721,16 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     factureBiens?: facture_bienUncheckedUpdateManyWithoutFactureNestedInput
     paiements?: paimentUncheckedUpdateManyWithoutFactureNestedInput
   }
@@ -19612,20 +23739,31 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     prix_total?: FloatFieldUpdateOperationsInput | number
-    statut?: EnumFactureStatusFieldUpdateOperationsInput | $Enums.FactureStatus
+    statut?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    date_paiement?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    methode_paiement?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_numero?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_banque?: NullableStringFieldUpdateOperationsInput | string | null
+    cheque_date_tirage?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type documentCreateManyTemplateInput = {
     id?: number
     CIN: string
-    data_json: string
+    data_json: JsonNullValueInput | InputJsonValue
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type documentUpdateWithoutTemplateInput = {
-    data_json?: StringFieldUpdateOperationsInput | string
+    data_json?: JsonNullValueInput | InputJsonValue
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     client?: ClientUpdateOneRequiredWithoutDocumentsNestedInput
     utilisateur?: UtilisateurUpdateOneRequiredWithoutDocumentsNestedInput
   }
@@ -19633,54 +23771,125 @@ export namespace Prisma {
   export type documentUncheckedUpdateWithoutTemplateInput = {
     id?: IntFieldUpdateOperationsInput | number
     CIN?: StringFieldUpdateOperationsInput | string
-    data_json?: StringFieldUpdateOperationsInput | string
+    data_json?: JsonNullValueInput | InputJsonValue
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type documentUncheckedUpdateManyWithoutTemplateInput = {
     id?: IntFieldUpdateOperationsInput | number
     CIN?: StringFieldUpdateOperationsInput | string
-    data_json?: StringFieldUpdateOperationsInput | string
+    data_json?: JsonNullValueInput | InputJsonValue
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type facture_bienCreateManyBienInput = {
     id?: number
-    id_facture: number
-    type_bien: $Enums.BienType
+    id_facture?: number | null
+    type_bien: string
     quantite: number
+    prix: number
     Cree_par: string
+    movementType?: $Enums.MovementType
+    created_at?: Date | string
+    updated_at?: Date | string
+  }
+
+  export type rendez_vousCreateManyBienInput = {
+    id?: number
+    CIN: string
+    sujet: string
+    date_rendez_vous: Date | string
+    created_at?: Date | string
+    Cree_par: string
+    status: $Enums.Status
+    cabinet?: string
+    updated_at?: Date | string
   }
 
   export type facture_bienUpdateWithoutBienInput = {
-    type_bien?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    type_bien?: StringFieldUpdateOperationsInput | string
     quantite?: IntFieldUpdateOperationsInput | number
-    facture?: factureUpdateOneRequiredWithoutFactureBiensNestedInput
+    prix?: FloatFieldUpdateOperationsInput | number
+    movementType?: EnumMovementTypeFieldUpdateOperationsInput | $Enums.MovementType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    facture?: factureUpdateOneWithoutFactureBiensNestedInput
     utilisateur?: UtilisateurUpdateOneRequiredWithoutFactureBiensNestedInput
   }
 
   export type facture_bienUncheckedUpdateWithoutBienInput = {
     id?: IntFieldUpdateOperationsInput | number
-    id_facture?: IntFieldUpdateOperationsInput | number
-    type_bien?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    id_facture?: NullableIntFieldUpdateOperationsInput | number | null
+    type_bien?: StringFieldUpdateOperationsInput | string
     quantite?: IntFieldUpdateOperationsInput | number
+    prix?: FloatFieldUpdateOperationsInput | number
     Cree_par?: StringFieldUpdateOperationsInput | string
+    movementType?: EnumMovementTypeFieldUpdateOperationsInput | $Enums.MovementType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type facture_bienUncheckedUpdateManyWithoutBienInput = {
     id?: IntFieldUpdateOperationsInput | number
-    id_facture?: IntFieldUpdateOperationsInput | number
-    type_bien?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    id_facture?: NullableIntFieldUpdateOperationsInput | number | null
+    type_bien?: StringFieldUpdateOperationsInput | string
     quantite?: IntFieldUpdateOperationsInput | number
+    prix?: FloatFieldUpdateOperationsInput | number
     Cree_par?: StringFieldUpdateOperationsInput | string
+    movementType?: EnumMovementTypeFieldUpdateOperationsInput | $Enums.MovementType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type rendez_vousUpdateWithoutBienInput = {
+    sujet?: StringFieldUpdateOperationsInput | string
+    date_rendez_vous?: DateTimeFieldUpdateOperationsInput | Date | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    cabinet?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    client?: ClientUpdateOneRequiredWithoutRendez_vousNestedInput
+    utilisateur?: UtilisateurUpdateOneRequiredWithoutRendez_vousNestedInput
+  }
+
+  export type rendez_vousUncheckedUpdateWithoutBienInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    CIN?: StringFieldUpdateOperationsInput | string
+    sujet?: StringFieldUpdateOperationsInput | string
+    date_rendez_vous?: DateTimeFieldUpdateOperationsInput | Date | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    Cree_par?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    cabinet?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type rendez_vousUncheckedUpdateManyWithoutBienInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    CIN?: StringFieldUpdateOperationsInput | string
+    sujet?: StringFieldUpdateOperationsInput | string
+    date_rendez_vous?: DateTimeFieldUpdateOperationsInput | Date | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    Cree_par?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    cabinet?: StringFieldUpdateOperationsInput | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type facture_bienCreateManyFactureInput = {
     id?: number
     id_bien: number
-    type_bien: $Enums.BienType
+    type_bien: string
     quantite: number
+    prix: number
     Cree_par: string
+    movementType?: $Enums.MovementType
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type paimentCreateManyFactureInput = {
@@ -19688,11 +23897,17 @@ export namespace Prisma {
     date: Date | string
     montant_totale: number
     Cree_par: string
+    created_at?: Date | string
+    updated_at?: Date | string
   }
 
   export type facture_bienUpdateWithoutFactureInput = {
-    type_bien?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    type_bien?: StringFieldUpdateOperationsInput | string
     quantite?: IntFieldUpdateOperationsInput | number
+    prix?: FloatFieldUpdateOperationsInput | number
+    movementType?: EnumMovementTypeFieldUpdateOperationsInput | $Enums.MovementType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     bien?: bienUpdateOneRequiredWithoutFactureBiensNestedInput
     utilisateur?: UtilisateurUpdateOneRequiredWithoutFactureBiensNestedInput
   }
@@ -19700,22 +23915,32 @@ export namespace Prisma {
   export type facture_bienUncheckedUpdateWithoutFactureInput = {
     id?: IntFieldUpdateOperationsInput | number
     id_bien?: IntFieldUpdateOperationsInput | number
-    type_bien?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    type_bien?: StringFieldUpdateOperationsInput | string
     quantite?: IntFieldUpdateOperationsInput | number
+    prix?: FloatFieldUpdateOperationsInput | number
     Cree_par?: StringFieldUpdateOperationsInput | string
+    movementType?: EnumMovementTypeFieldUpdateOperationsInput | $Enums.MovementType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type facture_bienUncheckedUpdateManyWithoutFactureInput = {
     id?: IntFieldUpdateOperationsInput | number
     id_bien?: IntFieldUpdateOperationsInput | number
-    type_bien?: EnumBienTypeFieldUpdateOperationsInput | $Enums.BienType
+    type_bien?: StringFieldUpdateOperationsInput | string
     quantite?: IntFieldUpdateOperationsInput | number
+    prix?: FloatFieldUpdateOperationsInput | number
     Cree_par?: StringFieldUpdateOperationsInput | string
+    movementType?: EnumMovementTypeFieldUpdateOperationsInput | $Enums.MovementType
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type paimentUpdateWithoutFactureInput = {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     montant_totale?: FloatFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     utilisateur?: UtilisateurUpdateOneRequiredWithoutPaiementsNestedInput
   }
 
@@ -19724,6 +23949,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     montant_totale?: FloatFieldUpdateOperationsInput | number
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type paimentUncheckedUpdateManyWithoutFactureInput = {
@@ -19731,6 +23958,8 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     montant_totale?: FloatFieldUpdateOperationsInput | number
     Cree_par?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

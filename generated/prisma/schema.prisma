@@ -8,13 +8,18 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
 }
 
 enum Role {
-  ADMIN
-  USER
-  OTHER
+  admin
+  therapeute
+}
+
+enum Status {
+  programmé
+  confirmé
+  terminé
+  annulé
 }
 
 enum ServiceType {
@@ -22,10 +27,9 @@ enum ServiceType {
   TYPE2
 }
 
-enum FactureStatus {
-  PAYEE
-  NON_PAYEE
-  EN_ATTENTE
+enum MovementType {
+  OUT
+  IN
 }
 
 enum BienType {
@@ -45,6 +49,7 @@ model Utilisateur {
   password         String
   role             Role
   created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 
   // Relations
   clients           Client[]             @relation("UtilisateurClients")
@@ -52,22 +57,27 @@ model Utilisateur {
   documentTemplates document_templates[]
   documents         document[]
   // services         service[]
-  biens             bien[]
+  biensCreated      bien[]               @relation("BienCreePar")
+  biensTherapeute   bien[]               @relation("BienTherapeute")
   factures          facture[]
   factureBiens      facture_bien[]
   paiements         paiment[]
+  scanned_Documents scannedDocument[]
 }
 
 model Entreprise {
-  id         Int      @id @default(autoincrement())
-  ICE        Int
-  CNSS       Int
-  RC         Int
-  IF         Int
-  RIB        Int
-  patente    Int
-  adresse    String
-  created_at DateTime @default(now())
+  id               Int      @id @default(autoincrement())
+  ICE              String
+  CNSS             String
+  RC               String
+  IF               String
+  RIB              String
+  patente          String
+  adresse          String
+  email            String?
+  numero_telephone String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 }
 
 model Client {
@@ -84,47 +94,72 @@ model Client {
   allergies        String?
   commentaire      String?
   created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
   Cree_par         String
 
   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN], name: "UtilisateurClients")
 
-  rendez_vous rendez_vous[]
-  documents   document[]
-  factures    facture[]
+  rendez_vous       rendez_vous[]
+  documents         document[]
+  scanned_Documents scannedDocument[]
+  factures          facture[]
 }
 
 model rendez_vous {
   id               Int      @id @default(autoincrement())
   CIN              String
   sujet            String
+  soin_id          Int
   date_rendez_vous DateTime
   created_at       DateTime @default(now())
   Cree_par         String
+  status           Status
+  cabinet          String   @default("Biohacking")
+  updated_at       DateTime @updatedAt
 
   client      Client      @relation(fields: [CIN], references: [CIN])
   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
+  bien        bien        @relation(fields: [soin_id], references: [id])
 }
 
 model document_templates {
   id            Int    @id @default(autoincrement())
   name          String
-  sections_json String
+  sections_json Json
   Cree_par      String
 
   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
   documents   document[]
+  created_at  DateTime    @default(now())
 }
 
 model document {
-  id          Int    @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   template_id Int
   CIN         String
-  data_json   String
+  data_json   Json
   Cree_par    String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
   template    document_templates @relation(fields: [template_id], references: [id])
   client      Client             @relation(fields: [CIN], references: [CIN])
   utilisateur Utilisateur        @relation(fields: [Cree_par], references: [CIN])
+}
+
+model scannedDocument {
+  id          Int     @id @default(autoincrement())
+  title       String
+  filePath    String
+  CIN         String
+  description String?
+  Cree_par    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client      Client      @relation(fields: [CIN], references: [CIN])
+  utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
 }
 
 // model service {
@@ -139,26 +174,41 @@ model document {
 // }
 
 model bien {
-  id        Int         @id @default(autoincrement())
-  Nom       String
-  bien_type BienType
-  Type      ServiceType
-  prix      Float
-  stock     Int
-  Cree_par  String
+  id         Int      @id @default(autoincrement())
+  Nom        String
+  bien_type  BienType
+  Type       String
+  prix       Float
+  stock      Int
+  cabinet    String   @default("Biohacking")
+  Cree_par   String
+  therapeute String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  utilisateur  Utilisateur    @relation(fields: [Cree_par], references: [CIN])
+  utilisateur    Utilisateur  @relation("BienCreePar", fields: [Cree_par], references: [CIN])
+  therapeuteUser Utilisateur? @relation("BienTherapeute", fields: [therapeute], references: [CIN])
+
   factureBiens facture_bien[]
+
+  rendez_vous rendez_vous[]
 }
 
 model facture {
-  id         Int           @id @default(autoincrement())
-  CIN        String
-  date       DateTime
-  prix_total Float
-  statut     FactureStatus
-  notes      String?
-  Cree_par   String
+  id                 Int       @id @default(autoincrement())
+  CIN                String
+  date               DateTime
+  prix_total         Float
+  statut             String
+  notes              String?
+  Cree_par           String
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+  date_paiement      DateTime?
+  methode_paiement   String?
+  cheque_numero      String?
+  cheque_banque      String?
+  cheque_date_tirage DateTime?
 
   client       Client         @relation(fields: [CIN], references: [CIN])
   utilisateur  Utilisateur    @relation(fields: [Cree_par], references: [CIN])
@@ -167,14 +217,18 @@ model facture {
 }
 
 model facture_bien {
-  id         Int      @id @default(autoincrement())
-  id_facture Int
-  id_bien    Int
-  type_bien  BienType
-  quantite   Int
-  Cree_par   String
+  id           Int          @id @default(autoincrement())
+  id_facture   Int?
+  id_bien      Int
+  type_bien    String
+  quantite     Int
+  prix         Float
+  Cree_par     String
+  movementType MovementType @default(OUT)
+  created_at   DateTime     @default(now())
+  updated_at   DateTime     @updatedAt
 
-  facture     facture     @relation(fields: [id_facture], references: [id])
+  facture     facture?    @relation(fields: [id_facture], references: [id])
   bien        bien        @relation(fields: [id_bien], references: [id])
   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])
 
@@ -188,6 +242,8 @@ model paiment {
   date           DateTime
   montant_totale Float
   Cree_par       String
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 
   facture     facture     @relation(fields: [id_facture], references: [id])
   utilisateur Utilisateur @relation(fields: [Cree_par], references: [CIN])

@@ -34,7 +34,9 @@ export class AuthService {
       const payload = { sub: user.id, email: user.email, role: user.role };
       return {
         user: user,
-        token: this.jwtService.sign(payload),
+        token: this.jwtService.sign(payload, {
+          secret: process.env.JWT_SECRET,
+        }),
       };
     } else {
       throw new UnauthorizedException();
@@ -46,7 +48,9 @@ export class AuthService {
       const hashedPassword = await bcrypt.hash(data.password, 10);
       data.date_naissance = new Date(data.date_naissance);
       const payload = { email: data.email, role: data.role };
-      const access_token = this.jwtService.sign(payload);
+      const access_token = this.jwtService.sign(payload, {
+        secret: process.env.JWT_SECRET,
+      });
       const user = await this.prisma.utilisateur.create({
         data: {
           CIN: data.CIN,

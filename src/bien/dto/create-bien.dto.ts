@@ -8,7 +8,7 @@ import {
   Min,
   Max,
 } from 'class-validator';
-import { BienType, ServiceType } from 'generated/prisma';
+import { BienType, ServiceType } from '@prisma/client';
 
 export class CreateBienDto {
   @IsNotEmpty({ message: 'Le nom du bien est obligatoire.\n' })

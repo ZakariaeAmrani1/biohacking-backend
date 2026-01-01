@@ -7,7 +7,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { BienType } from 'generated/prisma';
+import { BienType } from '@prisma/client';
 
 export class CreateFactureBienDto {
   // @IsNotEmpty({ message: 'La facture est obligatoire.\n' })
